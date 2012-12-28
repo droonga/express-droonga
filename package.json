@@ -1,0 +1,10 @@
+{
+  "name": "express-kotoumi",
+  "description": "express-kotoumi",
+  "version": "0.0.1",
+  "author": "Kotoumi project <mori@groonga.org>",
+  "dependencies": {
+    "fluent-logger": "*",
+    "socket.io": "*"
+  }
+}
