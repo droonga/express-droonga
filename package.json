@@ -1,0 +1,23 @@
+{
+  "name": "express-kotoumi",
+  "description": "A framework for building scalable realtime web API services for Express",
+  "version": "0.0.1",
+  "author": "Kotoumi project <kotoumi@groonga.org>",
+  "contributors": [
+    {
+      "name": "Daijiro MORI",
+      "email": "mori@groonga.org"
+    }
+  ],
+  "dependencies": {
+    "express": "3.*",
+    "jade": "*",
+    "fluent-logger": "*",
+    "socket.io": "*",
+    "express-resource": "*"
+  }
+  "main": "index",
+  "engines": {
+    "node": "*"
+  }
+}
