@@ -15,10 +15,9 @@ suit('Connection', function() {
       }
     };
     connection = new Connection({
-      tag: 'test',
-      host: 'localhost',
-      port: 3000,
-      sender: sender
+      tag:        'test',
+      listenPort: 3333,
+      sender:     sender
     });
   });
 
