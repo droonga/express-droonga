@@ -15,7 +15,15 @@
     "fluent-logger": "*",
     "socket.io": "*",
     "express-resource": "*"
-  }
+  },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*",
+    "nodemock": "*"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter list --ui tdd --timeout 5s"
+  },
   "main": "index",
   "engines": {
     "node": "*"
