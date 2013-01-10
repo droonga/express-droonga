@@ -4,30 +4,48 @@ var nodemock = require('nodemock');
 var Connection = require('../lib/backend-adaptor').Connection;
 
 function createSender() {
-  return nodemock;
+  var sender = {
+    emit: function(eventName, message) {
+      this.messages.push({ eventName: eventName, message: message });
+    },
+    assertSent: function(eventName, message) {
+      var firstMessage = this.messages.shift();
+      var expectedMessage = { eventName: eventName, message: message };
+      assert.deepEqual(firstMessage, expectedMessage);
+    },
+    messages: [],
+  };
+  return sender;
 }
 
 function createReceiver() {
-  var mockedSocket = nodemock;
-  var callbackController = {};
+  var mockedSockets;
+  var mockedReceiverInternal = nodemock;
+  var connactionCallbackController = {};
   var receiver = {
     // mocking receiver
     sockets:
-      (mockedSocket =
-        mockedSocket.mock('on')
-          .takes('test.message', function() {})
-          .ctrl(1, callbackController)),
+      (mockedSockets = nodemock.mock('on')
+         .takes('connection', function() {})
+         .ctrl(1, connactionCallbackController)),
     'set': function(key, value) {},
 
     // extra features as a mocked object
-    triggerMessage: function(message) {
-      callbackController.trigger(message);
-    },
-    mock: function(name) {
-      return mockedSocket.mock(name);
-    },
-    assert: function() {
+    triggerConnect: function(tag) {
+      mockedSockets.assert();
+      var mockedSocket = nodemock.mock('on')
+                           .takes(tag + '.message', function() {});
+      connactionCallbackController.trigger(mockedSocket);
       mockedSocket.assert();
+    },
+    takes: function(message) {
+      this.assert = function() {
+        mockedReceiverInternal.assert();
+      };
+      mockedReceiverInternal = mockedReceiverInternal
+                                 .mock('emit')
+                                 .takes(message);
+      return mockedReceiverInternal;
     }
   };
   return receiver;
@@ -45,6 +63,7 @@ suite('Connection', function() {
       sender:     sender = createSender(),
       receiver:   receiver = createReceiver()
     });
+    receiver.triggerConnect('test');
   });
 
   teardown(function() {
@@ -53,17 +72,9 @@ suite('Connection', function() {
     receiver = undefined;
   });
 
-  function assertMessages() {
-    sender.assert();
-    receiver.assert();
-  }
-
   test('message without response (volatile message)', function() {
-    sender.mock('emit')
-      .takes({ tag: 'message',
-               message: { command: 'foobar' } });
-    connection.emit({ command: 'foobar' });
-    assertMessages();
+    connection.emitMessage({ command: 'foobar' });
+    sender.assertSent('message', { body: { command: 'foobar' } });
   });
 });
 
