@@ -22,6 +22,7 @@ function createMockedReceiver() {
   var mockedSockets;
   var mockedReceiverInternal = nodemock;
   var connactionCallbackController = {};
+  var messageCallbackController = {};
   var receiver = {
     // mocking receiver
     sockets:
@@ -34,18 +35,13 @@ function createMockedReceiver() {
     triggerConnect: function(tag) {
       mockedSockets.assertThrows();
       var mockedSocket = nodemock.mock('on')
-                           .takes(tag + '.message', function() {});
+                           .takes(tag + '.message', function() {})
+                           .ctrl(1, messageCallbackController);
       connactionCallbackController.trigger(mockedSocket);
       mockedSocket.assertThrows();
     },
-    takes: function(message) {
-      this.assert = function() {
-        mockedReceiverInternal.assertThrows();
-      };
-      mockedReceiverInternal = mockedReceiverInternal
-                                 .mock('emit')
-                                 .takes(message);
-      return mockedReceiverInternal;
+    emitMessage: function(message) { // simulate message from backend
+      messageCallbackController.trigger(message);
     }
   };
   return receiver;
@@ -150,12 +146,20 @@ suite('Connection', function() {
                           body:       { command: 'foobar' } });
     sender.assertSent('message', message);
 
-    callback.takes({ response: true });
-    connection.emit('replyTo:' + message.id, { response: true });
+    var now = new Date();
+    var response = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      replyTo:    message.id,
+      statusCode: 200,
+      body:       { response: true }
+    };
+    callback.takes(response);
+    receiver.emitMessage(response);
     callback.assert();
 
     // Secondary and later messages are ignored.
-    connection.emit('replyTo:' + message.id, { response: true });
+    receiver.emitMessage(response);
     callback.assert();
   });
 });
