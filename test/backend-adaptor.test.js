@@ -3,7 +3,7 @@ var nodemock = require('nodemock');
 
 var Connection = require('../lib/backend-adaptor').Connection;
 
-function createSender() {
+function createMockedSender() {
   var sender = {
     emit: function(eventName, message) {
       this.messages.push({ eventName: eventName, message: message });
@@ -18,7 +18,7 @@ function createSender() {
   return sender;
 }
 
-function createReceiver() {
+function createMockedReceiver() {
   var mockedSockets;
   var mockedReceiverInternal = nodemock;
   var connactionCallbackController = {};
@@ -32,15 +32,15 @@ function createReceiver() {
 
     // extra features as a mocked object
     triggerConnect: function(tag) {
-      mockedSockets.assert();
+      mockedSockets.assertThrows();
       var mockedSocket = nodemock.mock('on')
                            .takes(tag + '.message', function() {});
       connactionCallbackController.trigger(mockedSocket);
-      mockedSocket.assert();
+      mockedSocket.assertThrows();
     },
     takes: function(message) {
       this.assert = function() {
-        mockedReceiverInternal.assert();
+        mockedReceiverInternal.assertThrows();
       };
       mockedReceiverInternal = mockedReceiverInternal
                                  .mock('emit')
@@ -49,6 +49,23 @@ function createReceiver() {
     }
   };
   return receiver;
+}
+
+function createMockedMessageCallback() {
+  var mockedCallback = nodemock;
+  var callback = function(message) {
+    mockedCallback.receive(message);
+  };
+  callback.takes = function(message) {
+    callback.assert = function() {
+      mockedCallback.assertThrows();
+    };
+    mockedCallback = mockedCallback
+                       .mock('receive')
+                       .takes(message);
+  };
+  callback.mock = mockedCallback;
+  return callback;
 }
 
 function TypeOf(typeString) {
@@ -101,8 +118,8 @@ suite('Connection', function() {
     connection = new Connection({
       tag:        'test',
       listenPort: 3333,
-      sender:     sender = createSender(),
-      receiver:   receiver = createReceiver()
+      sender:     sender = createMockedSender(),
+      receiver:   receiver = createMockedReceiver()
     });
     receiver.triggerConnect('test');
   });
@@ -113,7 +130,7 @@ suite('Connection', function() {
     receiver = undefined;
   });
 
-  test('message without response (volatile message)', function() {
+  test('sending message without response (volatile message)', function() {
     var message = connection.emitMessage({ command: 'foobar' });
     assertEnvelopeEqual(message,
                         { id:         TypeOf('string'),
@@ -121,6 +138,25 @@ suite('Connection', function() {
                           statusCode: 200,
                           body:       { command: 'foobar' } });
     sender.assertSent('message', message);
+  });
+
+  test('sending message with one response', function() {
+    var callback = createMockedMessageCallback();
+    var message = connection.emitMessage({ command: 'foobar' }, callback);
+    assertEnvelopeEqual(message,
+                        { id:         TypeOf('string'),
+                          date:       InstanceOf(Date),
+                          statusCode: 200,
+                          body:       { command: 'foobar' } });
+    sender.assertSent('message', message);
+
+    callback.takes({ response: true });
+    connection.emit('replyTo:' + message.id, { response: true });
+    callback.assert();
+
+    // Secondary and later messages are ignored.
+    connection.emit('replyTo:' + message.id, { response: true });
+    callback.assert();
   });
 });
 
