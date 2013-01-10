@@ -33,7 +33,7 @@ function createReceiver() {
   return receiver;
 }
 
-suit('Connection', function() {
+suite('Connection', function() {
   var connection;
   var sender;
   var receiver;
