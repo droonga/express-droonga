@@ -18,7 +18,8 @@
     "jade": "*",
     "fluent-logger": "*",
     "socket.io": "*",
-    "express-resource": "*"
+    "express-resource": "*",
+    "msgpack": "*"
   },
   "devDependencies": {
     "chai": "*",
