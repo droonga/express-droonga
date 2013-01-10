@@ -14,7 +14,7 @@
     }
   ],
   "dependencies": {
-    "express": "3.*",
+    "express": ">=3.0",
     "jade": "*",
     "fluent-logger": "*",
     "socket.io": "*",
