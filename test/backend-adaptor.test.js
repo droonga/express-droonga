@@ -51,6 +51,47 @@ function createReceiver() {
   return receiver;
 }
 
+function TypeOf(typeString) {
+  if (!(this instanceof TypeOf))
+    return new TypeOf(typeString);
+
+  this.typeString = typeString;
+  if (typeString == 'date') {
+    return new InstanceOf(Date);
+  }
+}
+
+function InstanceOf(constructor) {
+  if (!(this instanceof InstanceOf))
+    return new InstanceOf(constructor);
+
+  this.constructorFunction = constructor;
+}
+
+function assertEnvelopeEqual(actual, expected) {
+  var vs = JSON.stringify(actual) + ' vs ' + JSON.stringify(expected);
+  Object.keys(expected).forEach(function(key) {
+    var actualValue = actual[key];
+    var expectedValue = expected[key];
+    if (expectedValue instanceof InstanceOf) {
+      if (typeof actualValue == 'string') {
+        // Try fo parse the value and create new instance.
+        // If this process is failed, it can be an invalid value.
+        actualValue = new expectedValue.constructorFunction(actualValue);
+      }
+      assert.instanceOf(actualValue,
+                        expectedValue.constructorFunction,
+                        key + ' / ' + vs);
+    } else if (expectedValue instanceof TypeOf) {
+      assert.typeOf(typeof actualValue,
+                    expectedValue.typeString,
+                    key + ' / ' + vs);
+    } else {
+      assert.deepEqual(actualValue, expectedValue, key + ' / ' + vs);
+    }
+  });
+}
+
 suite('Connection', function() {
   var connection;
   var sender;
@@ -73,8 +114,13 @@ suite('Connection', function() {
   });
 
   test('message without response (volatile message)', function() {
-    connection.emitMessage({ command: 'foobar' });
-    sender.assertSent('message', { body: { command: 'foobar' } });
+    var message = connection.emitMessage({ command: 'foobar' });
+    assertEnvelopeEqual(message,
+                        { id:         TypeOf('string'),
+                          date:       InstanceOf(Date),
+                          statusCode: 200,
+                          body:       { command: 'foobar' } });
+    sender.assertSent('message', message);
   });
 });
 
