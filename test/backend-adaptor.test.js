@@ -136,6 +136,32 @@ suite('Connection', function() {
     sender.assertSent('message', message);
   });
 
+  test('receiving message from the backend', function() {
+    var callback = createMockedMessageCallback();
+    connection.on('message', callback);
+
+    var now = new Date();
+    var message = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      statusCode: 200,
+      body:       'first call'
+    };
+    callback.takes(message);
+    receiver.emitMessage(message);
+    callback.assert();
+
+    message.body = 'second call';
+    callback.takes(message);
+    receiver.emitMessage(message);
+    callback.assert();
+
+    message.body = 'third call';
+    connection.removeListener('message', callback);
+    receiver.emitMessage(message);
+    callback.assert();
+  });
+
   test('sending message with one response', function() {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage({ command: 'foobar' }, callback);
@@ -152,13 +178,14 @@ suite('Connection', function() {
       date:       now.toISOString(),
       replyTo:    message.id,
       statusCode: 200,
-      body:       { response: true }
+      body:       'first call'
     };
     callback.takes(response);
     receiver.emitMessage(response);
     callback.assert();
 
     // Secondary and later messages are ignored.
+    response.body = 'second call';
     receiver.emitMessage(response);
     callback.assert();
   });
