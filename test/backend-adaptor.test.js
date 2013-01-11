@@ -29,11 +29,12 @@ suite('Connection', function() {
   });
 
   test('sending message without response (volatile message)', function() {
-    var message = connection.emitMessage({ command: 'foobar' });
+    var message = connection.emitMessage('testRequest', { command: 'foobar' });
     assert.envelopeEqual(message,
                          { id:         TypeOf('string'),
                            date:       InstanceOf(Date),
                            statusCode: 200,
+                           type:       'testRequest',
                            body:       { command: 'foobar' } });
     sender.assertSent('message', message);
   });
@@ -47,6 +48,7 @@ suite('Connection', function() {
       id:         now.getTime(),
       date:       now.toISOString(),
       statusCode: 200,
+      type:       'testResponse',
       body:       'first call'
     };
     callback.takes(message);
@@ -66,11 +68,12 @@ suite('Connection', function() {
 
   test('sending message with one response', function() {
     var callback = utils.createMockedMessageCallback();
-    var message = connection.emitMessage({ command: 'foobar' }, callback);
+    var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
     assert.envelopeEqual(message,
                          { id:         TypeOf('string'),
                            date:       InstanceOf(Date),
                            statusCode: 200,
+                           type:       'testRequest',
                            body:       { command: 'foobar' } });
     sender.assertSent('message', message);
 
@@ -80,6 +83,7 @@ suite('Connection', function() {
       date:       now.toISOString(),
       replyTo:    message.id,
       statusCode: 200,
+      type:       'testResponse',
       body:       'first call'
     };
     callback.takes(response);
