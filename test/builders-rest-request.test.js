@@ -2,29 +2,61 @@ var assert = require('chai').assert;
 
 var builders = require('../lib/builders/rest-request');
 
-suite('from search REST API', function() {
-  test('simple query', function() {
-    var params = {
-      tableName: 'test_table',
-      query:     'foobar'
+suite('building message from REST API request', function() {
+  suite('search', function() {
+    var outputAll = {
+      startTime:   true,
+      elapsedTime: true,
+      count:       true,
+      attributes:  true,
+      recodes:     true
     };
-    var expectedBody = {
-      queries: {
-        result: {
-          source: 'test_table',
-          query:  'foobar',
-          output: {
-            startTime:   true,
-            elapsedTime: true,
-            count:       true,
-            attributes:  true,
-            recodes:     true
+
+    test('simple query', function() {
+      var params = {
+        tableName: 'test_table',
+        query:     'foobar'
+      };
+      var expectedBody = {
+        queries: {
+          result: {
+            source: 'test_table',
+            query:  'foobar',
+            output: outputAll
           }
         }
-      }
-    };
-    var actualBody = builders.search({ params: params });
-    assert.deepEqual(actualBody, expectedBody);
+      };
+      var actualBody = builders.search({ params: params });
+      assert.deepEqual(actualBody, expectedBody);
+    });
+
+    test('with options', function() {
+      var params = {
+        tableName:  'people',
+        query:      'foobar',
+        offset:     '10',
+        limit:      '100',
+        match_to:   'realname,nickname',
+        order_by:   '-realname,-nickname',
+        attributes: 'realname,nickname,age,job'
+      };
+      var expectedBody = {
+        queries: {
+          result: {
+            source:  'people',
+            query:   'foobar',
+            offset:  '10',
+            limit:   '100',
+            matchTo: ['realname', 'nickname'],
+            orderBy: ['-realname', '-nickname'],
+            attributes: ['realname', 'nickname', 'age', 'job'],
+            output:  outputAll
+          }
+        }
+      };
+      var actualBody = builders.search({ params: params });
+      assert.deepEqual(actualBody, expectedBody);
+    });
   });
 });
 
