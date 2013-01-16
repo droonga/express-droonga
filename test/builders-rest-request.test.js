@@ -47,8 +47,8 @@ suite('building message from REST API request', function() {
           result: {
             source:  'people',
             query:   'foobar',
-            offset:  '10',
-            limit:   '100',
+            offset:  10,
+            limit:   100,
             matchTo: ['realname', 'nickname'],
             sortBy:  ['-realname', '-nickname'],
             attributes: ['realname', 'nickname', 'age', 'job'],
