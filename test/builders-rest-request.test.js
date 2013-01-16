@@ -64,7 +64,7 @@ suite('building message from REST API request', function() {
       function testSuccessFor(key, value, params) {
         test(key + '=' + value + '(success)', function() {
           assert.doesNotThrow(function() {
-            params = params || {};
+            params = Object.create(params || {});
             params[key] = value;
             builders.search({ params: params });
           });
@@ -74,7 +74,7 @@ suite('building message from REST API request', function() {
       function testFailFor(key, value, params, errorMessage) {
         test(key + '=' + value + '(fail)', function() {
           assert.throws(function() {
-            params = params || {};
+            params = Object.create(params || {});
             params[key] = value;
             builders.search({ params: params });
           }, errorMessage);
