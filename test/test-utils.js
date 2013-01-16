@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var Deferred = require('jsdeferred').Deferred;
 
 function createMockedSender() {
   var sender = {
@@ -64,6 +65,70 @@ function createMockedMessageCallback() {
   return callback;
 }
 exports.createMockedMessageCallback = createMockedMessageCallback;
+
+
+var testPort = 3333;
+
+function setupServer(handler) {
+  var server = http.createServer(handler);
+  server.listen(testPort);
+  return server;
+}
+exports.setupServer = setupServer;
+
+function sendRequest(method, path, postData, headers) {
+  var deferred = new Deferred();
+
+  var options = {
+        host: 'localhost',
+        port: testPort,
+        path: path,
+        method: method,
+        headers: {}
+      };
+
+  if (headers) {
+    for (var header in headers) {
+      if (headers.hasOwnProperty(header))
+        options.headers[header] = headers[header];
+    }
+  }
+
+  Deferred.next(function() {
+    var request = http.request(options, function(response) {
+          var body = '';
+          response.on('data', function(data) {
+            body += data;
+          });
+          response.on('end', function() {
+            deferred.call({
+              statusCode: response.statusCode,
+              body: body
+            });
+          });
+        });
+    request.on('error', function(error) {
+      deferred.fail(error);
+    });
+
+    if (postData) request.write(postData);
+    request.end();
+  });
+
+  return deferred;
+}
+
+function get(path, headers) {
+  return sendRequest('GET', path, null, headers);
+}
+exports.get = get;
+Deferred.register('get', function() { return get.apply(this, arguments); });
+
+function post(path, body, headers) {
+  return sendRequest('POST', path, body, headers);
+}
+exports.post = post;
+Deferred.register('post', function() { return post.apply(this, arguments); });
 
 
 function TypeOf(typeString) {
