@@ -33,7 +33,7 @@ suite('REST API', function() {
     server = undefined;
   }
 
-  test('registeration for given handlers', function(done) {
+  test('registeration for given handlers', function() {
     var mockedHandlers = nodemock.mock('search')
           .takes('fake connection')
           .returns(function() {});
