@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 
 function createMockedSender() {
