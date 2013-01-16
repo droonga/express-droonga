@@ -50,10 +50,12 @@ suite('REST API', function() {
     setup(commonSetup);
     teardown(commonTeardown);
 
-    function createHandler(type) {
-      return function(request, response) {
-        response.write(type + 'OK');
-      }
+    function createHandlerFactory(type) {
+      return function() {
+        return function(request, response) {
+          response.write(type + 'OK');
+        };
+      };
     }
 
     test('to the document root', function(done) {
@@ -62,7 +64,7 @@ suite('REST API', function() {
         prefix:     '',
         connection: connection,
         handlers:   {
-          search: createHandler('search')
+          search: createHandlerFactory('search')
         }
       });
       server = utils.setupServer(application);
