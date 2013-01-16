@@ -4,6 +4,7 @@ var nodemock = require('nodemock');
 var utils = require('./test-utils');
 
 var express = require('express');
+var expressKotoumi = require('../lib/index');
 var Connection = require('../lib/backend-adaptor').Connection;
 
 suite('REST API', function() {
@@ -12,17 +13,17 @@ suite('REST API', function() {
   var receiver;
   var server;
 
-  setup(function() {
+  function commonSetup() {
     connection = new Connection({
       tag:        'test',
-      listenPort: 3333,
+      listenPort: utils.testServerPort,
       sender:     sender = utils.createMockedSender(),
       receiver:   receiver = utils.createMockedReceiver()
     });
     receiver.triggerConnect('test');
-  });
+  }
 
-  teardown(function() {
+  function commonTeardown() {
     if (server) {
       server.close();
     }
@@ -30,23 +31,29 @@ suite('REST API', function() {
     sender = undefined;
     receiver = undefined;
     server = undefined;
-  });
+  }
 
-  test('register to the document root', function(done) {
-    var application = express();
-    application.kotoumi({
-      prefix: ''
-    });
-    server = utils.setupServer(application);
+  suite('registeration', function() {
+    setup(commonSetup);
+    teardown(commonTeardown);
 
-    utils
-      .get('/tables/foobar')
-      .next(function(response) {
-        done();
-      })
-      .error(function(error) {
-        done(error);
+    test('to the document root', function(done) {
+      var application = express();
+      application.kotoumi({
+        prefix:     '',
+        connection: connection
       });
+      server = utils.setupServer(application);
+
+      utils
+        .get('/tables/foobar')
+        .next(function(response) {
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 });
 
