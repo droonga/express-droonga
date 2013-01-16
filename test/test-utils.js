@@ -118,7 +118,7 @@ function sortKeys(original) {
     return original.map(sortKeys);
 
   var sorted = {};
-  Object.keys(original).sort().forEach(key) {
+  Object.keys(original).sort().forEach(function(key) {
     sorted[key] = sortKeys(original[key]);
   });
   return sorted;
