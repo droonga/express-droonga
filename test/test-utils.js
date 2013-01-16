@@ -73,7 +73,7 @@ var testServerPort = 3334;
 
 function setupServer(handler) {
   var server = http.createServer(handler);
-  server.listen(testPort);
+  server.listen(testServerPort);
   return server;
 }
 exports.setupServer = setupServer;
@@ -83,7 +83,7 @@ function sendRequest(method, path, postData, headers) {
 
   var options = {
         host: 'localhost',
-        port: testPort,
+        port: testServerPort,
         path: path,
         method: method,
         headers: {}
