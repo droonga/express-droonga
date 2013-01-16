@@ -1,5 +1,4 @@
 var assert = require('chai').assert;
-var nodemock = require('nodemock');
 
 var utils = require('./test-utils');
 var TypeOf = utils.TypeOf;
