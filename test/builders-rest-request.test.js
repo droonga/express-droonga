@@ -39,7 +39,7 @@ suite('building message from REST API request', function() {
         offset:     '10',
         limit:      '100',
         match_to:   'realname,nickname',
-        order_by:   '-realname,-nickname',
+        sort_by:    '-realname,-nickname',
         attributes: 'realname,nickname,age,job'
       };
       var expectedBody = {
@@ -50,7 +50,7 @@ suite('building message from REST API request', function() {
             offset:  '10',
             limit:   '100',
             matchTo: ['realname', 'nickname'],
-            orderBy: ['-realname', '-nickname'],
+            sortBy:  ['-realname', '-nickname'],
             attributes: ['realname', 'nickname', 'age', 'job'],
             output:  outputAll
           }
