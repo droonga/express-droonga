@@ -109,3 +109,24 @@ function assertEnvelopeEqual(actual, expected) {
   });
 }
 assert.envelopeEqual = assertEnvelopeEqual;
+
+function sortKeys(original) {
+  if (!original || typeof original != 'object')
+    return original;
+
+  if (Array.isArray(original))
+    return original.map(sortKeys);
+
+  var sorted = {};
+  Object.keys(original).sort().forEach(key) {
+    sorted[key] = sortKeys(original[key]);
+  });
+  return sorted;
+}
+
+// assert.deepEqual fails when the order of hash keys are different,
+// even if they are "eaual" as JSON objects.
+function assertEqualJSON(actual, expected) {
+  this.deepEqual(sortKeys(actual), sortKeys(expected));
+}
+assert.equalJSON = assertEqualJSON;

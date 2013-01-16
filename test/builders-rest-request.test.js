@@ -1,5 +1,7 @@
 var assert = require('chai').assert;
 
+var utils = require('./test-utils');
+
 var builders = require('../lib/builders/rest-request');
 
 suite('building message from REST API request', function() {
@@ -27,7 +29,7 @@ suite('building message from REST API request', function() {
         }
       };
       var actualBody = builders.search({ params: params });
-      assert.deepEqual(actualBody, expectedBody);
+      assert.equalJSON(actualBody, expectedBody);
     });
 
     test('with options', function() {
@@ -55,7 +57,7 @@ suite('building message from REST API request', function() {
         }
       };
       var actualBody = builders.search({ params: params });
-      assert.deepEqual(actualBody, expectedBody);
+      assert.equalJSON(actualBody, expectedBody);
     });
   });
 });
