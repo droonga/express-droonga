@@ -34,7 +34,9 @@ suite('REST API', function() {
   }
 
   test('registeration for given handlers', function(done) {
-    var mockedHandlers = nodemock.mock('search').takes('fake connection');
+    var mockedHandlers = nodemock.mock('search')
+          .takes('fake connection')
+          .returns(function() {});
     var application = express();
     application.kotoumi({
       prefix:     '',
