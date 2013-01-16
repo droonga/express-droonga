@@ -83,6 +83,10 @@ suite('building message from REST API request', function() {
 
       var baseParams = { tableName: 'test' };
 
+      testSuccessFor('tableName', 'foobar');
+      testFailFor('', '', null, 'no source');
+      testFailFor('tableName', '', null, 'no source');
+
       testSuccessFor('limit', '0', baseParams);
       testSuccessFor('limit', '10', baseParams);
       testSuccessFor('limit', '-10', baseParams);
