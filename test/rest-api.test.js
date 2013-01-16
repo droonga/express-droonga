@@ -33,21 +33,42 @@ suite('REST API', function() {
     server = undefined;
   }
 
+  test('registeration for given handlers', function(done) {
+    var mockedHandlers = nodemock.mock('search').takes('fake connection');
+    var application = express();
+    application.kotoumi({
+      prefix:     '',
+      connection: 'fake connection',
+      handlers:   mockedHandlers
+    });
+    mockedHandlers.assertThrows();
+  });
+
   suite('registeration', function() {
     setup(commonSetup);
     teardown(commonTeardown);
+
+    function createHandler(type) {
+      return function(request, response) {
+        response.write(type + 'OK');
+      }
+    }
 
     test('to the document root', function(done) {
       var application = express();
       application.kotoumi({
         prefix:     '',
-        connection: connection
+        connection: connection,
+        handlers:   {
+          search: createHandler('search')
+        }
       });
       server = utils.setupServer(application);
 
       utils
         .get('/tables/foobar')
         .next(function(response) {
+          assert.equal('search OK', response.Body);
           done();
         })
         .error(function(error) {
