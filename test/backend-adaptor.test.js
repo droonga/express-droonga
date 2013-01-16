@@ -15,7 +15,7 @@ suite('Connection', function() {
   setup(function() {
     connection = new Connection({
       tag:        'test',
-      listenPort: 3333,
+      listenPort: utils.testBackendPort,
       sender:     sender = utils.createMockedSender(),
       receiver:   receiver = utils.createMockedReceiver()
     });

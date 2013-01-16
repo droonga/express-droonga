@@ -67,7 +67,8 @@ function createMockedMessageCallback() {
 exports.createMockedMessageCallback = createMockedMessageCallback;
 
 
-var testPort = 3333;
+var testBackendPort = 3333;
+var testServerPort = 3334;
 
 function setupServer(handler) {
   var server = http.createServer(handler);
