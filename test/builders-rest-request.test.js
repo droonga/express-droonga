@@ -15,9 +15,13 @@ suite('building message from REST API request', function() {
     };
 
     test('simple query', function() {
-      var params = {
-        tableName: 'test_table',
-        query:     'foobar'
+      var fakeRequest = {
+        params: {
+          tableName: 'test_table'
+        },
+        query: {
+          query: 'foobar'
+        }
       };
       var expectedBody = {
         queries: {
@@ -28,19 +32,23 @@ suite('building message from REST API request', function() {
           }
         }
       };
-      var actualBody = builders.search({ params: params });
+      var actualBody = builders.search(fakeRequest);
       assert.equalJSON(actualBody, expectedBody);
     });
 
     test('with options', function() {
-      var params = {
-        tableName:  'people',
-        query:      'foobar',
-        offset:     '10',
-        limit:      '100',
-        match_to:   'realname,nickname',
-        sort_by:    '-realname,-nickname',
-        attributes: 'realname,nickname,age,job'
+      var fakeRequest = {
+        params: {
+          tableName: 'people'
+        },
+        query: {
+          query:      'foobar',
+          offset:     '10',
+          limit:      '100',
+          match_to:   'realname,nickname',
+          sort_by:    '-realname,-nickname',
+          attributes: 'realname,nickname,age,job'
+        }
       };
       var expectedBody = {
         queries: {
@@ -56,52 +64,66 @@ suite('building message from REST API request', function() {
           }
         }
       };
-      var actualBody = builders.search({ params: params });
+      var actualBody = builders.search(fakeRequest);
       assert.equalJSON(actualBody, expectedBody);
     });
 
     suite('validation', function() {
-      function testSuccessFor(key, value, params) {
-        test(key + '=' + value + '(success)', function() {
+      function merge(base, extra) {
+        if (!extra || typeof extra != 'object')
+          return base || extra;
+
+        var merged = Object.create(base);
+        Object.keys(extra).forEach(function(key) {
+          merged[key] = merge(base[key] || null, extra[key]);
+        });
+        return merged;
+      }
+
+      function testSuccessFor(request, baseRequest) {
+        request = merge(baseRequest, request);
+        test(JSON.stringify(request) + ' (success)', function() {
           assert.doesNotThrow(function() {
-            params = Object.create(params || {});
-            params[key] = value;
-            builders.search({ params: params });
+            builders.search(request);
           });
         });
       }
 
-      function testFailFor(key, value, params, errorMessage) {
-        test(key + '=' + value + '(fail)', function() {
+      function testFailFor(request, errorMessage, baseRequest) {
+        request = merge(baseRequest, request);
+        test(JSON.stringify(request) + ' (fail)', function() {
           assert.throws(function() {
-            params = Object.create(params || {});
-            params[key] = value;
-            builders.search({ params: params });
+            builders.search(request);
           }, errorMessage);
         });
       }
 
-      var baseParams = { tableName: 'test' };
+      var baseRequest = {
+        params: {},
+        query: {}
+      };
 
-      testSuccessFor('tableName', 'foobar');
-      testFailFor('', '', null, 'no source');
-      testFailFor('tableName', '', null, 'no source');
+      testSuccessFor({ params: { tableName: 'foobar' } }, baseRequest);
+      testFailFor({}, 'no source', baseRequest);
+      testFailFor({ params: { tableName: '' } }, 'no source', baseRequest);
 
-      testSuccessFor('limit', '0', baseParams);
-      testSuccessFor('limit', '10', baseParams);
-      testSuccessFor('limit', '-10', baseParams);
-      testFailFor('limit', '', baseParams, 'invalid integer');
-      testFailFor('limit', '0.1', baseParams, 'invalid integer');
-      testFailFor('limit', '-0.1', baseParams, 'invalid integer');
-      testFailFor('limit', 'foobar', baseParams, 'invalid integer');
+      baseRequest.params.tableName = 'test';
 
-      testSuccessFor('offset', '0', baseParams);
-      testSuccessFor('offset', '10', baseParams);
-      testSuccessFor('offset', '-10', baseParams);
-      testFailFor('offset', '', baseParams, 'invalid integer');
-      testFailFor('offset', '0.1', baseParams, 'invalid integer');
-      testFailFor('offset', '-0.1', baseParams, 'invalid integer');
-      testFailFor('offset', 'foobar', baseParams, 'invalid integer');
+      testSuccessFor({ query: { limit: '0' } }, baseRequest);
+      testSuccessFor({ query: { limit: '10' } }, baseRequest);
+      testSuccessFor({ query: { limit: '-10' } }, baseRequest);
+      testFailFor({ query: { limit: '' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { limit: '0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { limit: '-0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { limit: 'foobar' } }, 'invalid integer', baseRequest);
+
+      testSuccessFor({ query: { offset: '0' } }, baseRequest);
+      testSuccessFor({ query: { offset: '10' } }, baseRequest);
+      testSuccessFor({ query: { offset: '-10' } }, baseRequest);
+      testFailFor({ query: { offset: '' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { offset: '0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { offset: '-0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { offset: 'foobar' } }, 'invalid integer', baseRequest);
     });
   });
 });
