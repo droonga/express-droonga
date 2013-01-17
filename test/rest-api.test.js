@@ -99,7 +99,7 @@ suite('REST API', function() {
             .takes('search', { requestMessage: true }, function() {})
             .ctrl(2, onReceive);
     var handler = expressKotoumi
-          .createRESTHandler(type,
+          .createRESTHandler('search',
                              requestBuilders,
                              responseBuilders,
                              connection);
