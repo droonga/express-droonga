@@ -69,16 +69,24 @@ suite('building message from REST API request', function() {
     });
 
     suite('validation', function() {
+      function deepClone(base) {
+        if (!base || typeof base != 'object')
+          return base;
+
+        var cloned = Object.create(null);
+        Object.keys(base).forEach(function(key) {
+          cloned[key] = deepClone(base[key]);
+        });
+        return cloned;
+      }
+
       function merge(base, extra) {
         if (!extra || typeof extra != 'object')
           return base || extra;
 
-        var merged = Object.create(null);
-        Object.keys(base).forEach(function(key) {
-          merged[key] = merge(base[key], null);
-        });
+        var merged = deepClone(base);
         Object.keys(extra).forEach(function(key) {
-          merged[key] = merge(base[key] || null, extra[key]);
+          merged[key] = merge(merged[key], extra[key]);
         });
         return merged;
       }
