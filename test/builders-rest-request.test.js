@@ -73,7 +73,10 @@ suite('building message from REST API request', function() {
         if (!extra || typeof extra != 'object')
           return base || extra;
 
-        var merged = Object.create(base);
+        var merged = Object.create(null);
+        Object.keys(base).forEach(function(key) {
+          merged[key] = merge(base[key], null);
+        });
         Object.keys(extra).forEach(function(key) {
           merged[key] = merge(base[key] || null, extra[key]);
         });
