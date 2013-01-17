@@ -8,31 +8,6 @@ var expressKotoumi = require('../lib/index');
 var Connection = require('../lib/backend-adaptor').Connection;
 
 suite('REST API', function() {
-  var connection;
-  var sender;
-  var receiver;
-  var server;
-
-  function commonSetup() {
-    connection = new Connection({
-      tag:        'test',
-      listenPort: utils.testServerPort,
-      sender:     sender = utils.createMockedSender(),
-      receiver:   receiver = utils.createMockedReceiver()
-    });
-    receiver.triggerConnect('test');
-  }
-
-  function commonTeardown() {
-    if (server) {
-      server.close();
-    }
-    connection = undefined;
-    sender = undefined;
-    receiver = undefined;
-    server = undefined;
-  }
-
   test('registeration for given handlers', function() {
     var mockedHandlers = nodemock.mock('search')
           .takes('fake connection')
@@ -47,9 +22,6 @@ suite('REST API', function() {
   });
 
   suite('registeration', function() {
-    setup(commonSetup);
-    teardown(commonTeardown);
-
     function createHandlerFactory(type) {
       return function() {
         return function(request, response) {
@@ -61,6 +33,14 @@ suite('REST API', function() {
     var handlersFactory = {
       search: createHandlerFactory('search')
     };
+
+    var server;
+    teardown(function() {
+      if (server) {
+        server.close();
+      }
+      server = undefined;
+    });
 
     test('to the document root', function(done) {
       var application = express();
@@ -101,6 +81,41 @@ suite('REST API', function() {
           done(error);
         });
     });
+  });
+
+  test('creation of REST handler', function() {
+    var requestBuilders = nodemock
+          .mock('search')
+            .takes({ request: true })
+            .returns({ requestMessage: true });
+    var responseBuilders = nodemock
+          .mock('search')
+            .takes({ responseMessage: true })
+            .returns({ response: true });
+
+    var onReceive = {};
+    var connection = nodemock
+          .mock('emitMessage')
+            .takes('search', { requestMessage: true }, function() {})
+            .ctrl(2, onReceive);
+    var handler = expressKotoumi
+          .createRESTHandler(type,
+                             requestBuilders,
+                             responseBuilders,
+                             connection);
+
+    var fakeRequest = { request: true };
+    var fakeResponse = nodemock
+          .mock('contentType')
+            .takes('application/json')
+          .mock('send')
+            .takes({ response: true }, 200);
+
+    handler(fakeRequest, fakeResponse);
+    connection.assertThrows();
+
+    onReceive.trigger({ responseMessage: true });
+    fakeResponse.assertThrows();
   });
 });
 
