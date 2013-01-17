@@ -68,8 +68,9 @@ function createMockedMessageCallback() {
 exports.createMockedMessageCallback = createMockedMessageCallback;
 
 
-var testBackendPort = 3333;
-var testServerPort = 3334;
+var testSendPort = exports.testSendPort = 3333;
+var testReceivePort = exports.testReceivePort = 3334;
+var testServerPort = exports.testServerPort = 3335;
 
 function setupServer(handler) {
   var server = http.createServer(handler);
@@ -197,3 +198,11 @@ function assertEqualJSON(actual, expected) {
   this.deepEqual(sortKeys(actual), sortKeys(expected));
 }
 assert.equalJSON = assertEqualJSON;
+
+exports.outputAll = {
+  startTime:   true,
+  elapsedTime: true,
+  count:       true,
+  attributes:  true,
+  recodes:     true
+};
