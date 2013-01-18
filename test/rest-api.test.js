@@ -117,5 +117,61 @@ suite('REST API', function() {
     onReceive.trigger({ responseMessage: true });
     fakeResponse.assertThrows();
   });
+
+  suite('default handlers', function() {
+    var server;
+
+    teardown(function() {
+      if (server) {
+        server.close();
+      }
+      server = undefined;
+    });
+
+    test('search', function(done) {
+      var receiverCallback = {};
+      var connection = {
+            emitMessage: function(type, message, callback) {
+              this.emitMessageCalledArguments.push({
+                type:     type,
+                message:  message,
+                callback: callback
+              });
+            },
+            emitMessageCalledArguments: []
+          };
+      var application = express();
+      application.kotoumi({
+        prefix:     '',
+        connection: connection
+      });
+      server = utils.setupServer(application);
+
+      utils.get('/tables/foo?query=bar');
+
+      setTimeout(function() {
+        try {
+          assert.equal(1, connection.emitMessageCalledArguments.length);
+          var args = connection.emitMessageCalledArguments[0];
+          assert.equal(args.type, 'search');
+
+          var expected = {
+            queries: {
+              result: {
+                source: 'foo',
+                query:  'bar',
+                output: utils.outputAll
+              }
+            }
+          };
+          assert.equalJSON(args.message, expected);
+
+          done();
+        } catch(error) {
+          done(error);
+        }
+      }, 100);
+    });
+  });
 });
 
