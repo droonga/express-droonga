@@ -80,7 +80,7 @@ suite('Connection', function() {
     var response = {
       id:         now.getTime(),
       date:       now.toISOString(),
-      replyTo:    message.id,
+      inReplyTo:  message.id,
       statusCode: 200,
       type:       'testResponse',
       body:       'first call'
