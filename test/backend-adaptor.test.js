@@ -32,6 +32,7 @@ suite('Connection', function() {
     assert.envelopeEqual(message,
                          { id:         TypeOf('string'),
                            date:       InstanceOf(Date),
+                           replyTo:    'localhost:' + utils.testReceivePort,
                            statusCode: 200,
                            type:       'testRequest',
                            body:       { command: 'foobar' } });
@@ -71,6 +72,7 @@ suite('Connection', function() {
     assert.envelopeEqual(message,
                          { id:         TypeOf('string'),
                            date:       InstanceOf(Date),
+                           replyTo:    'localhost:' + utils.testReceivePort,
                            statusCode: 200,
                            type:       'testRequest',
                            body:       { command: 'foobar' } });
