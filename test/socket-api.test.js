@@ -95,7 +95,11 @@ suite('Socket.IO API', function() {
   });
 
   test('front to back, extra command', function(done) {
+    var extraController = {};
     var connection = utils.createMockedBackendConnection()
+          .mock('on')
+            .takes('message', function() {})
+            .ctrl(1, extraController)
           .mock('emitMessage')
             .takes('foobar', { requestMessage: true });
 

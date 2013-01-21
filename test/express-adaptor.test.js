@@ -23,11 +23,12 @@ suite('Adaption for express application', function() {
     };
 
     var server;
+
     teardown(function() {
       if (server) {
         server.close();
+        server = undefined;
       }
-      server = undefined;
     });
 
     test('to the document root', function(done) {
