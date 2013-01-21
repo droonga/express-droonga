@@ -31,12 +31,12 @@ suite('Adaption for express application', function() {
 
     test('to the document root', function(done) {
       var application = express();
-      application.kotoumi({
+      server = application.kotoumi({
         prefix:     '',
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
+      server = utils.setupServer(server);
 
       utils
         .get('/tables/foobar')
@@ -51,12 +51,12 @@ suite('Adaption for express application', function() {
 
     test('under specified path', function(done) {
       var application = express();
-      application.kotoumi({
+      server = application.kotoumi({
         prefix:     '/path/to/kotoumi',
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
+      server = utils.setupServer(server);
 
       utils
         .get('/path/to/kotoumi/tables/foobar')
