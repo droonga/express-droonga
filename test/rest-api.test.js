@@ -4,7 +4,7 @@ var nodemock = require('nodemock');
 var utils = require('./test-utils');
 
 var express = require('express');
-var expressKotoumi = require('../lib/express-adaptor');
+var expressKotoumi = require('../lib/rest-adaptor');
 var Connection = require('../lib/backend-adaptor').Connection;
 
 suite('REST API', function() {
