@@ -1,4 +1,5 @@
 var express = require('express');
+var Connection = require('./lib/backend-adaptor').Connection;
 var restAdaptor = require('./lib/rest-adaptor');
 var socketAdaptor = require('./lib/socket-adaptor');
 
