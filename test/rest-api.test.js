@@ -110,7 +110,7 @@ suite('REST API', function() {
     requestBuilders.assertThrows();
     connection.assertThrows();
 
-    onReceive.trigger({ responseMessage: true });
+    onReceive.trigger({ body: { response: true } });
     fakeResponse.assertThrows();
   });
 
