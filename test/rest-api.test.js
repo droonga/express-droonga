@@ -100,7 +100,7 @@ suite('REST API', function() {
             .ctrl(2, onReceive);
     var handler = restAdaptor
           .createHandler('search',
-                         requestBuilders,
+                         requestBuilders.search,
                          connection);
 
     var fakeRequest = { request: true };
