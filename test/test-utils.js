@@ -2,6 +2,9 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
+var client = require('socket.io-client');
+
+var socketAdaptor = require('../lib/socket-adaptor');
 
 function createMockedSender() {
   var sender = {
@@ -137,6 +140,37 @@ function post(path, body, headers) {
 }
 exports.post = post;
 Deferred.register('post', function() { return post.apply(this, arguments); });
+
+
+function createClientSocket() {
+  var host = 'http://localhost:' + testServerPort;
+  var options = { 'force new connection': true };
+  return client.connect(host, options);
+}
+exports.createClientSocket = createClientSocket;
+
+function createMockedBackendConnection() {
+  var connection = nodemock;
+  var onMessageControllers = {};
+  socketAdaptor.commands.forEach(function(command) {
+    onMessageControllers[command] = {};
+    connection = connection
+      .mock('on')
+      .takes('message', function() {})
+      .ctrl(1, onMessageControllers[command]);
+  });
+  connection.controllers = onMessageControllers;
+  return connection;
+}
+exports.createMockedBackendConnection = createMockedBackendConnection;
+
+function createMockedHandlersFactory() {
+  return nodemock
+    .mock('search')
+    .takes({})
+    .returns(function() {});
+}
+exports.createMockedHandlersFactory = createMockedHandlersFactory;
 
 
 function TypeOf(typeString) {
