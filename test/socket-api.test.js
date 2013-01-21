@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('./test-utils');
 
@@ -19,13 +20,13 @@ suite('Socket.IO API', function() {
     server = undefined;
   });
 
-  test('front to back', function() {
+  test('front to back', function(done) {
     var connection = nodemock
           .mock('on')
             .takes('message', function() {})
             .times(socketAdaptor.commands.length)
           .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {});
+            .takes('search', { requestMessage: true });
 
     var application = express();
     server = utils.setupServer(application);
@@ -34,9 +35,20 @@ suite('Socket.IO API', function() {
     });
 
     var clientSocket = client.connect('http://localhost:' + utils.testServerPort);
-    clientSocket.emit('search', { requestMessage: true });
 
-    connection.assertThrows();
+    Deferred
+      .wait(0.1)
+      .next(function() {
+        clientSocket.emit('search', { requestMessage: true });
+      })
+      .wait(0.1)
+      .next(function() {
+        connection.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 });
 
