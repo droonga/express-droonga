@@ -25,7 +25,8 @@
     "chai": "*",
     "jsdeferred": "*",
     "mocha": "*",
-    "nodemock": "*"
+    "nodemock": "*",
+    "socket.io-client": "*"
   },
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter list --ui tdd --timeout 5s"
