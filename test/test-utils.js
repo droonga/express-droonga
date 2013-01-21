@@ -74,7 +74,7 @@ var testServerPort = exports.testServerPort = 3335;
 
 function setupServer(handlerOrServer) {
   var server;
-  if ('listen' in handlerOrServer) { // it is a server
+  if ('close' in handlerOrServer) { // it is a server
     server = handlerOrServer;
   } else { // it is a handler
     server = http.createServer(handlerOrServer);
