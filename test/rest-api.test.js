@@ -4,7 +4,7 @@ var nodemock = require('nodemock');
 var utils = require('./test-utils');
 
 var express = require('express');
-var expressKotoumi = require('../lib/rest-adaptor');
+var restAdaptor = require('../lib/rest-adaptor');
 var Connection = require('../lib/backend-adaptor').Connection;
 
 suite('REST API', function() {
@@ -13,7 +13,7 @@ suite('REST API', function() {
           .takes('fake connection')
           .returns(function() {});
     var application = express();
-    application.kotoumi({
+    restAdaptor.registerHandlers(application, {
       prefix:     '',
       connection: 'fake connection',
       handlers:   mockedHandlers
@@ -44,7 +44,7 @@ suite('REST API', function() {
 
     test('to the document root', function(done) {
       var application = express();
-      application.kotoumi({
+      restAdaptor.registerHandlers(application, {
         prefix:     '',
         connection: 'fake connection',
         handlers:   handlersFactory
@@ -64,7 +64,7 @@ suite('REST API', function() {
 
     test('under specified path', function(done) {
       var application = express();
-      application.kotoumi({
+      restAdaptor.registerHandlers(application, {
         prefix:     '/path/to/kotoumi',
         connection: 'fake connection',
         handlers:   handlersFactory
@@ -98,7 +98,7 @@ suite('REST API', function() {
           .mock('emitMessage')
             .takes('search', { requestMessage: true }, function() {})
             .ctrl(2, onReceive);
-    var handler = expressKotoumi
+    var handler = restAdaptor
           .createRESTHandler('search',
                              requestBuilders,
                              responseBuilders,
@@ -141,7 +141,7 @@ suite('REST API', function() {
             emitMessageCalledArguments: []
           };
       var application = express();
-      application.kotoumi({
+      restAdaptor.registerHandlers(application, {
         prefix:     '',
         connection: connection
       });

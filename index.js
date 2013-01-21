@@ -1,1 +1,13 @@
-var expressAdaptor = require('./lib/express-adaptor');
+var express = require('express');
+var restAdaptor = require('./lib/rest-adaptor');
+
+express.application.kotoumi = function(params) {
+  params = params || {};
+
+  params.connection = params.connection || new Connection(params);
+
+  params.prefix = params.prefix || '';
+  params.prefix = params.prefix.replace(/\/$/, '');
+
+  restAdaptor.registerHandlers(this, params);
+}
