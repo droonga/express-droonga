@@ -88,10 +88,6 @@ suite('REST API', function() {
           .mock('search')
             .takes({ request: true })
             .returns({ requestMessage: true });
-    var responseBuilders = nodemock
-          .mock('search')
-            .takes({ responseMessage: true })
-            .returns({ response: true });
 
     var onReceive = {};
     var connection = nodemock
@@ -111,6 +107,7 @@ suite('REST API', function() {
             .takes({ response: true }, 200);
 
     handler(fakeRequest, fakeResponse);
+    requestBuilders.assertThrows();
     connection.assertThrows();
 
     onReceive.trigger({ responseMessage: true });
