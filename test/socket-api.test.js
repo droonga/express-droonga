@@ -93,5 +93,36 @@ suite('Socket.IO API', function() {
         done(error);
       });
   });
+
+  test('front to back, extra command', function(done) {
+    var connection = utils.createMockedBackendConnection()
+          .mock('emitMessage')
+            .takes('foobar', { requestMessage: true });
+
+    var application = express();
+    server = utils.setupServer(application);
+    socketAdaptor.registerHandlers(application, server, {
+      connection: connection,
+      extraCommands: [
+        'foobar'
+      ]
+    });
+
+    clientSocket = utils.createClientSocket();
+
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        clientSocket.emit('foobar', { requestMessage: true });
+      })
+      .wait(0.01)
+      .next(function() {
+        connection.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
 });
 
