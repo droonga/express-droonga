@@ -21,6 +21,9 @@ suite('Socket.IO API', function() {
 
   test('front to back', function() {
     var connection = nodemock
+          .mock('on')
+            .takes('message', function() {})
+            .times(socketAdaptor.commands.length)
           .mock('emitMessage')
             .takes('search', { requestMessage: true }, function() {});
 
