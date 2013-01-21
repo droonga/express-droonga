@@ -33,7 +33,7 @@ suite('Socket.IO API', function() {
     var clientSocket = client.connect('http://localhost:' + utils.testServerPort);
     clientSocket.emit('search', { requestMessage: true });
 
-    connection.assertThrow();
+    connection.assertThrows();
   });
 });
 
