@@ -72,8 +72,13 @@ var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
 var testServerPort = exports.testServerPort = 3335;
 
-function setupServer(handler) {
-  var server = http.createServer(handler);
+function setupServer(handlerOrServer) {
+  var server;
+  if ('listen' in handlerOrServer) { // it is a server
+    server = handlerOrServer;
+  } else { // it is a handler
+    server = http.createServer(handlerOrServer);
+  }
   server.listen(testServerPort);
   return server;
 }
