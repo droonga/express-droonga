@@ -1,4 +1,3 @@
-var http = require('http');
 var express = require('express');
 var restAdaptor = require('./lib/rest-adaptor');
 var socketAdaptor = require('./lib/socket-adaptor');
@@ -13,8 +12,6 @@ express.application.kotoumi = function(params) {
 
   restAdaptor.registerHandlers(this, params);
 
-  params.server = params.server || http.createServer(this);
-  socketAdaptor.registerHandlers(this, params.server, params);
-
-  return params.server;
+  if (params.server)
+    socketAdaptor.registerHandlers(this, params.server, params);
 }
