@@ -22,8 +22,7 @@ suite('Socket.IO API', function() {
   test('front to back', function() {
     var connection = nodemock
           .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {})
-            .ctrl(2, onReceive);
+            .takes('search', { requestMessage: true }, function() {});
 
     var application = express();
     server = utils.setupServer(application);
