@@ -7,8 +7,8 @@
 
 ## server
 
-If both express-kotoumi and kotoumi (fluentd) is running on the same machine,
-you can use express-kotoumi easily.
+If both express-kotoumi and kotoumi (fluentd) are running on the same machine,
+you can initialize the express-kotoumi instance easily.
 
     var express = require('express'),
         kotoumi = require('express-kotoumi');
