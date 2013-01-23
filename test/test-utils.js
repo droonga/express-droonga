@@ -54,16 +54,16 @@ exports.createMockedReceiver = createMockedReceiver;
 
 function createMockedMessageCallback() {
   var mockedCallback = nodemock;
-  var callback = function(message) {
-    mockedCallback.receive(message);
+  var callback = function(error, message) {
+    mockedCallback.receive(error, message);
   };
-  callback.takes = function(message) {
+  callback.takes = function(error, message) {
     callback.assert = function() {
       mockedCallback.assertThrows();
     };
     mockedCallback = mockedCallback
                        .mock('receive')
-                       .takes(message);
+                       .takes(error, message);
   };
   callback.mock = mockedCallback;
   return callback;
