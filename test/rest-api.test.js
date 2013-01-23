@@ -92,7 +92,7 @@ suite('REST API', function() {
     var onReceive = {};
     var connection = nodemock
           .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {})
+            .takes('search', { requestMessage: true }, function() {}, null)
             .ctrl(2, onReceive);
     var handler = restAdaptor
           .createHandler('search',
