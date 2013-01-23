@@ -19,6 +19,7 @@
     "express-resource": "*",
     "fluent-logger": "*",
     "jade": "*",
+    "less-middleware": "*",
     "msgpack": "*",
     "socket.io": "*"
   },
