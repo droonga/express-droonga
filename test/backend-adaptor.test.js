@@ -1,4 +1,5 @@
 var assert = require('chai').assert;
+var nodemock = require('nodemock');
 
 var utils = require('./test-utils');
 var TypeOf = utils.TypeOf;
@@ -40,8 +41,24 @@ suite('Connection', function() {
     sender.assertSent('message', message);
   });
 
+  function createMockedMessageCallback() {
+    var mockedCallback = nodemock;
+    var callback = function() {
+      mockedCallback.receive.apply(mockedCallback, arguments);
+    };
+    callback.takes = function() {
+      callback.assert = function() {
+        mockedCallback.assertThrows();
+      };
+      mockedCallback = mockedCallback.mock('receive');
+      mockedCallback = mockedCallback.takes.apply(mockedCallback, arguments);
+    };
+    callback.mock = mockedCallback;
+    return callback;
+  }
+
   test('receiving message from the backend', function() {
-    var callback = utils.createMockedMessageCallback();
+    var callback = createMockedMessageCallback();
     connection.on('message', callback);
 
     var now = new Date();
@@ -68,7 +85,7 @@ suite('Connection', function() {
   });
 
   test('sending message with one response', function() {
-    var callback = utils.createMockedMessageCallback();
+    var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
     assert.envelopeEqual(message,
                          { id:         TypeOf('string'),

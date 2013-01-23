@@ -52,23 +52,6 @@ function createMockedReceiver() {
 }
 exports.createMockedReceiver = createMockedReceiver;
 
-function createMockedMessageCallback() {
-  var mockedCallback = nodemock;
-  var callback = function() {
-    mockedCallback.receive.apply(mockedCallback, arguments);
-  };
-  callback.takes = function() {
-    callback.assert = function() {
-      mockedCallback.assertThrows();
-    };
-    mockedCallback = mockedCallback.mock('receive');
-    mockedCallback = mockedCallback.takes.apply(mockedCallback, arguments);
-  };
-  callback.mock = mockedCallback;
-  return callback;
-}
-exports.createMockedMessageCallback = createMockedMessageCallback;
-
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
