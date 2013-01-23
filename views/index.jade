@@ -1,0 +1,13 @@
+doctype 5
+html(lang='ja')
+  head
+    meta(charset='UTF-8')
+    title= (title ? title + ' - ' : '') + 'Express Kotoumi Dashboard'
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href=prefix + '/styles/override.css', type='text/css', media='screen')
+    script(type='text/javascript', src=prefix + '/bootstrap/js/bootstrap.min.js')
+  body
+    .container
+      form.navbar-search.pull-left
+        div
+          input(type='text', class='search-query', placeholder='Search')

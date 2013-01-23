@@ -14,8 +14,7 @@
     }
   ],
   "dependencies": {
-    "ejs": "*",
-    "express": ">=3.0",
+   "express": ">=3.0",
     "express-resource": "*",
     "fluent-logger": "*",
     "jade": "*",
