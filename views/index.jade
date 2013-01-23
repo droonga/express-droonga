@@ -7,9 +7,9 @@ html(lang='ja')
     link(rel='stylesheet', href=prefix + '/styles/override.css', type='text/css', media='screen')
     script(type='text/javascript', src=prefix + '/bootstrap/js/bootstrap.min.js')
   body
-    .navbar.navbar.navbar-fixed-top
+    #header
       .navbar-inner
         .container
           a.brand(href=prefix + '/dashboard') Express Kotoumi Dashboard
-          form.navbar-search.pull-right
-            input.search-query(type='text', placeholder='Search')
+          form
+            input(type='text', placeholder='Search')
