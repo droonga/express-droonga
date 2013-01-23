@@ -52,12 +52,12 @@ suite('Connection', function() {
       type:       'testResponse',
       body:       'first call'
     };
-    callback.takes(null, message);
+    callback.takes(message);
     receiver.emitMessage(message);
     callback.assert();
 
     message.body = 'second call';
-    callback.takes(null, message);
+    callback.takes(message);
     receiver.emitMessage(message);
     callback.assert();
 
