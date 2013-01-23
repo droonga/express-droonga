@@ -2,6 +2,7 @@ var express = require('express');
 var Connection = require('./lib/backend-adaptor').Connection;
 var restAdaptor = require('./lib/rest-adaptor');
 var socketAdaptor = require('./lib/socket-adaptor');
+var dashboardAdaptor = require('./lib/dashboard-adaptor');
 
 express.application.kotoumi = function(params) {
   params = params || {};
@@ -15,4 +16,6 @@ express.application.kotoumi = function(params) {
 
   if (params.server)
     socketAdaptor.registerHandlers(this, params.server, params);
+
+  dashboardAdaptor.registerHandlers(this, params);
 }
