@@ -47,10 +47,12 @@ suite('building message from REST API request', function() {
           limit:      '100',
           match_to:   'realname,nickname',
           sort_by:    '-realname,-nickname',
-          attributes: 'realname,nickname,age,job'
+          attributes: 'realname,nickname,age,job',
+          timeout:    1000
         }
       };
       var expectedBody = {
+        timeout: 1000,
         queries: {
           result: {
             source:  'people',
@@ -135,6 +137,14 @@ suite('building message from REST API request', function() {
       testFailFor({ query: { offset: '0.1' } }, 'invalid integer', baseRequest);
       testFailFor({ query: { offset: '-0.1' } }, 'invalid integer', baseRequest);
       testFailFor({ query: { offset: 'foobar' } }, 'invalid integer', baseRequest);
+
+      testSuccessFor({ query: { timeout: '0' } }, baseRequest);
+      testSuccessFor({ query: { timeout: '10' } }, baseRequest);
+      testSuccessFor({ query: { timeout: '-10' } }, baseRequest);
+      testFailFor({ query: { timeout: '' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { timeout: '0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { timeout: '-0.1' } }, 'invalid integer', baseRequest);
+      testFailFor({ query: { timeout: 'foobar' } }, 'invalid integer', baseRequest);
     });
   });
 });
