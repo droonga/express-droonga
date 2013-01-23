@@ -5,7 +5,7 @@ var express = require('express'),
     http = require('http');
 
 var application = express();
-var server = http.startServer(application);
+var server = http.createServer(application);
 application.kotoumi({
   prefix: '',
   server: server
