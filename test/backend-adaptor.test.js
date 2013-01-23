@@ -172,5 +172,28 @@ suite('Connection', function() {
         done(error);
       });
   });
+
+  test('sending message with one response, timeout (ignored negative timeout)', function() {
+    var callback = createMockedMessageCallback();
+    var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, -1);
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
+    sender.assertSent('message', message);
+    assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+
+    var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+    callback.takes(null, response);
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        receiver.emitMessage(response);
+        callback.assert();
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
 });
 
