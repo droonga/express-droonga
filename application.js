@@ -11,4 +11,4 @@ application.kotoumi({
   server: server
 });
 
-serer.listen(13000);
+server.listen(13000);
