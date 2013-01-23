@@ -48,7 +48,7 @@ suite('building message from REST API request', function() {
           match_to:   'realname,nickname',
           sort_by:    '-realname,-nickname',
           attributes: 'realname,nickname,age,job',
-          timeout:    1000
+          timeout:    '1000'
         }
       };
       var expectedBody = {
