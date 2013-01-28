@@ -44,12 +44,17 @@ suite('Receiver', function() {
   });
 
   test('receiving packed message', function(done) {
-    var mockedReceiver = nodemock.mock('receive')
-          .takes({ message: true });
+    var mockedReceiver = nodemock
+          .mock('start')
+          .mock('receive')
+            .takes({ message: true });
 
     receiver = new Receiver();
     receiver.on('kotoumi.message', function(data) {
       mockedReceiver.receive(data);
+    });
+    receiver.listen(function() {
+      mockedReceiver.start();
     });
 
     Deferred
