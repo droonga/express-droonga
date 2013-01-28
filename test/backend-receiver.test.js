@@ -22,14 +22,24 @@ function connectTo(port) {
 }
 
 function sendPacketTo(packet, port) {
+  var clientSocket;
   return connectTo(port)
-    .next(function(clientSocket) {
+    .next(function(newSocket) {
+      clientSocket = newSocket;
       var packedPacket = msgpack.pack(packet);
       clientSocket.write(new Buffer(packedPacket));
-      return clientSocket;
     })
-    .next(function(clientSocket) {
+    .wait(0.01)
+    .next(function() {
       clientSocket.destroy();
+      clientSocket = undefined;
+    })
+    .error(function(error) {
+      if (clientSocket) {
+        clientSocket.destroy();
+        clientSocket = undefined;
+      }
+      throw error;
     });
 }
 
