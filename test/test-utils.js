@@ -39,7 +39,7 @@ function createMockedReceiver(tag) {
         mockedInternalReceiver = undefined;
       }
     },
-    emitMessage: function(message) { // simulate message from backend
+    emulateMessageReceive: function(message) {
       this.assertInitialized();
       messageCallbackController.trigger(message);
     }

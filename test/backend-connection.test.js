@@ -90,17 +90,17 @@ suite('Connection', function() {
       body:       'first call'
     };
     callback.takes(message);
-    receiver.emitMessage(message);
+    receiver.emulateMessageReceive(message);
     callback.assert();
 
     message.body = 'second call';
     callback.takes(message);
-    receiver.emitMessage(message);
+    receiver.emulateMessageReceive(message);
     callback.assert();
 
     message.body = 'third call';
     connection.removeListener('message', callback);
-    receiver.emitMessage(message);
+    receiver.emulateMessageReceive(message);
     callback.assert();
   });
 
@@ -113,12 +113,12 @@ suite('Connection', function() {
 
     var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
     callback.takes(null, response);
-    receiver.emitMessage(response);
+    receiver.emulateMessageReceive(response);
     callback.assert();
 
     // Secondary and later messages are ignored.
     response.body = 'second call';
-    receiver.emitMessage(response);
+    receiver.emulateMessageReceive(response);
     callback.assert();
   });
 
@@ -132,7 +132,7 @@ suite('Connection', function() {
     var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
     response.statusCode = 503;
     callback.takes(503, response);
-    receiver.emitMessage(response);
+    receiver.emulateMessageReceive(response);
     callback.assert();
   });
 
@@ -146,7 +146,7 @@ suite('Connection', function() {
 
     var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
     callback.takes(null, response);
-    receiver.emitMessage(response);
+    receiver.emulateMessageReceive(response);
     callback.assert();
     assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
   });
@@ -185,7 +185,7 @@ suite('Connection', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        receiver.emitMessage(response);
+        receiver.emulateMessageReceive(response);
         callback.assert();
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
         done();
