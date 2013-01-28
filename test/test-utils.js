@@ -8,6 +8,12 @@ var socketIoHandler = require('../lib/frontend/socket.io-handler');
 
 function createMockedSender() {
   var sender = {
+    on: function() {
+    },
+    removeAllListeners: function() {
+    },
+    removeListener: function() {
+    },
     emit: function(eventName, message) {
       this.messages.push({ eventName: eventName, message: message });
     },
