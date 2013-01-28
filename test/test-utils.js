@@ -4,7 +4,7 @@ var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
 
-var socketAdaptor = require('../lib/socket-adaptor');
+var socketIoHandler = require('../lib/frontend/socket.io-handler');
 
 function createMockedSender() {
   var sender = {
@@ -134,7 +134,7 @@ exports.createClientSocket = createClientSocket;
 function createMockedBackendConnection() {
   var connection = nodemock;
   var onMessageControllers = {};
-  socketAdaptor.commands.forEach(function(command) {
+  socketIoHandler.commands.forEach(function(command) {
     onMessageControllers[command] = {};
     connection = connection
       .mock('on')

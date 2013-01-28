@@ -6,7 +6,7 @@ var express = require('express');
 var utils = require('./test-utils');
 
 var adaptor = require('../index');
-var Connection = require('../lib/backend-adaptor').Connection;
+var Connection = require('../lib/backend/connection').Connection;
 
 suite('Adaption for express application', function() {
   suite('REST API', function() {

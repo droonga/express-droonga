@@ -6,8 +6,7 @@ var utils = require('./test-utils');
 var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
-var backendAdaptor = require('../lib/backend-adaptor');
-var Connection = backendAdaptor.Connection;
+var Connection = require('../lib/backend/connection').Connection;
 
 suite('Connection', function() {
   var connection;
@@ -160,7 +159,7 @@ suite('Connection', function() {
     sender.assertSent('message', message);
     assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
-    callback.takes(backendAdaptor.ERROR_GATEWAY_TIMEOUT, null);
+    callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
     Deferred
       .wait(0.01)
       .next(function() {

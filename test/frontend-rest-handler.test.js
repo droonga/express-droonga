@@ -4,8 +4,8 @@ var nodemock = require('nodemock');
 var utils = require('./test-utils');
 
 var express = require('express');
-var restAdaptor = require('../lib/rest-adaptor');
-var Connection = require('../lib/backend-adaptor').Connection;
+var restHandler = require('../lib/frontend/rest-handler');
+var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
   test('registeration for given handlers', function() {
@@ -13,7 +13,7 @@ suite('REST API', function() {
           .takes('fake connection')
           .returns(function() {});
     var application = express();
-    restAdaptor.registerHandlers(application, {
+    restHandler.register(application, {
       prefix:     '',
       connection: 'fake connection',
       handlers:   mockedHandlers
@@ -44,7 +44,7 @@ suite('REST API', function() {
 
     test('to the document root', function(done) {
       var application = express();
-      restAdaptor.registerHandlers(application, {
+      restHandler.register(application, {
         prefix:     '',
         connection: 'fake connection',
         handlers:   handlersFactory
@@ -64,7 +64,7 @@ suite('REST API', function() {
 
     test('under specified path', function(done) {
       var application = express();
-      restAdaptor.registerHandlers(application, {
+      restHandler.register(application, {
         prefix:     '/path/to/kotoumi',
         connection: 'fake connection',
         handlers:   handlersFactory
@@ -94,7 +94,7 @@ suite('REST API', function() {
           .mock('emitMessage')
             .takes('search', { requestMessage: true }, function() {}, null)
             .ctrl(2, onReceive);
-    var handler = restAdaptor
+    var handler = restHandler
           .createHandler('search',
                          requestBuilders.search,
                          connection);
@@ -137,7 +137,7 @@ suite('REST API', function() {
             emitMessageCalledArguments: []
           };
       var application = express();
-      restAdaptor.registerHandlers(application, {
+      restHandler.register(application, {
         prefix:     '',
         connection: connection
       });

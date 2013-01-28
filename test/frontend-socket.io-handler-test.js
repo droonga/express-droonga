@@ -5,8 +5,8 @@ var express = require('express');
 
 var utils = require('./test-utils');
 
-var socketAdaptor = require('../lib/socket-adaptor');
-var Connection = require('../lib/backend-adaptor').Connection;
+var socketIoHandler = require('../lib/frontend/socket.io-handler');
+var Connection = require('../lib/backend/connection').Connection;
 
 suite('Socket.IO API', function() {
   var server;
@@ -30,7 +30,7 @@ suite('Socket.IO API', function() {
 
     var application = express();
     server = utils.setupServer(application);
-    socketAdaptor.registerHandlers(application, server, {
+    socketIoHandler.register(application, server, {
       connection: connection
     });
 
@@ -56,7 +56,7 @@ suite('Socket.IO API', function() {
 
     var application = express();
     server = utils.setupServer(application);
-    socketAdaptor.registerHandlers(application, server, {
+    socketIoHandler.register(application, server, {
       connection: connection
     });
 
@@ -105,7 +105,7 @@ suite('Socket.IO API', function() {
 
     var application = express();
     server = utils.setupServer(application);
-    socketAdaptor.registerHandlers(application, server, {
+    socketIoHandler.register(application, server, {
       connection: connection,
       extraCommands: [
         'foobar'
