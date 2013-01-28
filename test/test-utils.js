@@ -24,27 +24,20 @@ exports.createMockedSender = createMockedSender;
 
 function createMockedReceiver() {
   var mockedSockets;
-  var mockedReceiverInternal = nodemock;
-  var connactionCallbackController = {};
   var messageCallbackController = {};
   var receiver = {
     // mocking receiver
-    sockets:
-      (mockedSockets = nodemock.mock('on')
-         .takes('connection', function() {})
-         .ctrl(1, connactionCallbackController)),
-    'set': function(key, value) {},
-
-    // extra features as a mocked object
-    triggerConnect: function(tag) {
-      mockedSockets.assertThrows();
-      var mockedSocket = nodemock.mock('on')
-                           .takes(tag + '.message', function() {})
-                           .ctrl(1, messageCallbackController);
-      connactionCallbackController.trigger(mockedSocket);
-      mockedSocket.assertThrows();
+    on: (mockedSockets = nodemock.mock('on')
+        .takes(tag + '.message', function() {})
+        .ctrl(1, messageCallbackController),
+    assertInitialized: function() {
+      if (mockedSockets) {
+        mockedSockets.assertThrows();
+        mockedSockets = undefined;
+      }
     },
     emitMessage: function(message) { // simulate message from backend
+      this.assertInitialized();
       messageCallbackController.trigger(message);
     }
   };

@@ -21,7 +21,7 @@ suite('Connection', function() {
       sender:     sender = utils.createMockedSender(),
       receiver:   receiver = utils.createMockedReceiver()
     });
-    receiver.triggerConnect('test');
+    receiver.assertInitialized();
   });
 
   teardown(function() {
