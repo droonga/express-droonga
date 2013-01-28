@@ -83,5 +83,42 @@ suite('Receiver', function() {
         done(error);
       });
   });
+
+  test('re-connecting', function(done) {
+    var mockedReceiver = nodemock
+          .mock('start')
+          .mock('receive')
+            .takes({ message1: true })
+          .mock('receive')
+            .takes({ message2: true });
+
+    receiver = new Receiver();
+    receiver.on('kotoumi.message', function(data) {
+      mockedReceiver.receive(data);
+    });
+    receiver.listen(function() {
+      mockedReceiver.start();
+    });
+
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.notEqual(receiver.port, undefined);
+
+        var rawPacket = { tag: 'kotoumi.message', data: { message1: true } };
+        return sendPacketTo(rawPacket, receiver.port);
+      })
+      .next(function() {
+        var rawPacket = { tag: 'kotoumi.message', data: { message2: true } };
+        return sendPacketTo(rawPacket, receiver.port);
+      })
+      .next(function() {
+        mockedReceiver.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
 });
 
