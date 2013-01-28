@@ -19,7 +19,7 @@ suite('Connection', function() {
       receiveHostName: 'localhost',
       receivePort: utils.testReceivePort,
       sender:     sender = utils.createMockedSender(),
-      receiver:   receiver = utils.createMockedReceiver()
+      receiver:   receiver = utils.createMockedReceiver('test')
     });
     receiver.assertInitialized();
   });

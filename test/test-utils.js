@@ -22,7 +22,7 @@ function createMockedSender() {
 }
 exports.createMockedSender = createMockedSender;
 
-function createMockedReceiver() {
+function createMockedReceiver(tag) {
   var mockedSockets;
   var messageCallbackController = {};
   var receiver = {
