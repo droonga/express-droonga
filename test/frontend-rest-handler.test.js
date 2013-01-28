@@ -49,9 +49,10 @@ suite('REST API', function() {
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
-
-      utils
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+        })
         .get('/tables/foobar')
         .next(function(response) {
           assert.equal('search OK', response.body);
@@ -69,9 +70,10 @@ suite('REST API', function() {
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
-
-      utils
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+        })
         .get('/path/to/kotoumi/tables/foobar')
         .next(function(response) {
           assert.equal('search OK', response.body);
@@ -141,12 +143,13 @@ suite('REST API', function() {
         prefix:     '',
         connection: connection
       });
-      server = utils.setupServer(application);
-
-      utils.get('/tables/foo?query=bar');
-
-      setTimeout(function() {
-        try {
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          utils.get('/tables/foo?query=bar');
+        })
+        .wait(0.1)
+        .next(function() {
           assert.equal(1, connection.emitMessageCalledArguments.length);
           var args = connection.emitMessageCalledArguments[0];
           assert.equal(args.type, 'search');
@@ -163,10 +166,10 @@ suite('REST API', function() {
           assert.equalJSON(args.message, expected);
 
           done();
-        } catch(error) {
+        })
+        .error(function(error) {
           done(error);
-        }
-      }, 100);
+        });
     });
   });
 });

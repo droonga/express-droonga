@@ -54,14 +54,17 @@ var testReceivePort = exports.testReceivePort = 3334;
 var testServerPort = exports.testServerPort = 3335;
 
 function setupServer(handlerOrServer) {
+  var deferred = new Deferred();
   var server;
   if ('close' in handlerOrServer) { // it is a server
     server = handlerOrServer;
   } else { // it is a handler
     server = http.createServer(handlerOrServer);
   }
-  server.listen(testServerPort);
-  return server;
+  server.listen(testServerPort, function() {
+    deferred.call(server);
+  });
+  return deferred;
 }
 exports.setupServer = setupServer;
 

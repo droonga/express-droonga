@@ -38,9 +38,11 @@ suite('Adaption for express application', function() {
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
 
-      utils
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+        })
         .get('/tables/foobar')
         .next(function(response) {
           assert.equal('search OK', response.body);
@@ -58,9 +60,10 @@ suite('Adaption for express application', function() {
         connection: 'fake connection',
         handlers:   handlersFactory
       });
-      server = utils.setupServer(application);
-
-      utils
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+        })
         .get('/path/to/kotoumi/tables/foobar')
         .next(function(response) {
           assert.equal('search OK', response.body);
@@ -94,17 +97,18 @@ suite('Adaption for express application', function() {
               .takes('search', { requestMessage: true });
 
       var application = express();
-      server = utils.setupServer(application);
-      application.kotoumi({
-        connection: connection,
-        server:     server,
-        handlers:   handlersFactory
-      });
-      handlersFactory.assertThrows();
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          application.kotoumi({
+            connection: connection,
+            server:     server,
+            handlers:   handlersFactory
+          });
+          handlersFactory.assertThrows();
 
-      clientSocket = utils.createClientSocket();
-
-      Deferred
+          clientSocket = utils.createClientSocket();
+        })
         .wait(0.01)
         .next(function() {
           clientSocket.emit('search', { requestMessage: true });
@@ -123,17 +127,6 @@ suite('Adaption for express application', function() {
       var handlersFactory = utils.createMockedHandlersFactory();
       var connection = utils.createMockedBackendConnection();
 
-      var application = express();
-      server = utils.setupServer(application);
-      application.kotoumi({
-        connection: connection,
-        server:     server,
-        handlers:   handlersFactory
-      });
-      handlersFactory.assertThrows();
-
-      clientSocket = utils.createClientSocket();
-
       var clientReceiver = nodemock
             .mock('receive')
             .takes({
@@ -144,7 +137,19 @@ suite('Adaption for express application', function() {
         clientReceiver.receive(data);
       });
 
-      Deferred
+      var application = express();
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          application.kotoumi({
+            connection: connection,
+            server:     server,
+            handlers:   handlersFactory
+          });
+          handlersFactory.assertThrows();
+
+          clientSocket = utils.createClientSocket();
+        })
         .wait(0.01)
         .next(function() {
           connection.assertThrows();

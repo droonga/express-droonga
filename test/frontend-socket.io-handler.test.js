@@ -29,14 +29,15 @@ suite('Socket.IO API', function() {
             .takes('search', { requestMessage: true });
 
     var application = express();
-    server = utils.setupServer(application);
-    socketIoHandler.register(application, server, {
-      connection: connection
-    });
+    utils.setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+        socketIoHandler.register(application, server, {
+          connection: connection
+        });
 
-    clientSocket = utils.createClientSocket();
-
-    Deferred
+        clientSocket = utils.createClientSocket();
+      })
       .wait(0.01)
       .next(function() {
         clientSocket.emit('search', { requestMessage: true });
@@ -54,14 +55,6 @@ suite('Socket.IO API', function() {
   test('back to front', function(done) {
     var connection = utils.createMockedBackendConnection();
 
-    var application = express();
-    server = utils.setupServer(application);
-    socketIoHandler.register(application, server, {
-      connection: connection
-    });
-
-    clientSocket = utils.createClientSocket();
-
     var clientReceiver = nodemock
           .mock('receive')
           .takes({
@@ -72,7 +65,16 @@ suite('Socket.IO API', function() {
       clientReceiver.receive(data);
     });
 
-    Deferred
+    var application = express();
+    utils.setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+        socketIoHandler.register(application, server, {
+          connection: connection
+        });
+
+        clientSocket = utils.createClientSocket();
+      })
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
@@ -104,17 +106,18 @@ suite('Socket.IO API', function() {
             .takes('foobar', { requestMessage: true });
 
     var application = express();
-    server = utils.setupServer(application);
-    socketIoHandler.register(application, server, {
-      connection: connection,
-      extraCommands: [
-        'foobar'
-      ]
-    });
+    utils.setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+        socketIoHandler.register(application, server, {
+          connection: connection,
+          extraCommands: [
+            'foobar'
+          ]
+        });
 
-    clientSocket = utils.createClientSocket();
-
-    Deferred
+        clientSocket = utils.createClientSocket();
+      })
       .wait(0.01)
       .next(function() {
         clientSocket.emit('foobar', { requestMessage: true });
