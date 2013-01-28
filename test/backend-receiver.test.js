@@ -22,7 +22,7 @@ function connectTo(port) {
 }
 
 function sendPacketTo(packet, port) {
-  return connectTo(receiver.port)
+  return connectTo(port)
     .next(function(clientSocket) {
       var packedPacket = msgpack.pack(packet);
       clientSocket.write(new Buffer(packedPacket));
