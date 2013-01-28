@@ -27,7 +27,7 @@ function createMockedReceiver() {
   var messageCallbackController = {};
   var receiver = {
     // mocking receiver
-    on: (mockedSockets = nodemock.mock('on')
+    on: (mockedSockets = nodemock.mock('on'))
         .takes(tag + '.message', function() {})
         .ctrl(1, messageCallbackController),
     assertInitialized: function() {
