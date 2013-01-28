@@ -15,7 +15,7 @@ function connectTo(port) {
     clientSocket.destroy();
     deferred.fail(error);
   });
-  clientSocket.connect(receiver.port, 'localhost', function(){
+  clientSocket.connect(port, 'localhost', function(){
     deferred.call(clientSocket);
   });
   return deferred;
