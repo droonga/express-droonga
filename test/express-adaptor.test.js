@@ -107,10 +107,10 @@ suite('Adaption for express application', function() {
           });
           handlersFactory.assertThrows();
 
-          clientSocket = utils.createClientSocket();
+          return utils.createClientSocket();
         })
-        .wait(0.01)
-        .next(function() {
+        .next(function(newClientSocket) {
+          clientSocket = newClientSocket;
           clientSocket.emit('search', { requestMessage: true });
         })
         .wait(0.01)
@@ -145,14 +145,16 @@ suite('Adaption for express application', function() {
           });
           handlersFactory.assertThrows();
 
-          clientSocket = utils.createClientSocket();
+          return utils.createClientSocket();
+        })
+        .next(function(newClientSocket) {
+          clientSocket = newClientSocket;
+
+          connection.assertThrows();
+
           clientSocket.on('search.result', function(data) {
             clientReceiver.receive(data);
           });
-        })
-        .wait(0.01)
-        .next(function() {
-          connection.assertThrows();
 
           var envelope = {
             type:       'search.result',

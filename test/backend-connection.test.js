@@ -235,3 +235,49 @@ suite('Connection, basic features', function() {
       });
   });
 });
+
+suite('Connection, to backend', function() {
+  var connection;
+  var backend;
+
+  setup(function(done) {
+    backend = new MsgPackReceiver(utils.testSendPort);
+    backend.received = [];
+    backend.on('receive', function(data) {
+      backend.received.push(data);
+    });
+    backend.listen(function() {
+      connection = new Connection({
+        tag:      'test',
+        hostName: 'localhost',
+        port:     utils.testSendPort
+      });
+      done();
+    });
+  });
+
+  teardown(function() {
+    if (backend) {
+      backend.close();
+      backend = undefined;
+    }
+    if (connection) {
+      connection.close();
+      connection = undefined;
+    }
+  });
+
+  test('send', function(done) {
+    connection.emitMessage({ message: true });
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received[0][0], 'test.message');
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+});

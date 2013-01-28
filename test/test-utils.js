@@ -124,9 +124,14 @@ Deferred.register('post', function() { return post.apply(this, arguments); });
 
 
 function createClientSocket() {
+  var deferred = new Deferred();
   var host = 'http://localhost:' + testServerPort;
   var options = { 'force new connection': true };
-  return client.connect(host, options);
+  var socket = client.connect(host, options);
+  socket.on('connect', function() {
+    deferred.call(socket);
+  });
+  return deferred;
 }
 exports.createClientSocket = createClientSocket;
 
