@@ -29,7 +29,7 @@ function sendPacketTo(packet, port) {
       return clientSocket;
     })
     .next(function(clientSocket) {
-      clientSocket.close();
+      clientSocket.destroy();
     });
 }
 
