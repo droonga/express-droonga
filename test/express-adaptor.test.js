@@ -133,9 +133,6 @@ suite('Adaption for express application', function() {
               statusCode: 200,
               body:       { searchResult: true }
             });
-      clientSocket.on('search.result', function(data) {
-        clientReceiver.receive(data);
-      });
 
       var application = express();
       utils.setupServer(application)
@@ -149,6 +146,9 @@ suite('Adaption for express application', function() {
           handlersFactory.assertThrows();
 
           clientSocket = utils.createClientSocket();
+          clientSocket.on('search.result', function(data) {
+            clientReceiver.receive(data);
+          });
         })
         .wait(0.01)
         .next(function() {
