@@ -7,20 +7,29 @@ var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
 var Connection = require('../lib/backend/connection').Connection;
+var MsgPackReceiver = require('../lib/backend/receiver').MsgPackReceiver;
 
-suite('Connection (initialization)', function() {
+suite('Connection, initialization', function() {
+  var connection;
+  teardown(function() {
+    if (connection) {
+      connection.close();
+      connection = undefined;
+    }
+  });
+
   function assertEventEmitter(object) {
     assert.equal(typeof object, 'object');
     assert.equal(typeof object.emit, 'function');
   }
 
   test('sender', function() {
-    var connection = new Connection({ tag: 'test' });
+    connection = new Connection({ tag: 'test' });
     assertEventEmitter(connection._sender);
   });
 
   test('receiver', function(done) {
-    var connection = new Connection({ tag: 'test' });
+    connection = new Connection({ tag: 'test' });
     assertEventEmitter(connection._receiver);
     assert.equal(connection.receivePort, undefined);
 
@@ -36,7 +45,7 @@ suite('Connection (initialization)', function() {
   });
 });
 
-suite('Connection', function() {
+suite('Connection, basic features', function() {
   var connection;
   var sender;
   var receiver;
@@ -53,7 +62,10 @@ suite('Connection', function() {
   });
 
   teardown(function() {
-    connection = undefined;
+    if (connection) {
+      connection.close();
+      connection = undefined;
+    }
     sender = undefined;
     receiver = undefined;
   });
@@ -223,4 +235,3 @@ suite('Connection', function() {
       });
   });
 });
-
