@@ -94,11 +94,19 @@ suite('Connection, basic features', function() {
     return response;
   }
 
-  test('sending message without response (volatile message)', function() {
+  test('sending message without response (volatile message)', function(done) {
     var message = connection.emitMessage('testRequest', { command: 'foobar' });
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
   function createMockedMessageCallback() {
@@ -144,63 +152,96 @@ suite('Connection, basic features', function() {
     callback.assert();
   });
 
-  test('sending message with one response, success', function() {
+  test('sending message with one response, success', function(done) {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
+    var response;
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
 
-    var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
-    callback.takes(null, response);
-    receiver.emulateMessageReceive(response);
-    callback.assert();
+        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        callback.takes(null, response);
+        receiver.emulateMessageReceive(response);
+        callback.assert();
 
-    // Secondary and later messages are ignored.
-    response.body = 'second call';
-    receiver.emulateMessageReceive(response);
-    callback.assert();
+        // Secondary and later messages are ignored.
+        response.body = 'second call';
+        receiver.emulateMessageReceive(response);
+        callback.assert();
+
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
-  test('sending message with one response, with error', function() {
+  test('sending message with one response, with error', function(done) {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
+    var response;
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
 
-    var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
-    response.statusCode = 503;
-    callback.takes(503, response);
-    receiver.emulateMessageReceive(response);
-    callback.assert();
+        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        response.statusCode = 503;
+        callback.takes(503, response);
+        receiver.emulateMessageReceive(response);
+        callback.assert();
+
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
-  test('sending message with one response, timeout (not timed out)', function() {
+  test('sending message with one response, timeout (not timed out)', function(done) {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, 1000);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
-    assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+    var response;
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
-    var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
-    callback.takes(null, response);
-    receiver.emulateMessageReceive(response);
-    callback.assert();
-    assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        callback.takes(null, response);
+        receiver.emulateMessageReceive(response);
+        callback.assert();
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
   test('sending message with one response, timeout (timed out)', function(done) {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, 1);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
-    assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
-
-    callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
     Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+
+        callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
+      })
       .wait(0.01)
       .next(function() {
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
@@ -215,14 +256,18 @@ suite('Connection, basic features', function() {
   test('sending message with one response, timeout (ignored negative timeout)', function() {
     var callback = createMockedMessageCallback();
     var message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, -1);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest', { command: 'foobar' }));
-    sender.assertSent('message', message);
-    assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
-
-    var response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
-    callback.takes(null, response);
+    var response;
     Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.envelopeEqual(message,
+                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+        sender.assertSent('message', message);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+
+        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        callback.takes(null, response);
+      })
       .wait(0.01)
       .next(function() {
         receiver.emulateMessageReceive(response);
@@ -240,20 +285,30 @@ suite('Connection, to backend', function() {
   var connection;
   var backend;
 
-  setup(function(done) {
-    backend = new MsgPackReceiver(utils.testSendPort);
+  function createBackend() {
+    var deferred = new Deferred();
+    var backend = new MsgPackReceiver(utils.testSendPort);
     backend.received = [];
     backend.on('receive', function(data) {
       backend.received.push(data);
     });
     backend.listen(function() {
-      connection = new Connection({
-        tag:      'test',
-        hostName: 'localhost',
-        port:     utils.testSendPort
-      });
-      done();
+      return deferred.call(backend);
     });
+    return deferred;
+  }
+
+  setup(function(done) {
+    createBackend()
+      .next(function(newBackend) {
+        backend = newBackend;
+        connection = new Connection({
+          tag:      'test',
+          hostName: 'localhost',
+          port:     utils.testSendPort
+        });
+        done();
+      });
   });
 
   teardown(function() {
@@ -267,13 +322,37 @@ suite('Connection, to backend', function() {
     }
   });
 
-  test('send', function(done) {
-    connection.emitMessage({ message: true });
+  test('normal messaging', function(done) {
     Deferred
+      .wait(0.01)
+      .next(function() {
+        connection.emitMessage({ message: true });
+      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
         assert.equal(backend.received[0][0], 'test.message');
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+
+  test('disconnected suddenly', function(done) {
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        connection.emitMessage({ message: true });
+      })
+      .wait(0.01)
+      .next(function() {
+        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received[0][0], 'test.message');
+
+        backend.close();
+        connection.emitMessage({ message: true });
+        assert.equal(backend.received.length, 1);
         done();
       })
       .error(function(error) {
