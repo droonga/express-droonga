@@ -19,11 +19,11 @@ you can initialize the express-kotoumi instance easily.
     
     application.kotoumi({
       prefix: '/kotoumi',
-      tag:    'groonga',
+      tag:    'kotoumi',
       server: server, // this is required to initialize Socket.IO API!
       extraCommands: [ // optional
         // extra command will be sent to kotoumi via the Socket.IO API, as is.
-        'groonga.reindex'
+        'kotoumi.reindex'
       ]
     });
 
@@ -32,10 +32,10 @@ to the kotoumi and to receive messages from the kotoumi.
 
     application.kotoumi({
       prefix: '/kotoumi',
-      tag:    'groonga',
+      tag:    'kotoumi',
       server: server,
       extraCommands: [
-        'groonga.reindex'
+        'kotoumi.reindex'
       ],
     
       // host and port to send messages to kotoumi
