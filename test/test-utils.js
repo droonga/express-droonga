@@ -23,17 +23,20 @@ function createMockedSender() {
 exports.createMockedSender = createMockedSender;
 
 function createMockedReceiver(tag) {
-  var mockedSockets;
   var messageCallbackController = {};
+  var mockedInternalReceiver = nodemock
+        .mock('on')
+          .takes(tag + '.message', function() {})
+          .ctrl(1, messageCallbackController);
   var receiver = {
     // mocking receiver
-    on: (mockedSockets = nodemock.mock('on'))
-        .takes(tag + '.message', function() {})
-        .ctrl(1, messageCallbackController),
+    on: function() {
+      return mockedInternalReceiver.on.apply(mockedInternalReceiver, arguments);
+    },
     assertInitialized: function() {
-      if (mockedSockets) {
-        mockedSockets.assertThrows();
-        mockedSockets = undefined;
+      if (mockedInternalReceiver) {
+        mockedInternalReceiver.assertThrows();
+        mockedInternalReceiver = undefined;
       }
     },
     emitMessage: function(message) { // simulate message from backend
