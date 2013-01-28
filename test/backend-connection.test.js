@@ -8,6 +8,34 @@ var InstanceOf = utils.InstanceOf;
 
 var Connection = require('../lib/backend/connection').Connection;
 
+suite('Connection (initialization)', function() {
+  function assertEventEmitter(object) {
+    assert.equal(typeof object, 'object');
+    assert.equal(typeof object.emit, 'function');
+  }
+
+  test('sender', function() {
+    var connection = new Connection({ tag: 'test' });
+    assertEventEmitter(connection._sender);
+  });
+
+  test('receiver', function(done) {
+    var connection = new Connection({ tag: 'test' });
+    assertEventEmitter(connection._receiver);
+    assert.equal(connection.receivePort, undefined);
+
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.notEqual(connection.receivePort, undefined);
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+});
+
 suite('Connection', function() {
   var connection;
   var sender;
