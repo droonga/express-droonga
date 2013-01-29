@@ -119,7 +119,8 @@ suite('Connection, basic features', function() {
       .next(function() {
         message = connection.emitMessage('testRequest', { command: 'foobar' });
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.01)
       .next(function() {
@@ -194,16 +195,21 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
+        message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback);
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
         assert.deepEqual(backend.received[0][2], message);
 
-        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        response = createReplyEnvelopeFor(message,
+                                          'testResponse',
+                                          'first call');
         callback.takes(null, response);
         packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
@@ -232,16 +238,21 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
+        message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback);
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
         assert.deepEqual(backend.received[0][2], message);
 
-        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        response = createReplyEnvelopeFor(message,
+                                          'testResponse',
+                                          'first call');
         response.statusCode = 503;
         callback.takes(503, response);
         packet = { tag: 'test.message', data: response };
@@ -264,11 +275,13 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
-          timeout: 1000
-        });
+        message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout: 1000 });
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.01)
       .next(function() {
@@ -276,7 +289,9 @@ suite('Connection, basic features', function() {
         assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
-        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
+        response = createReplyEnvelopeFor(message,
+                                          'testResponse',
+                                          'first call');
         callback.takes(null, response);
         packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
@@ -299,12 +314,14 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
-          timeout:  1,
-          delay:    10
-        });
+        message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout:  1,
+                                           delay:    10 });
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.05)
       .next(function() {
@@ -328,11 +345,13 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
-          timeout: -1
-        });
+        message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout: -1 });
         assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest', { command: 'foobar' }));
+                             createExpectedEnvelope('testRequest',
+                                                    { command: 'foobar' }));
       })
       .wait(0.01)
       .next(function() {
