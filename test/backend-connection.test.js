@@ -194,7 +194,9 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
+          callback: callback
+        });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -232,7 +234,9 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
+          callback: callback
+        });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -264,7 +268,10 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, 1000);
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
+          callback: callback,
+          timeout:  1000
+        });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -296,7 +303,12 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, 1);
+        callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
+          callback: callback,
+          timeout:  1,
+          delay:    1000
+        });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -306,7 +318,6 @@ suite('Connection, basic features', function() {
         assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
-        callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
       })
       .wait(0.01)
       .next(function() {
@@ -327,7 +338,10 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, -1);
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
+          callback: callback,
+          timeout:  -1
+        });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
