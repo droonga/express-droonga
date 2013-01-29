@@ -443,10 +443,11 @@ suite('Connection, to backend', function() {
   });
 
   test('disconnected suddenly', function(done) {
+    var restartedBackend;
     Deferred
       .wait(0.01)
       .next(function() {
-        connection.emitMessage({ message: true });
+        connection.emitMessage('test', { message: true });
       })
       .wait(0.01)
       .next(function() {
@@ -454,11 +455,20 @@ suite('Connection, to backend', function() {
         assert.equal(backend.received[0][0], 'test.message');
 
         backend.close();
-        connection.emitMessage({ message: true });
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        return createBackend();
+      })
+      .next(function(newBackend) {
+        restartedBackend = newBackend;
+        connection.emitMessage('test', { message: true });
+      })
+      .wait(0.5)
+      .next(function() {
+        assert.equal(restartedBackend.received.length,
+                     1,
+                     'message should be sent to the restarted backend');
         done();
       })
       .error(function(error) {
