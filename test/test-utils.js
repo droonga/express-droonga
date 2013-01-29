@@ -8,55 +8,6 @@ var client = require('socket.io-client');
 
 var socketIoHandler = require('../lib/frontend/socket.io-handler');
 
-function createMockedSender() {
-  var sender = {
-    on: function() {
-    },
-    removeAllListeners: function() {
-    },
-    removeListener: function() {
-    },
-    emit: function(eventName, message) {
-      this.messages.push({ eventName: eventName, message: message });
-    },
-    assertSent: function(eventName, message) {
-      var firstMessage = this.messages.shift();
-      var expectedMessage = { eventName: eventName, message: message };
-      assert.deepEqual(firstMessage, expectedMessage);
-    },
-    messages: [],
-  };
-  return sender;
-}
-exports.createMockedSender = createMockedSender;
-
-function createMockedReceiver(tag) {
-  var messageCallbackController = {};
-  var mockedInternalReceiver = nodemock
-        .mock('on')
-          .takes(tag + '.message', function() {})
-          .ctrl(1, messageCallbackController);
-  var receiver = {
-    // mocking receiver
-    on: function() {
-      return mockedInternalReceiver.on.apply(mockedInternalReceiver, arguments);
-    },
-    assertInitialized: function() {
-      if (mockedInternalReceiver) {
-        mockedInternalReceiver.assertThrows();
-        mockedInternalReceiver = undefined;
-      }
-    },
-    emulateMessageReceive: function(message) {
-      this.assertInitialized();
-      messageCallbackController.trigger(message);
-    }
-  };
-  return receiver;
-}
-exports.createMockedReceiver = createMockedReceiver;
-
-
 function connectTo(port) {
   var deferred = new Deferred();
   var clientSocket = new net.Socket();
