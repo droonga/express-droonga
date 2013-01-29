@@ -79,7 +79,9 @@ suite('Connection, basic features', function() {
           tag:      'test',
           hostName: 'localhost',
           port:     utils.testSendPort,
-          receivePort: utils.testReceivePort
+          receivePort: utils.testReceivePort,
+          maxRetyrCount: 3,
+          retryDelay: 0
         });
         done();
       });
@@ -408,7 +410,9 @@ suite('Connection, to backend', function() {
         connection = new Connection({
           tag:      'test',
           hostName: 'localhost',
-          port:     utils.testSendPort
+          port:     utils.testSendPort,
+          maxRetyrCount: 3,
+          retryDelay: 0
         });
         done();
       });
@@ -464,7 +468,7 @@ suite('Connection, to backend', function() {
         restartedBackend = newBackend;
         connection.emitMessage('test', { message: true });
       })
-      .wait(0.01)
+      .wait(0.1)
       .next(function() {
         assert.equal(restartedBackend.received.length,
                      1,
