@@ -161,7 +161,7 @@ suite('Connection, basic features', function() {
       body:       'first call'
     };
     callback.takes(message);
-    var packet = ['test.message', now, message];
+    var packet = { tag: 'test.message', data: message };
     utils.sendPacketTo(packet, utils.testReceivePort)
       .next(function() {
         callback.assert();
@@ -205,7 +205,7 @@ suite('Connection, basic features', function() {
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
-        packet = ['test.message', Date.now(), response];
+        packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -244,7 +244,7 @@ suite('Connection, basic features', function() {
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         response.statusCode = 503;
         callback.takes(503, response);
-        packet = ['test.message', Date.now(), response];
+        packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -276,7 +276,7 @@ suite('Connection, basic features', function() {
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
-        packet = ['test.message', Date.now(), response];
+        packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -339,7 +339,7 @@ suite('Connection, basic features', function() {
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
-        packet = ['test.message', Date.now(), response];
+        packet = { tag: 'test.message', data: response };
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
