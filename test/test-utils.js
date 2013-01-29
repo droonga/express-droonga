@@ -8,6 +8,11 @@ var client = require('socket.io-client');
 
 var socketIoHandler = require('../lib/frontend/socket.io-handler');
 
+var testSendPort = exports.testSendPort = 3333;
+var testReceivePort = exports.testReceivePort = 3334;
+var testServerPort = exports.testServerPort = 3335;
+
+
 function connectTo(port) {
   var deferred = new Deferred();
   var clientSocket = new net.Socket();
@@ -47,10 +52,6 @@ function sendPacketTo(packet, port) {
 exports.sendPacketTo = sendPacketTo;
 Deferred.register('sendPacketTo', function() { return sendPacketTo.apply(this, arguments); });
 
-
-var testSendPort = exports.testSendPort = 3333;
-var testReceivePort = exports.testReceivePort = 3334;
-var testServerPort = exports.testServerPort = 3335;
 
 function setupServer(handlerOrServer) {
   var deferred = new Deferred();
