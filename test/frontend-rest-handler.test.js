@@ -94,7 +94,7 @@ suite('REST API', function() {
     var onReceive = {};
     var connection = nodemock
           .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {}, null)
+            .takes('search', { requestMessage: true }, function() {}, {})
             .ctrl(2, onReceive);
     var handler = restHandler
           .createHandler('search',
@@ -129,11 +129,12 @@ suite('REST API', function() {
     test('search', function(done) {
       var receiverCallback = {};
       var connection = {
-            emitMessage: function(type, message, callback) {
+            emitMessage: function(type, message, callback, options) {
               this.emitMessageCalledArguments.push({
                 type:     type,
                 message:  message,
-                callback: callback
+                callback: callback,
+                options:  options
               });
             },
             emitMessageCalledArguments: []

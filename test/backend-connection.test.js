@@ -194,9 +194,7 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
-          callback: callback
-        });
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -234,9 +232,7 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
-          callback: callback
-        });
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback);
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
@@ -268,9 +264,8 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
-          callback: callback,
-          timeout:  1000
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
+          timeout: 1000
         });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
@@ -304,8 +299,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
-          callback: callback,
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
           timeout:  1,
           delay:    1000
         });
@@ -338,9 +332,8 @@ suite('Connection, basic features', function() {
     Deferred
       .wait(0.01)
       .next(function() {
-        message = connection.emitMessage('testRequest', { command: 'foobar' }, {
-          callback: callback,
-          timeout:  -1
+        message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
+          timeout: -1
         });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
