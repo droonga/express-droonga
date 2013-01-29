@@ -124,7 +124,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
         done();
       })
       .error(function(error) {
@@ -201,7 +201,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
@@ -239,7 +239,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         response.statusCode = 503;
@@ -271,7 +271,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
@@ -303,7 +303,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
         callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
@@ -334,7 +334,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1);
-        assert.equal(backend.received[0][2], message);
+        assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
