@@ -297,7 +297,7 @@ suite('Connection, basic features', function() {
         assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
                      1,
-                     'response listener should be there');
+                     'response listener should be still there');
 
         response = createReplyEnvelopeFor(message,
                                           'testResponse',
@@ -329,18 +329,24 @@ suite('Connection, basic features', function() {
         message = connection.emitMessage('testRequest',
                                          { command: 'foobar' },
                                          callback,
-                                         { timeout:  1,
-                                           delay:    10 });
+                                         { timeout: 20 });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest',
                                                     { command: 'foobar' }));
       })
-      .wait(0.05)
+      .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 0, 'no message should be sent');
+        assert.equal(backend.received.length, 1, 'message should be sent');
+        assert.deepEqual(backend.received[0][2], message);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     1,
+                     'response listener should be still there');
+      })
+      .wait(0.02)
+      .next(function() {
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
                      0,
-                     'response listener should be removed');
+                     'response listener should be removed by timeout');
         callback.assert();
         done();
       })
@@ -371,7 +377,7 @@ suite('Connection, basic features', function() {
         assert.deepEqual(backend.received[0][2], message);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
                      1,
-                     'response listener should be there');
+                     'response listener should be still there');
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
