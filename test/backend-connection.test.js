@@ -81,7 +81,7 @@ suite('Connection, basic features', function() {
           port:     utils.testSendPort,
           receivePort: utils.testReceivePort,
           maxRetyrCount: 3,
-          retryDelay: 0
+          retryDelay: 1
         });
         done();
       });
@@ -412,7 +412,7 @@ suite('Connection, to backend', function() {
           hostName: 'localhost',
           port:     utils.testSendPort,
           maxRetyrCount: 3,
-          retryDelay: 0
+          retryDelay: 1
         });
         done();
       });
