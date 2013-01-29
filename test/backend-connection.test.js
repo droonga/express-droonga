@@ -301,20 +301,14 @@ suite('Connection, basic features', function() {
         callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
         message = connection.emitMessage('testRequest', { command: 'foobar' }, callback, {
           timeout:  1,
-          delay:    1000
+          delay:    10
         });
         assert.envelopeEqual(message,
                              createExpectedEnvelope('testRequest', { command: 'foobar' }));
       })
-      .wait(0.01)
+      .wait(0.05)
       .next(function() {
-        assert.equal(backend.received.length, 1);
-        assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
-
-      })
-      .wait(0.01)
-      .next(function() {
+        assert.equal(backend.received.length, 0);
         assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
         callback.assert();
         done();
