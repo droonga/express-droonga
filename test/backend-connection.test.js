@@ -464,7 +464,7 @@ suite('Connection, to backend', function() {
         restartedBackend = newBackend;
         connection.emitMessage('test', { message: true });
       })
-      .wait(0.5)
+      .wait(0.01)
       .next(function() {
         assert.equal(restartedBackend.received.length,
                      1,
