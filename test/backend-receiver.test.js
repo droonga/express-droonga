@@ -1,47 +1,10 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var net = require('net');
-var msgpack = require('msgpack');
 var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('./test-utils');
 
 var Receiver = require('../lib/backend/receiver').Receiver;
-
-function connectTo(port) {
-  var deferred = new Deferred();
-  var clientSocket = new net.Socket();
-  clientSocket.on('error', function(error){
-    clientSocket.destroy();
-    deferred.fail(error);
-  });
-  clientSocket.connect(port, 'localhost', function(){
-    deferred.call(clientSocket);
-  });
-  return deferred;
-}
-
-function sendPacketTo(packet, port) {
-  var clientSocket;
-  return connectTo(port)
-    .next(function(newSocket) {
-      clientSocket = newSocket;
-      var packedPacket = msgpack.pack(packet);
-      clientSocket.write(new Buffer(packedPacket));
-    })
-    .wait(0.01)
-    .next(function() {
-      clientSocket.destroy();
-      clientSocket = undefined;
-    })
-    .error(function(error) {
-      if (clientSocket) {
-        clientSocket.destroy();
-        clientSocket = undefined;
-      }
-      throw error;
-    });
-}
 
 suite('Receiver', function() {
   var receiver;
@@ -73,7 +36,7 @@ suite('Receiver', function() {
         assert.notEqual(receiver.port, undefined);
 
         var rawPacket = { tag: 'kotoumi.message', data: { message: true } };
-        return sendPacketTo(rawPacket, receiver.port);
+        return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
         mockedReceiver.assertThrows();
@@ -106,11 +69,11 @@ suite('Receiver', function() {
         assert.notEqual(receiver.port, undefined);
 
         var rawPacket = { tag: 'kotoumi.message', data: { message1: true } };
-        return sendPacketTo(rawPacket, receiver.port);
+        return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
         var rawPacket = { tag: 'kotoumi.message', data: { message2: true } };
-        return sendPacketTo(rawPacket, receiver.port);
+        return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
         mockedReceiver.assertThrows();
