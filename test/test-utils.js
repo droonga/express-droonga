@@ -1,5 +1,7 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var net = require('net');
+var msgpack = require('msgpack');
 var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
@@ -53,6 +55,46 @@ function createMockedReceiver(tag) {
   return receiver;
 }
 exports.createMockedReceiver = createMockedReceiver;
+
+
+function connectTo(port) {
+  var deferred = new Deferred();
+  var clientSocket = new net.Socket();
+  clientSocket.on('error', function(error){
+    clientSocket.destroy();
+    deferred.fail(error);
+  });
+  clientSocket.connect(port, 'localhost', function(){
+    deferred.call(clientSocket);
+  });
+  return deferred;
+}
+exports.connectTo = connectTo;
+Deferred.register('connectTo', function() { return connectTo.apply(this, arguments); });
+
+function sendPacketTo(packet, port) {
+  var clientSocket;
+  return connectTo(port)
+    .next(function(newSocket) {
+      clientSocket = newSocket;
+      var packedPacket = msgpack.pack(packet);
+      clientSocket.write(new Buffer(packedPacket));
+    })
+    .wait(0.01)
+    .next(function() {
+      clientSocket.destroy();
+      clientSocket = undefined;
+    })
+    .error(function(error) {
+      if (clientSocket) {
+        clientSocket.destroy();
+        clientSocket = undefined;
+      }
+      throw error;
+    });
+}
+exports.sendPacketTo = sendPacketTo;
+Deferred.register('sendPacketTo', function() { return sendPacketTo.apply(this, arguments); });
 
 
 var testSendPort = exports.testSendPort = 3333;
