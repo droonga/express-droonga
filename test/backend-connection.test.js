@@ -33,8 +33,12 @@ suite('Connection, initialization', function() {
   });
 
   function assertEventEmitter(object) {
-    assert.equal(typeof object, 'object');
-    assert.equal(typeof object.emit, 'function');
+    assert.equal(typeof object,
+                 'object',
+                 'should be an instance of EventEmitter');
+    assert.equal(typeof object.emit,
+                 'function',
+                 'should be an instance of EventEmitter');
   }
 
   test('sender', function() {
@@ -45,12 +49,16 @@ suite('Connection, initialization', function() {
   test('receiver', function(done) {
     connection = new Connection({ tag: 'test' });
     assertEventEmitter(connection._receiver);
-    assert.equal(connection.receivePort, undefined);
+    assert.equal(connection.receivePort,
+                 undefined,
+                 'should be not-initialized');
 
     Deferred
       .wait(0.01)
       .next(function() {
-        assert.notEqual(connection.receivePort, undefined);
+        assert.notEqual(connection.receivePort,
+                        undefined,
+                        'should be initialized');
         done();
       })
       .error(function(error) {
@@ -124,7 +132,7 @@ suite('Connection, basic features', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
         done();
       })
@@ -204,7 +212,7 @@ suite('Connection, basic features', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
 
         response = createReplyEnvelopeFor(message,
@@ -247,7 +255,7 @@ suite('Connection, basic features', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
 
         response = createReplyEnvelopeFor(message,
@@ -285,9 +293,11 @@ suite('Connection, basic features', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     1,
+                     'response listener should be there');
 
         response = createReplyEnvelopeFor(message,
                                           'testResponse',
@@ -298,7 +308,9 @@ suite('Connection, basic features', function() {
       })
       .next(function() {
         callback.assert();
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     0,
+                     'response listener should be removed');
         done();
       })
       .error(function(error) {
@@ -328,7 +340,7 @@ suite('Connection, basic features', function() {
         assert.equal(backend.received.length, 0, 'no message should be sent');
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
                      0,
-                     'no listener should be there');
+                     'response listener should be removed');
         callback.assert();
         done();
       })
@@ -355,9 +367,11 @@ suite('Connection, basic features', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 1);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     1,
+                     'response listener should be there');
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
@@ -366,7 +380,9 @@ suite('Connection, basic features', function() {
       })
       .next(function() {
         callback.assert();
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     0),
+                     'response listener should be removed';
         done();
       })
       .error(function(error) {
@@ -411,7 +427,7 @@ suite('Connection, to backend', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.equal(backend.received[0][0], 'test.message');
         done();
       })
@@ -428,11 +444,14 @@ suite('Connection, to backend', function() {
       })
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1);
+        assert.equal(backend.received.length, 1, 'message should be sent');
         assert.equal(backend.received[0][0], 'test.message');
 
         backend.close();
         connection.emitMessage({ message: true });
+      })
+      .wait(0.01)
+      .next(function() {
         assert.equal(backend.received.length, 1);
         done();
       })
