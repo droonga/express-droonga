@@ -308,8 +308,10 @@ suite('Connection, basic features', function() {
       })
       .wait(0.05)
       .next(function() {
-        assert.equal(backend.received.length, 0);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length, 0);
+        assert.equal(backend.received.length, 0, 'no message should be sent');
+        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+                     0,
+                     'no listener should be there');
         callback.assert();
         done();
       })
