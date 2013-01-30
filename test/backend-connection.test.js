@@ -447,6 +447,7 @@ suite('Connection, to backend', function() {
   });
 
   test('disconnected suddenly', function(done) {
+    var errorHandler;
     var restartedBackend;
     Deferred
       .wait(0.01)
@@ -466,13 +467,36 @@ suite('Connection, to backend', function() {
       })
       .next(function(newBackend) {
         restartedBackend = newBackend;
+
+        errorHandler = nodemock
+          .mock('handle')
+            .takes({});
+        connection.on('error', function(error) {
+          errorHandler.handle(error);
+        });
+
         connection.emitMessage('test', { message: true });
       })
       .wait(0.1)
       .next(function() {
+        errorHandler.assertThrows();
+        assert.equal(backend.received.length,
+                     1,
+                     'no new message should be sent to the old backend');
+        assert.equal(restartedBackend.received.length,
+                     0,
+                     'message should be destroyed by socket error');
+
+        connection.emitMessage('test', { message: true });
+      })
+      .wait(0.01)
+      .next(function() {
+        assert.equal(backend.received.length,
+                     1,
+                     'no new message should be sent to the old backend');
         assert.equal(restartedBackend.received.length,
                      1,
-                     'message should be sent to the restarted backend');
+                     'message should be sent to the new backend');
         done();
       })
       .error(function(error) {
