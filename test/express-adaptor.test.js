@@ -76,10 +76,15 @@ suite('Adaption for express application', function() {
   });
 
   suite('Socket.IO API', function() {
+    var connection;
     var server;
     var clientSocket;
 
     teardown(function() {
+      if (connection) {
+        utils.readyToDestroyMockedConnection(connection);
+        connection = undefined;
+      }
       if (clientSocket) {
         clientSocket.disconnect();
         clientSocket = undefined;
@@ -92,9 +97,9 @@ suite('Adaption for express application', function() {
 
     test('front to back', function(done) {
       var handlersFactory = utils.createMockedHandlersFactory();
-      var connection = utils.createMockedBackendConnection()
-            .mock('emitMessage')
-              .takes('search', { requestMessage: true });
+      connection = utils.createMockedBackendConnection()
+        .mock('emitMessage')
+          .takes('search', { requestMessage: true });
 
       var application = express();
       utils.setupServer(application)
@@ -125,7 +130,7 @@ suite('Adaption for express application', function() {
 
     test('back to front', function(done) {
       var handlersFactory = utils.createMockedHandlersFactory();
-      var connection = utils.createMockedBackendConnection();
+      connection = utils.createMockedBackendConnection();
 
       var clientReceiver = nodemock
             .mock('receive')

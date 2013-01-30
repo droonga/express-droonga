@@ -157,6 +157,17 @@ function createMockedBackendConnection() {
 }
 exports.createMockedBackendConnection = createMockedBackendConnection;
 
+function readyToDestroyMockedConnection(connection) {
+  connection = connection
+    .mock('removeListener')
+      .takes('message', function() {})
+      .times(socketIoHandler.commands.length)
+    .mock('removeListener')
+      .takes('error', function() {});
+  return connection;
+}
+exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;
+
 function createMockedHandlersFactory() {
   return nodemock
     .mock('search')

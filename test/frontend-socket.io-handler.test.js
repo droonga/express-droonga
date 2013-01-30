@@ -9,10 +9,15 @@ var socketIoHandler = require('../lib/frontend/socket.io-handler');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('Socket.IO API', function() {
+    var connection;
   var server;
   var clientSocket;
 
   teardown(function() {
+    if (connection) {
+      utils.readyToDestroyMockedConnection(connection);
+      connection = undefined;
+    }
     if (clientSocket) {
       clientSocket.disconnect();
       clientSocket = undefined;
@@ -24,9 +29,9 @@ suite('Socket.IO API', function() {
   });
 
   test('front to back', function(done) {
-    var connection = utils.createMockedBackendConnection()
-          .mock('emitMessage')
-            .takes('search', { requestMessage: true });
+    connection = utils.createMockedBackendConnection()
+      .mock('emitMessage')
+        .takes('search', { requestMessage: true });
 
     var application = express();
     utils.setupServer(application)
@@ -53,7 +58,7 @@ suite('Socket.IO API', function() {
   });
 
   test('back to front', function(done) {
-    var connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection();
 
     var clientReceiver = nodemock
           .mock('receive')
@@ -100,12 +105,12 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command', function(done) {
     var extraController = {};
-    var connection = utils.createMockedBackendConnection()
-          .mock('on')
-            .takes('message', function() {})
-            .ctrl(1, extraController)
-          .mock('emitMessage')
-            .takes('foobar', { requestMessage: true });
+    connection = utils.createMockedBackendConnection()
+      .mock('on')
+        .takes('message', function() {})
+        .ctrl(1, extraController)
+      .mock('emitMessage')
+        .takes('foobar', { requestMessage: true });
 
     var application = express();
     utils.setupServer(application)
