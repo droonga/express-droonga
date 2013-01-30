@@ -132,6 +132,9 @@ suite('Socket.IO API', function() {
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
+        connection
+          .mock('removeListener')
+          .takes('message', function() {});
         done();
       })
       .error(function(error) {
