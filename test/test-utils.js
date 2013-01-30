@@ -142,9 +142,16 @@ function createMockedBackendConnection() {
     onMessageControllers[command] = {};
     connection = connection
       .mock('on')
-      .takes('message', function() {})
-      .ctrl(1, onMessageControllers[command]);
+        .takes('message', function() {})
+        .ctrl(1, onMessageControllers[command]);
   });
+
+  onMessageControllers.error = {};
+  connection = connection
+    .mock('on')
+      .takes('error', function() {})
+      .ctrl(1, onMessageControllers.error);
+
   connection.controllers = onMessageControllers;
   return connection;
 }
