@@ -172,7 +172,7 @@ suite('Connection, basic features', function() {
       body:       'first call'
     };
     callback.takes(message);
-    var packet = { tag: 'test.message', data: message };
+    var packet = ['test.message', Date.now(), message];
     utils.sendPacketTo(packet, utils.testReceivePort)
       .next(function() {
         callback.assert();
@@ -221,7 +221,7 @@ suite('Connection, basic features', function() {
                                           'testResponse',
                                           'first call');
         callback.takes(null, response);
-        packet = { tag: 'test.message', data: response };
+        packet = ['test.message', Date.now(), message];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -265,7 +265,7 @@ suite('Connection, basic features', function() {
                                           'first call');
         response.statusCode = 503;
         callback.takes(503, response);
-        packet = { tag: 'test.message', data: response };
+        packet = ['test.message', Date.now(), message];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -305,7 +305,7 @@ suite('Connection, basic features', function() {
                                           'testResponse',
                                           'first call');
         callback.takes(null, response);
-        packet = { tag: 'test.message', data: response };
+        packet = ['test.message', Date.now(), message];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
@@ -383,7 +383,7 @@ suite('Connection, basic features', function() {
 
         response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
         callback.takes(null, response);
-        packet = { tag: 'test.message', data: response };
+        packet = ['test.message', Date.now(), message];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
       .next(function() {
