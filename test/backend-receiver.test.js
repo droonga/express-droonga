@@ -16,7 +16,7 @@ suite('FluentReceiver', function() {
     }
   });
 
-  test('receiving packed message', function(done) {
+  test('receiving packed message (Message type)', function(done) {
     var mockedReceiver = nodemock
           .mock('start')
           .mock('receive')
@@ -35,7 +35,41 @@ suite('FluentReceiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = ['kotoumi.message', Number, { message: true }];
+        var rawPacket = ['kotoumi.message', Date.now(), { message: true }];
+        return utils.sendPacketTo(rawPacket, receiver.port);
+      })
+      .next(function() {
+        mockedReceiver.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+
+  test('receiving packed message (Forward type)', function(done) {
+    var mockedReceiver = nodemock
+          .mock('start')
+          .mock('receive')
+            .takes({ message1: true })
+          .mock('receive')
+            .takes({ message2: true });
+
+    receiver = new FluentReceiver();
+    receiver.on('kotoumi.message', function(data) {
+      mockedReceiver.receive(data);
+    });
+    receiver.listen(function() {
+      mockedReceiver.start();
+    });
+
+    Deferred
+      .wait(0.01)
+      .next(function() {
+        assert.notEqual(receiver.port, undefined);
+
+        var rawPacket = ['kotoumi.message', [[Date.now(), { message1: true }],
+                                             [Date.now(), { message2: true }]]];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
@@ -68,11 +102,11 @@ suite('FluentReceiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = ['kotoumi.message', Number, { message1: true }];
+        var rawPacket = ['kotoumi.message', Date.now(), { message1: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
-        var rawPacket = ['kotoumi.message', Number, { message2: true }];
+        var rawPacket = ['kotoumi.message', Date.now(), { message2: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
