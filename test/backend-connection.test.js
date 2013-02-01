@@ -221,9 +221,10 @@ suite('Connection, basic features', function() {
                                           'testResponse',
                                           'first call');
         callback.takes(null, response);
-        packet = ['test.message', Date.now(), message];
+        packet = ['test.message', Date.now(), response];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
+      .wait(0.01)
       .next(function() {
         callback.assert();
 
@@ -231,6 +232,7 @@ suite('Connection, basic features', function() {
         response.body = 'second call';
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
+      .wait(0.01)
       .next(function() {
         callback.assert();
         done();
@@ -265,9 +267,10 @@ suite('Connection, basic features', function() {
                                           'first call');
         response.statusCode = 503;
         callback.takes(503, response);
-        packet = ['test.message', Date.now(), message];
+        packet = ['test.message', Date.now(), response];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
+      .wait(0.01)
       .next(function() {
         callback.assert();
         done();
@@ -305,9 +308,10 @@ suite('Connection, basic features', function() {
                                           'testResponse',
                                           'first call');
         callback.takes(null, response);
-        packet = ['test.message', Date.now(), message];
+        packet = ['test.message', Date.now(), response];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
+      .wait(0.01)
       .next(function() {
         callback.assert();
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
@@ -386,6 +390,7 @@ suite('Connection, basic features', function() {
         packet = ['test.message', Date.now(), message];
         return utils.sendPacketTo(packet, utils.testReceivePort);
       })
+      .wait(0.01)
       .next(function() {
         callback.assert();
         assert.equal(connection.listeners('inReplyTo:' + message.id).length,
