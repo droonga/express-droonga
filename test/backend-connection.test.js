@@ -7,11 +7,11 @@ var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
 var Connection = require('../lib/backend/connection').Connection;
-var MsgPackReceiver = require('../lib/backend/receiver').MsgPackReceiver;
+var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
 
 function createBackend() {
   var deferred = new Deferred();
-  var backend = new MsgPackReceiver(utils.testSendPort);
+  var backend = new FluentReceiver(utils.testSendPort);
   backend.received = [];
   backend.on('receive', function(data) {
     backend.received.push(data);
