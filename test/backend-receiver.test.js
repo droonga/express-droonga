@@ -4,9 +4,9 @@ var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('./test-utils');
 
-var Receiver = require('../lib/backend/receiver').Receiver;
+var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
 
-suite('Receiver', function() {
+suite('FluentReceiver', function() {
   var receiver;
 
   teardown(function() {
@@ -22,7 +22,7 @@ suite('Receiver', function() {
           .mock('receive')
             .takes({ message: true });
 
-    receiver = new Receiver();
+    receiver = new FluentReceiver();
     receiver.on('kotoumi.message', function(data) {
       mockedReceiver.receive(data);
     });
@@ -35,7 +35,7 @@ suite('Receiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = { tag: 'kotoumi.message', data: { message: true } };
+        var rawPacket = ['kotoumi.message', Number, { message: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
@@ -55,7 +55,7 @@ suite('Receiver', function() {
           .mock('receive')
             .takes({ message2: true });
 
-    receiver = new Receiver();
+    receiver = new FluentReceiver();
     receiver.on('kotoumi.message', function(data) {
       mockedReceiver.receive(data);
     });
@@ -68,11 +68,11 @@ suite('Receiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = { tag: 'kotoumi.message', data: { message1: true } };
+        var rawPacket = ['kotoumi.message', Number, { message1: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
-        var rawPacket = { tag: 'kotoumi.message', data: { message2: true } };
+        var rawPacket = ['kotoumi.message', Number, { message2: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
