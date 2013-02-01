@@ -9,7 +9,7 @@ var socketIoHandler = require('../lib/frontend/socket.io-handler');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('Socket.IO API', function() {
-    var connection;
+  var connection;
   var server;
   var clientSocket;
 
