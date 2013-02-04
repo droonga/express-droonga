@@ -133,6 +133,7 @@ suite('Adaption for express application', function() {
     test('back to front', function(done) {
       var handlersFactory = utils.createMockedHandlersFactory();
       connection = utils.createMockedBackendConnection();
+      connection.emitMessage = function() {}; // stubbing
 
       var clientReceiver = nodemock
             .mock('receive')
