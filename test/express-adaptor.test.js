@@ -31,11 +31,20 @@ suite('Adaption for express application', function() {
       }
     });
 
+    function createFakeConnection() {
+      return {
+        emitMessage: function() {},
+        emit: function() {},
+        on: function() {}
+      };
+    }
+
     test('to the document root', function(done) {
+      var fakeConnection = createFakeConnection();
       var application = express();
       application.kotoumi({
         prefix:     '',
-        connection: 'fake connection',
+        connection: fakeConnection,
         handlers:   handlersFactory
       });
 
@@ -54,10 +63,11 @@ suite('Adaption for express application', function() {
     });
 
     test('under specified path', function(done) {
+      var fakeConnection = createFakeConnection();
       var application = express();
       application.kotoumi({
         prefix:     '/path/to/kotoumi',
-        connection: 'fake connection',
+        connection: fakeConnection,
         handlers:   handlersFactory
       });
       utils.setupServer(application)

@@ -8,14 +8,23 @@ var restHandler = require('../lib/frontend/rest-handler');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
+  function createFakeConnection() {
+    return {
+      emitMessage: function() {},
+      emit: function() {},
+      on: function() {}
+    };
+  }
+
   test('registeration for given handlers', function() {
+    var fakeConnection = createFakeConnection();
     var mockedHandlers = nodemock.mock('search')
-          .takes('fake connection')
+          .takes(fakeConnection)
           .returns(function() {});
     var application = express();
     restHandler.register(application, {
       prefix:     '',
-      connection: 'fake connection',
+      connection: fakeConnection,
       handlers:   mockedHandlers
     });
     mockedHandlers.assertThrows();
@@ -43,10 +52,11 @@ suite('REST API', function() {
     });
 
     test('to the document root', function(done) {
+      var fakeConnection = createFakeConnection();
       var application = express();
       restHandler.register(application, {
         prefix:     '',
-        connection: 'fake connection',
+        connection: fakeConnection,
         handlers:   handlersFactory
       });
       utils.setupServer(application)
@@ -64,10 +74,11 @@ suite('REST API', function() {
     });
 
     test('under specified path', function(done) {
+      var fakeConnection = createFakeConnection();
       var application = express();
       restHandler.register(application, {
         prefix:     '/path/to/kotoumi',
-        connection: 'fake connection',
+        connection: fakeConnection,
         handlers:   handlersFactory
       });
       utils.setupServer(application)
