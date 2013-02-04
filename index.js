@@ -18,4 +18,9 @@ express.application.kotoumi = function(params) {
     socketIoHandler.register(this, params.server, params);
 
   dashboardHandler.register(this, params);
+
+  var connection = params.connection;
+
+  this.connection = connection;
+  this.emitMessage = connection.emitMessage.bind(connection); // shorthand
 }
