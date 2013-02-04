@@ -28,6 +28,19 @@ suite('Socket.IO API', function() {
     }
   });
 
+  test('initialization', function() {
+    var mockedListener = nodemock
+      .mock('connected')
+        .takes({});
+
+    var application = express();
+    application.on('connection', function(socket) {
+      mockedListener.connected();
+    });
+    utils.setupServer(application)
+    
+  });
+
   test('front to back', function(done) {
     connection = utils.createMockedBackendConnection()
       .mock('emitMessage')
