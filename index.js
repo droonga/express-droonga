@@ -8,18 +8,21 @@ express.application.kotoumi = function(params) {
   params = params || {};
 
   params.connection = params.connection || new Connection(params);
+  var connection = params.connection;
 
   params.prefix = params.prefix || '';
   params.prefix = params.prefix.replace(/\/$/, '');
 
   restHandler.register(this, params);
 
-  if (params.server)
+  if (params.server) {
     socketIoHandler.register(this, params.server, params);
+    params.server.on('close', function() {
+      connection.close();
+    });
+  }
 
   dashboardHandler.register(this, params);
-
-  var connection = params.connection;
 
   this.connection = connection;
   this.emitMessage = connection.emitMessage.bind(connection); // shorthand
