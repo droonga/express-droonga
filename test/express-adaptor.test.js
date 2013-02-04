@@ -31,16 +31,8 @@ suite('Adaption for express application', function() {
       }
     });
 
-    function createFakeConnection() {
-      return {
-        emitMessage: function() {},
-        emit: function() {},
-        on: function() {}
-      };
-    }
-
     test('to the document root', function(done) {
-      var fakeConnection = createFakeConnection();
+      var fakeConnection = utils.createStubbedBackendConnection();
       var application = express();
       application.kotoumi({
         prefix:     '',
@@ -63,7 +55,7 @@ suite('Adaption for express application', function() {
     });
 
     test('under specified path', function(done) {
-      var fakeConnection = createFakeConnection();
+      var fakeConnection = utils.createStubbedBackendConnection();
       var application = express();
       application.kotoumi({
         prefix:     '/path/to/kotoumi',

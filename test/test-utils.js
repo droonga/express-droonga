@@ -157,6 +157,17 @@ function createMockedBackendConnection() {
 }
 exports.createMockedBackendConnection = createMockedBackendConnection;
 
+function createStubbedBackendConnection() {
+  return {
+    emitMessage: function() {},
+    emit: function() {},
+    on: function() {},
+    removeListener: function(),
+    removeAllListeners: function()
+  };
+}
+exports.createStubbedBackendConnection = createStubbedBackendConnection;
+
 function readyToDestroyMockedConnection(connection) {
   connection = connection
     .mock('removeListener')
