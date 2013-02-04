@@ -28,17 +28,35 @@ suite('Socket.IO API', function() {
     }
   });
 
-  test('initialization', function() {
+  test('initialization', function(done) {
     var mockedListener = nodemock
-      .mock('connected')
-        .takes({});
+      .mock('connected');
 
     var application = express();
     application.on('connection', function(socket) {
       mockedListener.connected();
     });
+
     utils.setupServer(application)
-    
+      .next(function(newServer) {
+        server = newServer;
+        socketIoHandler.register(application, server, {
+          connection: utils.createStubbedBackendConnection()
+        });
+
+        return utils.createClientSocket();
+      })
+      .next(function(newClientSocket) {
+        clientSocket = newClientSocket;
+      })
+      .wait(0.01)
+      .next(function() {
+        mockedListener.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
   test('front to back', function(done) {
