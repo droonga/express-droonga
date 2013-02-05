@@ -6,7 +6,7 @@ var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
 
-var socketIoHandler = require('../lib/frontend/socket.io-handler');
+var socketIoAdaptor = require('../lib/frontend/socket.io-adaptor');
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
@@ -138,7 +138,7 @@ exports.createClientSocket = createClientSocket;
 function createMockedBackendConnection() {
   var connection = nodemock;
   var onMessageControllers = {};
-  socketIoHandler.commands.forEach(function(command) {
+  socketIoAdaptor.commands.forEach(function(command) {
     onMessageControllers[command] = {};
     connection = connection
       .mock('on')
@@ -172,7 +172,7 @@ function readyToDestroyMockedConnection(connection) {
   connection = connection
     .mock('removeListener')
       .takes('message', function() {})
-      .times(socketIoHandler.commands.length)
+      .times(socketIoAdaptor.commands.length)
     .mock('removeListener')
       .takes('error', function() {});
   return connection;

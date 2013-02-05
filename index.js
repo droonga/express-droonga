@@ -1,7 +1,7 @@
 var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
 var restAdaptor = require('./lib/frontend/rest-adaptor');
-var socketIoHandler = require('./lib/frontend/socket.io-handler');
+var socketIoAdaptor = require('./lib/frontend/socket.io-adaptor');
 var dashboardHandler = require('./lib/frontend/dashboard-handler');
 
 express.application.kotoumi = function(params) {
@@ -16,7 +16,7 @@ express.application.kotoumi = function(params) {
   restAdaptor.register(this, params);
 
   if (params.server) {
-    socketIoHandler.register(this, params.server, params);
+    socketIoAdaptor.register(this, params.server, params);
     params.server.on('close', function() {
       connection.close();
     });
