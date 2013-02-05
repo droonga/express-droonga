@@ -57,7 +57,7 @@ suite('REST API', function() {
         })
         .get('/tables/foobar')
         .next(function(response) {
-          assert.equal('search OK', response.body);
+          assert.equal(response.body, 'search OK');
           done();
         })
         .error(function(error) {
