@@ -46,7 +46,7 @@ suite('Adaption for express application', function() {
         })
         .get('/tables/foobar')
         .next(function(response) {
-          assert.equal('search OK', response.body);
+          assert.equal(response.body, 'search OK');
           done();
         })
         .error(function(error) {
@@ -68,7 +68,7 @@ suite('Adaption for express application', function() {
         })
         .get('/path/to/kotoumi/tables/foobar')
         .next(function(response) {
-          assert.equal('search OK', response.body);
+          assert.equal(response.body, 'search OK');
           done();
         })
         .error(function(error) {
