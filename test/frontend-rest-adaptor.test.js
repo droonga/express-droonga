@@ -4,7 +4,7 @@ var nodemock = require('nodemock');
 var utils = require('./test-utils');
 
 var express = require('express');
-var restHandler = require('../lib/frontend/rest-handler');
+var restAdaptor = require('../lib/frontend/rest-adaptor');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
@@ -14,7 +14,7 @@ suite('REST API', function() {
           .takes(fakeConnection)
           .returns(function() {});
     var application = express();
-    restHandler.register(application, {
+    restAdaptor.register(application, {
       prefix:     '',
       connection: fakeConnection,
       handlers:   mockedHandlers
@@ -46,7 +46,7 @@ suite('REST API', function() {
     test('to the document root', function(done) {
       var fakeConnection = utils.createStubbedBackendConnection();
       var application = express();
-      restHandler.register(application, {
+      restAdaptor.register(application, {
         prefix:     '',
         connection: fakeConnection,
         handlers:   handlersFactory
@@ -68,7 +68,7 @@ suite('REST API', function() {
     test('under specified path', function(done) {
       var fakeConnection = utils.createStubbedBackendConnection();
       var application = express();
-      restHandler.register(application, {
+      restAdaptor.register(application, {
         prefix:     '/path/to/kotoumi',
         connection: fakeConnection,
         handlers:   handlersFactory
@@ -99,7 +99,7 @@ suite('REST API', function() {
           .mock('emitMessage')
             .takes('search', { requestMessage: true }, function() {}, {})
             .ctrl(2, onReceive);
-    var handler = restHandler
+    var handler = restAdaptor
           .createHandler('search',
                          requestBuilders.search,
                          connection);
@@ -143,7 +143,7 @@ suite('REST API', function() {
             emitMessageCalledArguments: []
           };
       var application = express();
-      restHandler.register(application, {
+      restAdaptor.register(application, {
         prefix:     '',
         connection: connection
       });
