@@ -18,7 +18,10 @@ express.application.kotoumi = function(params) {
   if (params.server) {
     socketIoAdaptor.register(this, params.server, params);
     params.server.on('close', function() {
-      connection.close();
+      // The connection can be mocked/stubbed. We don't need to close
+      // such a fake connection.
+      if (typeof connection.close == 'function')
+        connection.close();
     });
   }
 
