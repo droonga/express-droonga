@@ -5,6 +5,7 @@ var utils = require('./test-utils');
 
 var express = require('express');
 var restAdaptor = require('../lib/frontend/rest-adaptor');
+var restCommands = require('../lib/frontend/default-commands/rest');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
@@ -55,10 +56,16 @@ suite('REST API', function() {
     });
 
     assert.deepEqual(registeredCommands,
-                     [basePlugin.getCommand,
-                      basePlugin.putCommand,
-                      overridingPlugin.postCommand,
-                      overridingPlugin.deleteCommand]);
+                     [{ command: 'search',
+                        definition: restCommands.search },
+                      { command: 'getCommand',
+                        definition: basePlugin.getCommand },
+                      { command: 'putCommand',
+                        definition: basePlugin.putCommand },
+                      { command: 'postCommand',
+                        definition: overridingPlugin.postCommand },
+                      { command: 'deleteCommand',
+                        definition: overridingPlugin.deleteCommand }]);
   });
 
   suite('registeration', function() {
