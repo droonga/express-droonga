@@ -8,18 +8,57 @@ var restAdaptor = require('../lib/frontend/rest-adaptor');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
-  test('registeration for given handlers', function() {
-    var fakeConnection = utils.createStubbedBackendConnection();
-    var mockedHandlers = nodemock.mock('search')
-          .takes(fakeConnection)
-          .returns(function() {});
+  test('registeration of plugin commands', function() {
+    var basePlugin = {
+      getCommand: {
+        method: 'GET',
+        path: '/get',
+        requestBuilder: function() {}
+      },
+      putCommand: {
+        method: 'PUT',
+        path: '/put',
+        requestBuilder: function() {}
+      },
+      postCommand: {
+        method: 'POST',
+        path: '/post',
+        requestBuilder: function() {}
+      },
+      deleteCommand: {
+        method: 'DELETE',
+        path: '/delete',
+        requestBuilder: function() {}
+      }
+    };
+    var overridingPlugin = {
+      postCommand: {
+        method: 'POST',
+        path: '/post/overridden',
+        requestBuilder: function() {}
+      },
+      deleteCommand: {
+        method: 'DELETE',
+        path: '/delete/overridden',
+        requestBuilder: function() {}
+      }
+    };
+
     var application = express();
-    restAdaptor.register(application, {
+    var registeredCommands = restAdaptor.register(application, {
       prefix:     '',
-      connection: fakeConnection,
-      handlers:   mockedHandlers
+      connection: utils.createStubbedBackendConnection(),
+      plugins: [
+        basePlugin,
+        overridingPlugin
+      ]
     });
-    mockedHandlers.assertThrows();
+
+    assert.deepEqual(registeredCommands,
+                     [basePlugin.getCommand,
+                      basePlugin.putCommand,
+                      overridingPlugin.postCommand,
+                      overridingPlugin.deleteCommand]);
   });
 
   suite('registeration', function() {
