@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('./test-utils');
 
@@ -55,6 +56,12 @@ suite('REST API', function() {
       ]
     });
 
+    registeredCommands = registeredCommands.map(function(command) {
+      return {
+        command: command.command,
+        definition: command.definition
+      };
+    });
     assert.deepEqual(registeredCommands,
                      [{ command: 'search',
                         definition: restCommands.search },
@@ -81,29 +88,60 @@ suite('REST API', function() {
       api: defineCommand('api', '/path/to/api')
     };
 
+    var connection;
+    var application;
     var server;
-    teardown(function() {
-      if (server) {
-        server.close();
-      }
-      server = undefined;
-    });
 
-    test('to the document root', function(done) {
-      var fakeConnection = utils.createStubbedBackendConnection();
-      var application = express();
-      restAdaptor.register(application, {
-        prefix:     '',
-        connection: fakeConnection,
-        plugins:    [testPlugin]
-      });
+    setup(function(done) {
+      connection = utils.createMockedBackendConnection();
+      application = express();
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
+          done();
+        });
+    });
+
+    teardown(function() {
+      if (connection) {
+        utils.readyToDestroyMockedConnection(connection);
+        connection = undefined;
+      }
+      if (server) {
+        server.close();
+        server = undefined;
+      }
+    });
+
+    test('to the document root', function(done) {
+      var onReceive = {};
+      connection
+        .mock('emitMessage')
+          .takes('api', 'api requested', function() {}, { 'timeout': null })
+          .ctrl(2, onReceive);
+
+      restAdaptor.register(application, {
+        prefix:     '',
+        connection: connection,
+        plugins:    [testPlugin]
+      });
+
+      var responseBody;
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          utils.get('/path/to/api')
+            .next(function(response) {
+              responseBody = response.body;
+            });
         })
-        .get('/path/to/api')
-        .next(function(response) {
-          assert.equal(response.body, 'api OK');
+        .wait(0.01)
+        .next(function() {
+          onReceive.trigger(null, { body: 'API OK?' });
+        })
+        .wait(0.01)
+        .next(function() {
+          assert.equal(responseBody, 'api OK');
           done();
         })
         .error(function(error) {
@@ -112,20 +150,34 @@ suite('REST API', function() {
     });
 
     test('under specified path', function(done) {
-      var fakeConnection = utils.createStubbedBackendConnection();
-      var application = express();
+      var onReceive = {};
+      connection
+        .mock('emitMessage')
+          .takes('api', 'api requested', function() {}, { 'timeout': null })
+          .ctrl(2, onReceive);
+
       restAdaptor.register(application, {
         prefix:     '/path/to/kotoumi',
-        connection: fakeConnection,
+        connection: connection,
         plugins:    [testPlugin]
       });
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
+
+      var responseBody;
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          utils.get('/path/to/kotoumi/path/to/api')
+            .next(function(response) {
+              responseBody = response.body;
+            });
         })
-        .get('/path/to/kotoumi/path/to/api')
-        .next(function(response) {
-          assert.equal(response.body, 'api OK');
+        .wait(0.01)
+        .next(function() {
+          onReceive.trigger(null, { body: 'API OK?' });
+        })
+        .wait(0.01)
+        .next(function() {
+          assert.equal(responseBody, 'api OK');
           done();
         })
         .error(function(error) {
