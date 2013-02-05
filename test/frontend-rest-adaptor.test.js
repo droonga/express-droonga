@@ -69,16 +69,16 @@ suite('REST API', function() {
   });
 
   suite('registeration', function() {
-    function createHandlerFactory(type) {
-      return function() {
-        return function(request, response) {
-          response.contentType('text/plain');
-          response.send(type + ' OK', 200);
-        };
+    function defineCommand(command, path) {
+      return {
+        method: 'GET',
+        path: path,
+        requestBuilder: function() { return command + ' requested'; },
+        responseBuilder: function() { return command + ' OK'; }
       };
     }
-    var handlersFactory = {
-      search: createHandlerFactory('search')
+    var testPlugin = {
+      api: defineCommand('api', '/path/to/api')
     };
 
     var server;
@@ -95,15 +95,15 @@ suite('REST API', function() {
       restAdaptor.register(application, {
         prefix:     '',
         connection: fakeConnection,
-        handlers:   handlersFactory
+        plugins:    [testPlugin]
       });
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
         })
-        .get('/tables/foobar')
+        .get('/path/to/api')
         .next(function(response) {
-          assert.equal(response.body, 'search OK');
+          assert.equal(response.body, 'api OK');
           done();
         })
         .error(function(error) {
@@ -117,15 +117,15 @@ suite('REST API', function() {
       restAdaptor.register(application, {
         prefix:     '/path/to/kotoumi',
         connection: fakeConnection,
-        handlers:   handlersFactory
+        plugins:    [testPlugin]
       });
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
         })
-        .get('/path/to/kotoumi/tables/foobar')
+        .get('/path/to/kotoumi/path/to/api')
         .next(function(response) {
-          assert.equal(response.body, 'search OK');
+          assert.equal(response.body, 'api OK');
           done();
         })
         .error(function(error) {
