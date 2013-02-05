@@ -163,7 +163,8 @@ function createStubbedBackendConnection() {
     emit: function() {},
     on: function() {},
     removeListener: function() {},
-    removeAllListeners: function() {}
+    removeAllListeners: function() {},
+    close: function() {}
   };
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
