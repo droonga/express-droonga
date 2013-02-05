@@ -9,22 +9,38 @@ var adaptor = require('../index');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('Adaption for express application', function() {
-  suite('REST API', function() {
-    function createHandlerFactory(type) {
-      return function() {
-        return function(request, response) {
-          response.contentType('text/plain');
-          response.send(type + ' OK', 200);
-        };
+  suite('REST API registeration', function() {
+    function defineCommand(command, path) {
+      return {
+        method: 'GET',
+        path: path,
+        requestBuilder: function() { return command + ' requested'; },
+        responseBuilder: function() { return command + ' OK'; }
       };
     }
-    var handlersFactory = {
-      search: createHandlerFactory('search')
+    var testPlugin = {
+      api: defineCommand('api', '/path/to/api')
     };
 
+    var connection;
+    var application;
     var server;
 
+    setup(function(done) {
+      connection = utils.createMockedBackendConnection();
+      application = express();
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          done();
+        });
+    });
+
     teardown(function() {
+      if (connection) {
+        utils.readyToDestroyMockedConnection(connection);
+        connection = undefined;
+      }
       if (server) {
         server.close();
         server = undefined;
@@ -32,21 +48,34 @@ suite('Adaption for express application', function() {
     });
 
     test('to the document root', function(done) {
-      var fakeConnection = utils.createStubbedBackendConnection();
-      var application = express();
+      var onReceive = {};
+      connection
+        .mock('emitMessage')
+          .takes('api', 'api requested', function() {}, { 'timeout': null })
+          .ctrl(2, onReceive);
+
       application.kotoumi({
         prefix:     '',
-        connection: fakeConnection,
-        handlers:   handlersFactory
+        connection: connection,
+        plugins:    [testPlugin]
       });
 
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
+      var responseBody;
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          utils.get('/path/to/api')
+            .next(function(response) {
+              responseBody = response.body;
+            });
         })
-        .get('/tables/foobar')
-        .next(function(response) {
-          assert.equal(response.body, 'search OK');
+        .wait(0.01)
+        .next(function() {
+          onReceive.trigger(null, { body: 'API OK?' });
+        })
+        .wait(0.01)
+        .next(function() {
+          assert.equal(responseBody, 'api OK');
           done();
         })
         .error(function(error) {
@@ -55,20 +84,34 @@ suite('Adaption for express application', function() {
     });
 
     test('under specified path', function(done) {
-      var fakeConnection = utils.createStubbedBackendConnection();
-      var application = express();
+      var onReceive = {};
+      connection
+        .mock('emitMessage')
+          .takes('api', 'api requested', function() {}, { 'timeout': null })
+          .ctrl(2, onReceive);
+
       application.kotoumi({
         prefix:     '/path/to/kotoumi',
-        connection: fakeConnection,
-        handlers:   handlersFactory
+        connection: connection,
+        plugins:    [testPlugin]
       });
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
+
+      var responseBody;
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          utils.get('/path/to/kotoumi/path/to/api')
+            .next(function(response) {
+              responseBody = response.body;
+            });
         })
-        .get('/path/to/kotoumi/tables/foobar')
-        .next(function(response) {
-          assert.equal(response.body, 'search OK');
+        .wait(0.01)
+        .next(function() {
+          onReceive.trigger(null, { body: 'API OK?' });
+        })
+        .wait(0.01)
+        .next(function() {
+          assert.equal(responseBody, 'api OK');
           done();
         })
         .error(function(error) {

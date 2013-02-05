@@ -186,47 +186,14 @@ suite('REST API', function() {
     });
   });
 
-  test('creation of REST handler', function() {
-    var requestBuilders = nodemock
-          .mock('search')
-            .takes({ request: true })
-            .returns({ requestMessage: true });
-
-    var onReceive = {};
-    var connection = nodemock
-          .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {}, {})
-            .ctrl(2, onReceive);
-    var handler = restAdaptor
-          .createHandler({
-            command:        'search',
-            requestBuilder: requestBuilders.search,
-            connection:     connection
-          });
-
-    var fakeRequest = { request: true };
-    var fakeResponse = nodemock
-          .mock('contentType')
-            .takes('application/json')
-          .mock('send')
-            .takes({ response: true }, 200);
-
-    handler(fakeRequest, fakeResponse);
-    requestBuilders.assertThrows();
-    connection.assertThrows();
-
-    onReceive.trigger(null, { body: { response: true } });
-    fakeResponse.assertThrows();
-  });
-
-  suite('default handlers', function() {
+  suite('default commands', function() {
     var server;
 
     teardown(function() {
       if (server) {
         server.close();
+        server = undefined;
       }
-      server = undefined;
     });
 
     test('search', function(done) {
