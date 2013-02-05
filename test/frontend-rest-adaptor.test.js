@@ -100,9 +100,11 @@ suite('REST API', function() {
             .takes('search', { requestMessage: true }, function() {}, {})
             .ctrl(2, onReceive);
     var handler = restAdaptor
-          .createHandler('search',
-                         requestBuilders.search,
-                         connection);
+          .createHandler({
+            command:        'search',
+            requestBuilder: requestBuilders.search,
+            connection:     connection
+          });
 
     var fakeRequest = { request: true };
     var fakeResponse = nodemock

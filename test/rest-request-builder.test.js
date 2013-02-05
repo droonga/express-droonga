@@ -2,7 +2,7 @@ var assert = require('chai').assert;
 
 var utils = require('./test-utils');
 
-var builders = require('../lib/frontend/rest-request-builder');
+var builders = require('../lib/frontend/default-commands/rest-request-builder');
 
 suite('building message from REST API request', function() {
   suite('search', function() {
