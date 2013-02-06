@@ -6,6 +6,7 @@ var express = require('express');
 var utils = require('./test-utils');
 
 var socketIoAdaptor = require('../lib/frontend/socket.io-adaptor');
+var scoketIoCommands = require('../lib/frontend/default-commands/socket.io');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('Socket.IO API', function() {
@@ -26,6 +27,67 @@ suite('Socket.IO API', function() {
       server.close();
       server = undefined;
     }
+  });
+
+  test('registeration of plugin commands', function() {
+    var basePlugin = {
+      getCommand: {
+        requestBuilder: function() {}
+      },
+      putCommand: {
+        requestBuilder: function() {}
+      },
+      postCommand: {
+        requestBuilder: function() {}
+      },
+      deleteCommand: {
+        requestBuilder: function() {}
+      }
+    };
+    var overridingPlugin = {
+      postCommand: {
+        requestBuilder: function() {}
+      },
+      deleteCommand: {
+        requestBuilder: function() {}
+      }
+    };
+
+    utils.setupServer(utils.testServerPort)
+      .next(function(newServer) {
+        server = newServer;
+
+        var application = express();
+        var registeredCommands = socketIoAdaptor.register(application, server, {
+          connection: utils.createStubbedBackendConnection(),
+          plugins: [
+            basePlugin,
+            overridingPlugin
+          ]
+        });
+
+        registeredCommands = registeredCommands.map(function(command) {
+          return {
+            command: command.command,
+            definition: command.definition
+          };
+        });
+        assert.deepEqual(registeredCommands,
+                         [{ command: 'search',
+                            definition: scoketIoCommands.search },
+                          { command: 'getCommand',
+                            definition: basePlugin.getCommand },
+                          { command: 'putCommand',
+                            definition: basePlugin.putCommand },
+                          { command: 'postCommand',
+                            definition: overridingPlugin.postCommand },
+                          { command: 'deleteCommand',
+                            definition: overridingPlugin.deleteCommand }]);
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
   });
 
   test('initialization', function(done) {
