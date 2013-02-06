@@ -295,7 +295,7 @@ suite('Socket.IO API', function() {
 
     var mockedReceiver = nodemock
           .mock('receive')
-            .takes({ responseMessage: true });
+            .takes('custom response');
 
     var application = express();
     utils.setupServer(application)
