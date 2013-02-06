@@ -142,7 +142,7 @@ suite('Socket.IO API', function() {
             .takes('search',
                    { requestMessage: true },
                    null,
-                   { sessionId: clientSocket.sessionid });
+                   { sessionId: clientSocket.socket.sessionid });
         clientSocket.emit('search', { requestMessage: true });
       })
       .wait(0.01)
@@ -237,7 +237,7 @@ suite('Socket.IO API', function() {
             .takes('foobar',
                    { requestMessage: true },
                    null,
-                   { sessionId: clientSocket.sessionid });
+                   { sessionId: clientSocket.socket.sessionid });
         clientSocket.emit('foobar', { requestMessage: true });
       })
       .wait(0.01)
@@ -277,7 +277,7 @@ suite('Socket.IO API', function() {
             .takes('builder',
                    'builder request',
                    null,
-                   { sessionId: clientSocket.sessionid });
+                   { sessionId: clientSocket.socket.sessionid });
         clientSocket.on('builder.result', function(data) {
           mockedReceiver.receive(data);
         });
@@ -329,7 +329,7 @@ suite('Socket.IO API', function() {
             .takes('customevent',
                    { requestMessage: true },
                    null,
-                   { sessionId: clientSocket.sessionid });
+                   { sessionId: clientSocket.socket.sessionid });
         clientSocket.on('custom', function(data) {
           mockedReceiver.receive(data);
         });
