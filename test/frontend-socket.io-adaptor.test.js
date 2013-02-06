@@ -124,7 +124,7 @@ suite('Socket.IO API', function() {
   test('front to back', function(done) {
     connection = utils.createMockedBackendConnection()
       .mock('emitMessage')
-        .takes('search', { requestMessage: true });
+        .takes('search', { requestMessage: true }, null, { sessionId: '' });
 
     var application = express();
     utils.setupServer(application)
