@@ -122,9 +122,7 @@ suite('Socket.IO API', function() {
   });
 
   test('front to back', function(done) {
-    connection = utils.createMockedBackendConnection()
-      .mock('emitMessage')
-        .takes('search', { requestMessage: true }, null, { sessionId: '' });
+    connection = utils.createMockedBackendConnection();
 
     var application = express();
     utils.setupServer(application)
@@ -138,6 +136,13 @@ suite('Socket.IO API', function() {
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+
+        connection = connection
+          .mock('emitMessage')
+            .takes('search',
+                   { requestMessage: true },
+                   null,
+                   { sessionId: clientSocket.sessionid });
         clientSocket.emit('search', { requestMessage: true });
       })
       .wait(0.01)
@@ -211,9 +216,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (without builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection()
-      .mock('emitMessage')
-        .takes('foobar', { requestMessage: true });
+    connection = utils.createMockedBackendConnection();
 
     var application = express();
     utils.setupServer(application)
@@ -228,6 +231,13 @@ suite('Socket.IO API', function() {
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+
+        connection = connection
+          .mock('emitMessage')
+            .takes('foobar',
+                   { requestMessage: true },
+                   null,
+                   { sessionId: clientSocket.sessionid });
         clientSocket.emit('foobar', { requestMessage: true });
       })
       .wait(0.01)
@@ -242,9 +252,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (with builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection()
-      .mock('emitMessage')
-        .takes('builder', 'builder request');
+    connection = utils.createMockedBackendConnection();
 
     var mockedReceiver = nodemock
           .mock('receive')
@@ -263,6 +271,13 @@ suite('Socket.IO API', function() {
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+
+        connection = connection
+          .mock('emitMessage')
+            .takes('builder',
+                   'builder request',
+                   null,
+                   { sessionId: clientSocket.sessionid });
         clientSocket.on('builder.result', function(data) {
           mockedReceiver.receive(data);
         });
@@ -289,9 +304,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (custom event name)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection()
-      .mock('emitMessage')
-        .takes('customevent', { requestMessage: true });
+    connection = utils.createMockedBackendConnection();
 
     var mockedReceiver = nodemock
           .mock('receive')
@@ -310,6 +323,13 @@ suite('Socket.IO API', function() {
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+
+        connection = connection
+          .mock('emitMessage')
+            .takes('customevent',
+                   { requestMessage: true },
+                   null,
+                   { sessionId: clientSocket.sessionid });
         clientSocket.on('custom', function(data) {
           mockedReceiver.receive(data);
         });
