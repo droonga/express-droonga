@@ -184,7 +184,7 @@ suite('Socket.IO API', function() {
           statusCode: 200,
           body:       { searchResult: true}
         };
-        connection.controllers.search.trigger(envelope);
+        connection.controllers.message.trigger(envelope);
       })
       .wait(0.01)
       .next(function() {
