@@ -196,7 +196,20 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('front to back, extra command', function(done) {
+  var testPlugin = {
+    'foobar': {
+    },
+    'builder': {
+      requestBuilder: function() { return 'builder request'; },
+      responseBuilder: function() { return 'builder response' }
+    },
+    'customevent': {
+      resoonseEvent: 'custom',
+      responseBuilder: function() { return 'custom response' }
+    }
+  };
+
+  test('front to back, extra command (without builder)', function(done) {
     var extraController = {};
     connection = utils.createMockedBackendConnection()
       .mock('emitMessage')
@@ -208,9 +221,7 @@ suite('Socket.IO API', function() {
         server = newServer;
         socketIoAdaptor.register(application, server, {
           connection: connection,
-          plugins: [
-            { 'foobar': {} }
-          ]
+          plugins: [testPlugin]
         });
 
         return utils.createClientSocket();
@@ -222,6 +233,53 @@ suite('Socket.IO API', function() {
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+
+  test('front to back, extra command (with builder)', function(done) {
+    var extraController = {};
+    connection = utils.createMockedBackendConnection()
+      .mock('emitMessage')
+        .takes('builder', 'builder request');
+
+    var mockedReceiver = nodemock
+          .mock('receive')
+            .takes('builder response');
+
+    var application = express();
+    utils.setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+        socketIoAdaptor.register(application, server, {
+          connection: connection,
+          plugins: [testPlugin]
+        });
+
+        return utils.createClientSocket();
+      })
+      .next(function(newClientSocket) {
+        clientSocket = newClientSocket;
+        clientSocket.on('builder.result', function(data) {
+          mockedReceiver.receive(data);
+        });
+        clientSocket.emit('builder', { requestMessage: true });
+      })
+      .wait(0.01)
+      .next(function() {
+        connection.assertThrows();
+        connection.controllers.message.trigger({
+          statusCode: 200,
+          type: 'builder.result',
+          body: { responseMessage: true }
+        });
+      })
+      .wait(0.01)
+      .next(function() {
+        mockedReceiver.assertThrows();
         done();
       })
       .error(function(error) {
