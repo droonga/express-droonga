@@ -29,7 +29,7 @@ suite('Socket.IO API', function() {
     }
   });
 
-  test('registeration of plugin commands', function() {
+  test('registeration of plugin commands', function(done) {
     var basePlugin = {
       getCommand: {
         requestBuilder: function() {}
