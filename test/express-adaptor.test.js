@@ -120,7 +120,7 @@ suite('Adaption for express application', function() {
     });
   });
 
-  suite('Socket.IO API', function() {
+  suite('Socket.IO API registeration', function() {
     var connection;
     var server;
     var clientSocket;
@@ -141,7 +141,6 @@ suite('Adaption for express application', function() {
     });
 
     test('front to back', function(done) {
-      var handlersFactory = utils.createMockedHandlersFactory();
       connection = utils.createMockedBackendConnection()
         .mock('emitMessage')
           .takes('search', { requestMessage: true });
@@ -152,10 +151,8 @@ suite('Adaption for express application', function() {
           server = newServer;
           application.kotoumi({
             connection: connection,
-            server:     server,
-            handlers:   handlersFactory
+            server:     server
           });
-          handlersFactory.assertThrows();
 
           return utils.createClientSocket();
         })
@@ -174,7 +171,6 @@ suite('Adaption for express application', function() {
     });
 
     test('back to front', function(done) {
-      var handlersFactory = utils.createMockedHandlersFactory();
       connection = utils.createMockedBackendConnection();
       connection.emitMessage = function() {}; // stubbing
 
@@ -191,10 +187,8 @@ suite('Adaption for express application', function() {
           server = newServer;
           application.kotoumi({
             connection: connection,
-            server:     server,
-            handlers:   handlersFactory
+            server:     server
           });
-          handlersFactory.assertThrows();
 
           return utils.createClientSocket();
         })
