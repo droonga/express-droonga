@@ -53,11 +53,11 @@ suite('Socket.IO API', function() {
       }
     };
 
-    utils.setupServer(utils.testServerPort)
+    var application = express();
+    utils.setupServer(application)
       .next(function(newServer) {
         server = newServer;
 
-        var application = express();
         var registeredCommands = socketIoAdaptor.register(application, server, {
           connection: utils.createStubbedBackendConnection(),
           plugins: [
