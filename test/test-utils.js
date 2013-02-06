@@ -148,9 +148,15 @@ function createMockedBackendConnection() {
     onMessageControllers[command] = {};
     connection = connection
       .mock('on')
-        .takes('message', function() {})
+        .takes(command, function() {})
         .ctrl(1, onMessageControllers[command]);
   });
+
+  onMessageControllers.message = {};
+  connection = connection
+    .mock('on')
+      .takes('message', function() {})
+      .ctrl(1, onMessageControllers.message);
 
   onMessageControllers.error = {};
   connection = connection
@@ -179,7 +185,6 @@ function readyToDestroyMockedConnection(connection) {
   connection = connection
     .mock('removeListener')
       .takes('message', function() {})
-      .times(socketIoDefaultCommands.length)
     .mock('removeListener')
       .takes('error', function() {});
   return connection;

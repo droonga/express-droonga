@@ -199,9 +199,6 @@ suite('Socket.IO API', function() {
   test('front to back, extra command', function(done) {
     var extraController = {};
     connection = utils.createMockedBackendConnection()
-      .mock('on')
-        .takes('message', function() {})
-        .ctrl(1, extraController)
       .mock('emitMessage')
         .takes('foobar', { requestMessage: true });
 
@@ -211,8 +208,8 @@ suite('Socket.IO API', function() {
         server = newServer;
         socketIoAdaptor.register(application, server, {
           connection: connection,
-          extraCommands: [
-            'foobar'
+          plugins: [
+            { 'foobar': {} }
           ]
         });
 
@@ -225,9 +222,6 @@ suite('Socket.IO API', function() {
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
-        connection
-          .mock('removeListener')
-          .takes('message', function() {});
         done();
       })
       .error(function(error) {
