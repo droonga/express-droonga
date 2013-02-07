@@ -15,6 +15,19 @@ suite('Socket.IO API', function() {
   var server;
   var clientSocket;
 
+  var testPlugin = {
+    'foobar': new model.SocketCommand(),
+    'builder': new model.SocketRequestResponse({
+      toBackend: function(event, data) { return [event, 'builder request']; },
+      toClient: function(event, data) { return [event, 'builder response'] }
+    }),
+    'customevent': new model.SocketRequestResponse({
+      toBackend: function(event, data) { return ['custom', data] },
+      toClient: function(event, data) { return [event, 'custom response']; }
+    }),
+    'pubsub': new model.SocketPublisSubscribe()
+  };
+
   teardown(function() {
     if (connection) {
       utils.readyToDestroyMockedConnection(connection);
@@ -129,7 +142,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('search', { requestMessage: true });
+            .takes('search', { requestMessage: true } function() {}, {});
         clientSocket.emit('search', { requestMessage: true });
       })
       .wait(0.01)
@@ -149,7 +162,7 @@ suite('Socket.IO API', function() {
           .mock('receive')
           .takes({
             statusCode: 200,
-            body:       { searchResult: true }
+            body:       { published: true }
           });
 
     var application = express();
@@ -157,7 +170,8 @@ suite('Socket.IO API', function() {
       .next(function(newServer) {
         server = newServer;
         socketIoAdaptor.register(application, server, {
-          connection: connection
+          connection: connection,
+          plugins: [testPlugin]
         });
 
         return utils.createClientSocket();
@@ -167,14 +181,14 @@ suite('Socket.IO API', function() {
 
         connection.assertThrows();
 
-        clientSocket.on('search.result', function(data) {
+        clientSocket.on('pubsub', function(data) {
           clientReceiver.receive(data);
         });
 
         var envelope = {
-          type:       'search.result',
+          type:       'pubsub',
           statusCode: 200,
-          body:       { searchResult: true}
+          body:       { published: true}
         };
         connection.controllers.search.trigger(envelope);
       })
@@ -187,18 +201,6 @@ suite('Socket.IO API', function() {
         done(error);
       });
   });
-
-  var testPlugin = {
-    'foobar': new model.SocketCommand(),
-    'builder': new model.SocketRequestResponse({
-      toBackend: function() { return 'builder request'; },
-      toClient: function() { return 'builder response' }
-    }),
-    'customevent': new model.SocketRequestResponse({
-      toBackend: 'custom',
-      toClient: function() { return 'custom response' }
-    })
-  };
 
   test('front to back, extra command (without builder)', function(done) {
     var extraController = {};
