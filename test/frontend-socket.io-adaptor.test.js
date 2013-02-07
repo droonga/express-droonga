@@ -35,7 +35,7 @@ suite('Socket.IO API', function() {
       getCommand: new model.SocketRequestResponse(),
       putCommand: new model.SocketRequestResponse(),
       postCommand: new model.SocketRequestResponse(),
-      deleteCommand: new model.SocketRequestResponse()
+      deleteCommand: new model.SocketRequestResponse(),
       ignored: new model.REST()
     };
     var overridingPlugin = {
