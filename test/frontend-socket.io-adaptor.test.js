@@ -156,7 +156,7 @@ suite('Socket.IO API', function() {
   });
 
   test('back to front', function(done) {
-    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+    connection = utils.createMockedBackendConnection(testPlugin);
 
     var clientReceiver = nodemock
           .mock('receive')
