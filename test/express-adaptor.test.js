@@ -11,14 +11,6 @@ var Connection = require('../lib/backend/connection').Connection;
 
 suite('Adaption for express application', function() {
   suite('REST API registeration', function() {
-    function defineCommand(command, path) {
-      return {
-        method: 'GET',
-        path: path,
-        requestBuilder: function() {},
-        responseBuilder: function() {}
-      };
-    }
     var testPlugin = {
       api: new model.REST({
         path: '/path/to/api',
