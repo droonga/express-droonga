@@ -140,7 +140,10 @@ suite('Adaption for express application', function() {
     test('front to back', function(done) {
       connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule)
         .mock('emitMessage')
-          .takes('search', { requestMessage: true });
+          .takes('search',
+                 { requestMessage: true },
+                 function() {},
+                 { timeout: 10 * 1000 });
 
       var application = express();
       utils.setupServer(application)
@@ -168,15 +171,18 @@ suite('Adaption for express application', function() {
     });
 
     test('back to front', function(done) {
-      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
-      connection.emitMessage = function() {}; // stubbing
+      var onResponse = {};
+      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule)
+        .mock('emitMessage')
+          .takes('search',
+                 { requestMessage: true },
+                 function() {},
+                 { timeout: 10 * 1000 })
+          .ctrl(2, onResponse);
 
       var clientReceiver = nodemock
             .mock('receive')
-            .takes({
-              statusCode: 200,
-              body:       { searchResult: true }
-            });
+            .takes({ searchResult: true });
 
       var application = express();
       utils.setupServer(application)
@@ -192,18 +198,20 @@ suite('Adaption for express application', function() {
         .next(function(newClientSocket) {
           clientSocket = newClientSocket;
 
-          connection.assertThrows();
-
           clientSocket.on('search.result', function(data) {
             clientReceiver.receive(data);
           });
-
+          clientSocket.emit('search', { requestMessage: true });
+        })
+        .wait(0.1)
+        .next(function() {
+          connection.assertThrows();
           var envelope = {
             type:       'search.result',
             statusCode: 200,
             body:       { searchResult: true}
           };
-          connection.controllers.message.trigger(envelope);
+          onResponse.trigger(envelope);
         })
         .wait(0.01)
         .next(function() {

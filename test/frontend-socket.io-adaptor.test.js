@@ -16,14 +16,14 @@ suite('Socket.IO API', function() {
   var clientSocket;
 
   var testPlugin = {
-    'foobar': new model.SocketCommand(),
-    'builder': new model.SocketRequestResponse({
+    'foobar': new model.SocketPublishSubscribe(),
+    'builder': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return [event, 'builder request']; },
       toClient: function(event, data) { return [event, 'builder response'] }
     }),
-    'customevent': new model.SocketRequestResponse({
+    'customevent': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return ['custom', data] },
-      toClient: function(event, data) { return [event, 'custom response']; }
+      toClient: function(event, data) { return ['custom', 'custom response']; }
     }),
     'pubsub': new model.SocketPublishSubscribe()
   };
@@ -160,10 +160,7 @@ suite('Socket.IO API', function() {
 
     var clientReceiver = nodemock
           .mock('receive')
-          .takes({
-            statusCode: 200,
-            body:       { published: true }
-          });
+          .takes({ published: true });
 
     var application = express();
     utils.setupServer(application)
@@ -204,7 +201,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (without builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+    connection = utils.createMockedBackendConnection(testPlugin);
 
     var application = express();
     utils.setupServer(application)
@@ -222,7 +219,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('foobar', { requestMessage: true });
+            .takes('foobar', { requestMessage: true }, null, {});
         clientSocket.emit('foobar', { requestMessage: true });
       })
       .wait(0.01)
@@ -237,7 +234,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (with builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+    connection = utils.createMockedBackendConnection(testPlugin);
 
     var mockedReceiver = nodemock
           .mock('receive')
@@ -259,7 +256,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('builder', 'builder request');
+            .takes('builder', 'builder request', null, {});
         clientSocket.on('builder.result', function(data) {
           mockedReceiver.receive(data);
         });
@@ -286,7 +283,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (custom event name)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+    connection = utils.createMockedBackendConnection(testPlugin);
 
     var mockedReceiver = nodemock
           .mock('receive')
@@ -308,7 +305,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('customevent', { requestMessage: true });
+            .takes('custom', { requestMessage: true }, null, {});
         clientSocket.on('custom', function(data) {
           mockedReceiver.receive(data);
         });
