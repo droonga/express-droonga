@@ -183,14 +183,6 @@ function readyToDestroyMockedConnection(connection) {
 }
 exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;
 
-function createMockedHandlersFactory() {
-  return nodemock
-    .mock('search')
-    .takes({})
-    .returns(function() {});
-}
-exports.createMockedHandlersFactory = createMockedHandlersFactory;
-
 
 function TypeOf(typeString) {
   if (!(this instanceof TypeOf))
