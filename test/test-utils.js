@@ -152,12 +152,6 @@ function createMockedBackendConnection() {
         .ctrl(1, onMessageControllers[command]);
   });
 
-  onMessageControllers.message = {};
-  connection = connection
-    .mock('on')
-      .takes('message', function() {})
-      .ctrl(1, onMessageControllers.message);
-
   onMessageControllers.error = {};
   connection = connection
     .mock('on')
@@ -183,8 +177,6 @@ exports.createStubbedBackendConnection = createStubbedBackendConnection;
 
 function readyToDestroyMockedConnection(connection) {
   connection = connection
-    .mock('removeListener')
-      .takes('message', function() {})
     .mock('removeListener')
       .takes('error', function() {});
   return connection;
