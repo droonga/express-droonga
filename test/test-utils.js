@@ -6,13 +6,9 @@ var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
 
-var socketIoDefaultCommandsModule = require('../lib/frontend/default-commands/socket.io');
-var socketIoDefaultCommands = [];
-Object.keys(socketIoDefaultCommandsModule).forEach(function(command) {
-  if (!command || typeof command != 'object')
-    return;
-  socketIoDefaultCommands.push(command);
-});
+var socketIoDefaultCommandsModule = 
+  exports.socketIoDefaultCommandsModule =
+    require('../lib/frontend/default-commands/socket.io');
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
@@ -141,15 +137,26 @@ function createClientSocket() {
 }
 exports.createClientSocket = createClientSocket;
 
-function createMockedBackendConnection() {
+function createMockedBackendConnection(socketCommands) {
+  socketCommands = socketCommands || {};
   var connection = nodemock;
   var onMessageControllers = {};
-  socketIoDefaultCommands.forEach(function(command) {
-    onMessageControllers[command] = {};
+  Object.keys(socketCommands).forEach(function(commandName) {
+    var command = socketCommands[commandName];
+    onMessageControllers[commandName] = {};
     connection = connection
       .mock('on')
         .takes(command, function() {})
-        .ctrl(1, onMessageControllers[command]);
+        .ctrl(1, onMessageControllers[commandName]);
+
+    if (model.isA(command, model.PublishSubscribe)) {
+      var published = commandName + '-published';
+      onMessageControllers[published] = {};
+      connection = connection
+        .mock('on')
+          .takes(command, function() {})
+          .ctrl(1, onMessageControllers[published]);
+    }
   });
 
   onMessageControllers.error = {};

@@ -125,7 +125,7 @@ suite('Socket.IO API', function() {
   });
 
   test('front to back', function(done) {
-    connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
 
     var application = express();
     utils.setupServer(application)
@@ -156,7 +156,7 @@ suite('Socket.IO API', function() {
   });
 
   test('back to front', function(done) {
-    connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
 
     var clientReceiver = nodemock
           .mock('receive')
@@ -204,7 +204,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (without builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
 
     var application = express();
     utils.setupServer(application)
@@ -237,7 +237,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (with builder)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
 
     var mockedReceiver = nodemock
           .mock('receive')
@@ -286,7 +286,7 @@ suite('Socket.IO API', function() {
 
   test('front to back, extra command (custom event name)', function(done) {
     var extraController = {};
-    connection = utils.createMockedBackendConnection();
+    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
 
     var mockedReceiver = nodemock
           .mock('receive')

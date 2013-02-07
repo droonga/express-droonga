@@ -24,7 +24,7 @@ suite('Adaption for express application', function() {
     var server;
 
     setup(function(done) {
-      connection = utils.createMockedBackendConnection();
+      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
       application = express();
       utils.setupServer(application)
         .next(function(newServer) {
@@ -138,7 +138,7 @@ suite('Adaption for express application', function() {
     });
 
     test('front to back', function(done) {
-      connection = utils.createMockedBackendConnection()
+      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule)
         .mock('emitMessage')
           .takes('search', { requestMessage: true });
 
@@ -168,7 +168,7 @@ suite('Adaption for express application', function() {
     });
 
     test('back to front', function(done) {
-      connection = utils.createMockedBackendConnection();
+      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
       connection.emitMessage = function() {}; // stubbing
 
       var clientReceiver = nodemock
