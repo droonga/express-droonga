@@ -9,6 +9,7 @@ var client = require('socket.io-client');
 var socketIoDefaultCommandsModule = 
   exports.socketIoDefaultCommandsModule =
     require('../lib/frontend/default-commands/socket.io');
+var model = require('../lib/model');
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
