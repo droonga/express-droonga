@@ -317,7 +317,7 @@ suite('Connection, basic features', function() {
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      1,
                      'response listener should be still there');
 
@@ -331,7 +331,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         callback.assert();
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      0,
                      'response listener should be removed');
         done();
@@ -362,13 +362,13 @@ suite('Connection, basic features', function() {
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      1,
                      'response listener should be still there');
       })
       .wait(0.02)
       .next(function() {
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      0,
                      'response listener should be removed by timeout');
         callback.assert();
@@ -400,7 +400,7 @@ suite('Connection, basic features', function() {
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
         assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      1,
                      'response listener should be still there');
 
@@ -412,7 +412,7 @@ suite('Connection, basic features', function() {
       .wait(0.01)
       .next(function() {
         callback.assert();
-        assert.equal(connection.listeners('inReplyTo:' + message.id).length,
+        assert.equal(connection.listeners('reply:' + message.id).length,
                      0),
                      'response listener should be removed';
         done();
