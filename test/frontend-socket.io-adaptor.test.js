@@ -58,7 +58,7 @@ suite('Socket.IO API', function() {
 
         registeredCommands = registeredCommands.map(function(command) {
           return {
-            command: command.command,
+            name:       command.name,
             definition: command.definition
           };
         });
