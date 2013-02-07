@@ -78,17 +78,17 @@ suite('REST API', function() {
 
   suite('registeration', function() {
     var testPlugin = {
-      api: {
+      api: new model.REST({
         path: '/path/to/api',
-        requestBuilder: function() { return 'api requested'; },
-        responseBuilder: function() { return 'api OK'; }
-      },
-      customCommandAPI: {
+        toBackend: function() { return 'api requested'; },
+        toClient: function() { return 'api OK'; }
+      }),
+      customCommandAPI: new model.REST({
         command: 'custom',
         path: '/path/to/customCommandAPI',
-        requestBuilder: function() { return 'customCommandAPI requested'; },
-        responseBuilder: function() { return 'customCommandAPI OK'; }
-      }
+        toBackend: function() { return 'customCommandAPI requested'; },
+        toClient: function() { return 'customCommandAPI OK'; }
+      })
     };
 
     var connection;

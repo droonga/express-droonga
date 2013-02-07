@@ -189,16 +189,15 @@ suite('Socket.IO API', function() {
   });
 
   var testPlugin = {
-    'foobar': {
-    },
-    'builder': {
-      requestBuilder: function() { return 'builder request'; },
-      responseBuilder: function() { return 'builder response' }
-    },
-    'customevent': {
-      responseEvent: 'custom',
-      responseBuilder: function() { return 'custom response' }
-    }
+    'foobar': new model.SocketCommand(),
+    'builder': new model.SocketRequestResponse({
+      toBackend: function() { return 'builder request'; },
+      toClient: function() { return 'builder response' }
+    }),
+    'customevent': new model.SocketRequestResponse({
+      toBackend: 'custom',
+      toClient: function() { return 'custom response' }
+    })
   };
 
   test('front to back, extra command (without builder)', function(done) {

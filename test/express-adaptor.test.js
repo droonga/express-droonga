@@ -14,12 +14,16 @@ suite('Adaption for express application', function() {
       return {
         method: 'GET',
         path: path,
-        requestBuilder: function() { return command + ' requested'; },
-        responseBuilder: function() { return command + ' OK'; }
+        requestBuilder: function() {},
+        responseBuilder: function() {}
       };
     }
     var testPlugin = {
-      api: defineCommand('api', '/path/to/api')
+      api: new model.REST({
+        path: '/path/to/api',
+        toBackend: function() { return 'api requested'; },
+        toClient: function() { return 'api OK'; }
+      })
     };
 
     var connection;
