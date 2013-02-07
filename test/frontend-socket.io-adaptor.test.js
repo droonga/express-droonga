@@ -190,7 +190,7 @@ suite('Socket.IO API', function() {
           statusCode: 200,
           body:       { published: true}
         };
-        connection.controllers.search.trigger(envelope);
+        connection.controllers.pubsub.trigger(envelope);
       })
       .wait(0.01)
       .next(function() {
