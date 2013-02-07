@@ -30,3 +30,5 @@ express.application.kotoumi = function(params) {
   this.connection = connection;
   this.emitMessage = connection.emitMessage.bind(connection); // shorthand
 }
+
+exports.model = require('./lib/model');
