@@ -144,19 +144,12 @@ function createMockedBackendConnection(socketCommands) {
   var onMessageControllers = {};
   Object.keys(socketCommands).forEach(function(commandName) {
     var command = socketCommands[commandName];
-    onMessageControllers[commandName] = {};
-    connection = connection
-      .mock('on')
-        .takes(command, function() {})
-        .ctrl(1, onMessageControllers[commandName]);
-
     if (model.isA(command, model.PublishSubscribe)) {
-      var published = commandName + '-published';
-      onMessageControllers[published] = {};
+      onMessageControllers[commandName] = {};
       connection = connection
         .mock('on')
-          .takes(command, function() {})
-          .ctrl(1, onMessageControllers[published]);
+          .takes(commandName, function() {})
+          .ctrl(1, onMessageControllers[commandName]);
     }
   });
 
