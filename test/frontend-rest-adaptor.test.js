@@ -6,44 +6,45 @@ var utils = require('./test-utils');
 
 var express = require('express');
 var restAdaptor = require('../lib/frontend/rest-adaptor');
+var model = require('../lib/model');
 var restCommands = require('../lib/frontend/default-commands/rest');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
-      getCommand: {
-        method: 'GET',
+      getCommand: new model.REST({
         path: '/get',
-        requestBuilder: function() {}
-      },
-      putCommand: {
+        toBackend: function() {}
+      }),
+      putCommand: new model.REST({
         method: 'PUT',
         path: '/put',
-        requestBuilder: function() {}
-      },
-      postCommand: {
+        toBackend: function() {}
+      }),
+      postCommand: new model.REST({
         method: 'POST',
         path: '/post',
-        requestBuilder: function() {}
-      },
-      deleteCommand: {
+        toBackend: function() {}
+      }),
+      deleteCommand: new model.REST({
         method: 'DELETE',
         path: '/delete',
-        requestBuilder: function() {}
-      }
+        toBackend: function() {}
+      }),
+      ignored: new model.SocketCommand()
     };
     var overridingPlugin = {
-      postCommand: {
+      postCommand: new model.REST({
         method: 'POST',
         path: '/post/overridden',
-        requestBuilder: function() {}
-      },
-      deleteCommand: {
+        toBackend: function() {}
+      }),
+      deleteCommand: new model.REST({
         method: 'DELETE',
         path: '/delete/overridden',
-        requestBuilder: function() {}
-      }
+        toBackend: function() {}
+      })
     };
 
     var application = express();

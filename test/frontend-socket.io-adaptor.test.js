@@ -6,6 +6,7 @@ var express = require('express');
 var utils = require('./test-utils');
 
 var socketIoAdaptor = require('../lib/frontend/socket.io-adaptor');
+var model = require('../lib/model');
 var scoketIoCommands = require('../lib/frontend/default-commands/socket.io');
 var Connection = require('../lib/backend/connection').Connection;
 
@@ -31,26 +32,15 @@ suite('Socket.IO API', function() {
 
   test('registeration of plugin commands', function(done) {
     var basePlugin = {
-      getCommand: {
-        requestBuilder: function() {}
-      },
-      putCommand: {
-        requestBuilder: function() {}
-      },
-      postCommand: {
-        requestBuilder: function() {}
-      },
-      deleteCommand: {
-        requestBuilder: function() {}
-      }
+      getCommand: new model.SocketRequestResponse(),
+      putCommand: new model.SocketRequestResponse(),
+      postCommand: new model.SocketRequestResponse(),
+      deleteCommand: new model.SocketRequestResponse()
+      ignored: new model.REST()
     };
     var overridingPlugin = {
-      postCommand: {
-        requestBuilder: function() {}
-      },
-      deleteCommand: {
-        requestBuilder: function() {}
-      }
+      postCommand: new model.SocketRequestResponse(),
+      deleteCommand: new model.SocketRequestResponse()
     };
 
     var application = express();
