@@ -25,7 +25,7 @@ suite('Socket.IO API', function() {
       toBackend: function(event, data) { return ['custom', data] },
       toClient: function(event, data) { return [event, 'custom response']; }
     }),
-    'pubsub': new model.SocketPublisSubscribe()
+    'pubsub': new model.SocketPublishSubscribe()
   };
 
   teardown(function() {
