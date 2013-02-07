@@ -142,7 +142,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('search', { requestMessage: true } function() {}, {});
+            .takes('search', { requestMessage: true }, function() {}, {});
         clientSocket.emit('search', { requestMessage: true });
       })
       .wait(0.01)
