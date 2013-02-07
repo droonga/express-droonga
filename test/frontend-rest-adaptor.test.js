@@ -14,36 +14,30 @@ suite('REST API', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
       getCommand: new model.REST({
-        path: '/get',
-        toBackend: function() {}
+        path: '/get'
       }),
       putCommand: new model.REST({
         method: 'PUT',
-        path: '/put',
-        toBackend: function() {}
+        path: '/put'
       }),
       postCommand: new model.REST({
         method: 'POST',
-        path: '/post',
-        toBackend: function() {}
+        path: '/post'
       }),
       deleteCommand: new model.REST({
         method: 'DELETE',
-        path: '/delete',
-        toBackend: function() {}
+        path: '/delete'
       }),
       ignored: new model.SocketCommand()
     };
     var overridingPlugin = {
       postCommand: new model.REST({
         method: 'POST',
-        path: '/post/overridden',
-        toBackend: function() {}
+        path: '/post/overridden'
       }),
       deleteCommand: new model.REST({
         method: 'DELETE',
-        path: '/delete/overridden',
-        toBackend: function() {}
+        path: '/delete/overridden'
       })
     };
 
@@ -80,8 +74,8 @@ suite('REST API', function() {
     var testPlugin = {
       api: new model.REST({
         path: '/path/to/api',
-        toBackend: function() { return 'api requested'; },
-        toClient: function() { return 'api OK'; }
+        toBackend: function(event, request) { return [event, 'api requested']; },
+        toClient: function(event, data) { return [event, 'api OK']; }
       })
     };
 
