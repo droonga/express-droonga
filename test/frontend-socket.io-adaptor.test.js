@@ -139,10 +139,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('search',
-                   { requestMessage: true },
-                   null,
-                   { sessionId: clientSocket.socket.sessionid });
+            .takes('search', { requestMessage: true });
         clientSocket.emit('search', { requestMessage: true });
       })
       .wait(0.01)
@@ -234,10 +231,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('foobar',
-                   { requestMessage: true },
-                   null,
-                   { sessionId: clientSocket.socket.sessionid });
+            .takes('foobar', { requestMessage: true });
         clientSocket.emit('foobar', { requestMessage: true });
       })
       .wait(0.01)
@@ -274,10 +268,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('builder',
-                   'builder request',
-                   null,
-                   { sessionId: clientSocket.socket.sessionid });
+            .takes('builder', 'builder request');
         clientSocket.on('builder.result', function(data) {
           mockedReceiver.receive(data);
         });
@@ -326,10 +317,7 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('customevent',
-                   { requestMessage: true },
-                   null,
-                   { sessionId: clientSocket.socket.sessionid });
+            .takes('customevent', { requestMessage: true });
         clientSocket.on('custom', function(data) {
           mockedReceiver.receive(data);
         });
