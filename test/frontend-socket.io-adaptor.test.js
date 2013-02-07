@@ -63,15 +63,15 @@ suite('Socket.IO API', function() {
           };
         });
         assert.deepEqual(registeredCommands,
-                         [{ command: 'search',
+                         [{ name:       'search',
                             definition: scoketIoCommands.search },
-                          { command: 'getCommand',
+                          { name:       'getCommand',
                             definition: basePlugin.getCommand },
-                          { command: 'putCommand',
+                          { name:       'putCommand',
                             definition: basePlugin.putCommand },
-                          { command: 'postCommand',
+                          { name:       'postCommand',
                             definition: overridingPlugin.postCommand },
-                          { command: 'deleteCommand',
+                          { name:       'deleteCommand',
                             definition: overridingPlugin.deleteCommand }]);
         done();
       })
@@ -176,7 +176,7 @@ suite('Socket.IO API', function() {
           statusCode: 200,
           body:       { searchResult: true}
         };
-        connection.controllers.message.trigger(envelope);
+        connection.controllers.search.trigger(envelope);
       })
       .wait(0.01)
       .next(function() {
@@ -266,7 +266,7 @@ suite('Socket.IO API', function() {
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
-        connection.controllers.message.trigger({
+        connection.controllers.builder.trigger({
           statusCode: 200,
           type: 'builder.result',
           body: { responseMessage: true }
@@ -315,7 +315,7 @@ suite('Socket.IO API', function() {
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
-        connection.controllers.message.trigger({
+        connection.controllers.customevent.trigger({
           statusCode: 200,
           type: 'customevent.result',
           body: { responseMessage: true }

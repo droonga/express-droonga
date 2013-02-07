@@ -64,15 +64,15 @@ suite('REST API', function() {
       };
     });
     assert.deepEqual(registeredCommands,
-                     [{ command: 'search',
+                     [{ name:       'search',
                         definition: restCommands.search },
-                      { command: 'getCommand',
+                      { name:       'getCommand',
                         definition: basePlugin.getCommand },
-                      { command: 'putCommand',
+                      { name:       'putCommand',
                         definition: basePlugin.putCommand },
-                      { command: 'postCommand',
+                      { name:       'postCommand',
                         definition: overridingPlugin.postCommand },
-                      { command: 'deleteCommand',
+                      { name:       'deleteCommand',
                         definition: overridingPlugin.deleteCommand }]);
   });
 
