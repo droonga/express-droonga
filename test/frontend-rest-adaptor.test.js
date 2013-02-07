@@ -82,12 +82,6 @@ suite('REST API', function() {
         path: '/path/to/api',
         toBackend: function() { return 'api requested'; },
         toClient: function() { return 'api OK'; }
-      }),
-      customCommandAPI: new model.REST({
-        command: 'custom',
-        path: '/path/to/customCommandAPI',
-        toBackend: function() { return 'customCommandAPI requested'; },
-        toClient: function() { return 'customCommandAPI OK'; }
       })
     };
 
@@ -181,45 +175,6 @@ suite('REST API', function() {
         .wait(0.01)
         .next(function() {
           assert.equal(responseBody, 'api OK');
-          done();
-        })
-        .error(function(error) {
-          done(error);
-        });
-    });
-
-    test('custom command name', function(done) {
-      var onReceive = {};
-      connection
-        .mock('emitMessage')
-          .takes('custom',
-                 'customCommandAPI requested',
-                 function() {},
-                 { 'timeout': null })
-          .ctrl(2, onReceive);
-
-      restAdaptor.register(application, {
-        prefix:     '',
-        connection: connection,
-        plugins:    [testPlugin]
-      });
-
-      var responseBody;
-      Deferred
-        .wait(0.01)
-        .next(function() {
-          utils.get('/path/to/customCommandAPI')
-            .next(function(response) {
-              responseBody = response.body;
-            });
-        })
-        .wait(0.01)
-        .next(function() {
-          onReceive.trigger(null, { body: 'API OK?' });
-        })
-        .wait(0.01)
-        .next(function() {
-          assert.equal(responseBody, 'customCommandAPI OK');
           done();
         })
         .error(function(error) {
