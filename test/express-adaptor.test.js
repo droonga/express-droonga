@@ -14,8 +14,8 @@ suite('Adaption for express application', function() {
     var testPlugin = {
       api: new model.REST({
         path: '/path/to/api',
-        toBackend: function() { return 'api requested'; },
-        toClient: function() { return 'api OK'; }
+        toBackend: function(event, request) { return [event, 'api requested']; },
+        toClient: function(event, data) { return [event, 'api OK']; }
       })
     };
 
@@ -46,7 +46,7 @@ suite('Adaption for express application', function() {
 
     test('to the document root', function(done) {
       var onReceive = {};
-      connection
+      connection = connection
         .mock('emitMessage')
           .takes('api', 'api requested', function() {}, { 'timeout': null })
           .ctrl(2, onReceive);
@@ -68,6 +68,7 @@ suite('Adaption for express application', function() {
         })
         .wait(0.01)
         .next(function() {
+          connection.assertThrows();
           onReceive.trigger(null, { body: 'API OK?' });
         })
         .wait(0.01)
@@ -82,7 +83,7 @@ suite('Adaption for express application', function() {
 
     test('under specified path', function(done) {
       var onReceive = {};
-      connection
+      connection = connection
         .mock('emitMessage')
           .takes('api', 'api requested', function() {}, { 'timeout': null })
           .ctrl(2, onReceive);
@@ -104,6 +105,7 @@ suite('Adaption for express application', function() {
         })
         .wait(0.01)
         .next(function() {
+          connection.assertThrows();
           onReceive.trigger(null, { body: 'API OK?' });
         })
         .wait(0.01)
