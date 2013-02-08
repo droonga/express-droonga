@@ -24,7 +24,7 @@ suite('Adaption for express application', function() {
     var server;
 
     setup(function(done) {
-      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+      connection = utils.createMockedBackendConnection(testPlugin);
       application = express();
       utils.setupServer(application)
         .next(function(newServer) {
