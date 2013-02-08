@@ -144,7 +144,7 @@ function createMockedBackendConnection(socketCommands) {
   var onMessageControllers = {};
   Object.keys(socketCommands).forEach(function(commandName) {
     var command = socketCommands[commandName];
-    if (model.isA(command, model.PublishSubscribe)) {
+    if (model.PublishSubscribe.isInstance(command)) {
       onMessageControllers[commandName] = {};
       connection = connection
         .mock('on')
