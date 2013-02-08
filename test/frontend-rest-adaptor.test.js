@@ -83,14 +83,9 @@ suite('REST API', function() {
     var application;
     var server;
 
-    setup(function(done) {
-      connection = utils.createMockedBackendConnection();
+    setup(function() {
+      connection = utils.createMockedBackendConnection(testPlugin);
       application = express();
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
-          done();
-        });
     });
 
     teardown(function() {
@@ -106,7 +101,7 @@ suite('REST API', function() {
 
     test('to the document root', function(done) {
       var onReceive = {};
-      connection
+      connection = connection
         .mock('emitMessage')
           .takes('api', 'api requested', function() {}, { 'timeout': null })
           .ctrl(2, onReceive);
@@ -118,9 +113,9 @@ suite('REST API', function() {
       });
 
       var responseBody;
-      Deferred
-        .wait(0.01)
-        .next(function() {
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
           utils.get('/path/to/api')
             .next(function(response) {
               responseBody = response.body;
@@ -128,6 +123,7 @@ suite('REST API', function() {
         })
         .wait(0.01)
         .next(function() {
+          connection.assertThrows();
           onReceive.trigger(null, { body: 'API OK?' });
         })
         .wait(0.01)
@@ -142,7 +138,7 @@ suite('REST API', function() {
 
     test('under specified path', function(done) {
       var onReceive = {};
-      connection
+      connection = connection
         .mock('emitMessage')
           .takes('api', 'api requested', function() {}, { 'timeout': null })
           .ctrl(2, onReceive);
@@ -154,9 +150,9 @@ suite('REST API', function() {
       });
 
       var responseBody;
-      Deferred
-        .wait(0.01)
-        .next(function() {
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
           utils.get('/path/to/kotoumi/path/to/api')
             .next(function(response) {
               responseBody = response.body;
@@ -164,6 +160,7 @@ suite('REST API', function() {
         })
         .wait(0.01)
         .next(function() {
+          connection.assertThrows();
           onReceive.trigger(null, { body: 'API OK?' });
         })
         .wait(0.01)

@@ -142,8 +142,11 @@ function createMockedBackendConnection(socketCommands) {
   socketCommands = socketCommands || {};
   var connection = nodemock;
   var onMessageControllers = {};
+  var hasSocketCommand = false;
   Object.keys(socketCommands).forEach(function(commandName) {
     var command = socketCommands[commandName];
+    hasSocketCommand = hasSocketCommand ||
+                         model.SocketCommand.isInstance(command);
     if (model.PublishSubscribe.isInstance(command)) {
       onMessageControllers[commandName] = {};
       connection = connection
@@ -153,11 +156,13 @@ function createMockedBackendConnection(socketCommands) {
     }
   });
 
-  onMessageControllers.error = {};
-  connection = connection
-    .mock('on')
-      .takes('error', function() {})
-      .ctrl(1, onMessageControllers.error);
+  if (hasSocketCommand) {
+    onMessageControllers.error = {};
+    connection = connection
+      .mock('on')
+        .takes('error', function() {})
+        .ctrl(1, onMessageControllers.error);
+  }
 
   connection.controllers = onMessageControllers;
   return connection;
