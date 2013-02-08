@@ -209,11 +209,11 @@ suite('Adaption for express application', function() {
         .next(function() {
           connection.assertThrows();
           var envelope = {
-            type:       'search.result',
             statusCode: 200,
+            type:       'search.result',
             body:       { searchResult: true}
           };
-          onResponse.trigger(envelope);
+          onResponse.trigger(null, envelope);
         })
         .wait(0.01)
         .next(function() {
