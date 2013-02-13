@@ -212,18 +212,12 @@ suite('Socket.IO API', function() {
       Math.random()
     ];
     var clientReceiver = nodemock
-          .mock('receive')
-            .takes(0, messages[0])
-          .mock('receive')
-            .takes(1, messages[1])
-          .mock('receive')
-            .takes(2, messages[2])
-          .mock('receive')
-            .takes(0, messages[3])
-          .mock('receive')
-            .takes(1, messages[4])
-          .mock('receive')
-            .takes(2, messages[5]);
+          .mock('receive').takes(0, messages[0])
+          .mock('receive').takes(1, messages[1])
+          .mock('receive').takes(2, messages[2])
+          .mock('receive').takes(0, messages[3])
+          .mock('receive').takes(1, messages[4])
+          .mock('receive').takes(2, messages[5]);
 
     var application = express();
     utils.setupServer(application)
