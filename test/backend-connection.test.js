@@ -122,6 +122,22 @@ suite('Connection, simple communication', function() {
     return response;
   }
 
+  function createMockedMessageCallback() {
+    var mockedCallback = nodemock;
+    var callback = function() {
+      mockedCallback.receive.apply(mockedCallback, arguments);
+    };
+    callback.takes = function() {
+      callback.assert = function() {
+        mockedCallback.assertThrows();
+      };
+      mockedCallback = mockedCallback.mock('receive');
+      mockedCallback = mockedCallback.takes.apply(mockedCallback, arguments);
+    };
+    callback.mock = mockedCallback;
+    return callback;
+  }
+
   test('one way message from front to back', function(done) {
     var message = connection.emitMessage('testRequest', { command: 'foobar' });
     assert.envelopeEqual(message,
@@ -138,22 +154,6 @@ suite('Connection, simple communication', function() {
         done(error);
       });
   });
-
-  function createMockedMessageCallback() {
-    var mockedCallback = nodemock;
-    var callback = function() {
-      mockedCallback.receive.apply(mockedCallback, arguments);
-    };
-    callback.takes = function() {
-      callback.assert = function() {
-        mockedCallback.assertThrows();
-      };
-      mockedCallback = mockedCallback.mock('receive');
-      mockedCallback = mockedCallback.takes.apply(mockedCallback, arguments);
-    };
-    callback.mock = mockedCallback;
-    return callback;
-  }
 
   test('one way message from back to front', function(done) {
     var callback = createMockedMessageCallback();
