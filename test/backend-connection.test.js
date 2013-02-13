@@ -133,6 +133,7 @@ suite('Connection, simple communication', function() {
       };
       mockedCallback = mockedCallback.mock('receive');
       mockedCallback = mockedCallback.takes.apply(mockedCallback, arguments);
+      return this;
     };
     callback.mock = mockedCallback;
     return callback;
@@ -174,30 +175,43 @@ suite('Connection, simple communication', function() {
     connection.on('message', callback);
 
     var now = new Date();
-    var message = {
+    var stringMessage = {
       id:         now.getTime(),
       date:       now.toISOString(),
       statusCode: 200,
-      type:       'testResponse',
+      type:       'string',
       body:       'first call'
     };
-    callback.takes(message);
-    var packet = ['test.message', Date.now(), message];
-    utils.sendPacketTo(packet, utils.testReceivePort)
-      .next(function() {
-        callback.assert();
+    var numericMessage = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      statusCode: 200,
+      type:       'numeric',
+      body:       1234
+    };
+    var objectMessage = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      statusCode: 200,
+      type:       'object',
+      body:       { value: true }
+    };
+    callback
+      .takes(stringMessage)
+      .takes(numericMessage)
+      .takes(objectMessage);
 
-        message.body = 'second call';
-        callback.takes(message);
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
-      .next(function() {
-        callback.assert();
-
-        message.body = 'third call';
-        connection.removeListener('message', callback);
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
+    var packets = {
+      string:  ['test.message', Date.now(), stringMessage],
+      numeric: ['test.message', Date.now(), numericMessage],
+      object:  ['test.message', Date.now(), objectMessage],
+      unknown: ['unknown', Date.now(), {}]
+    };
+    utils
+      .sendPacketTo(packets.string, utils.testReceivePort)
+      .sendPacketTo(packets.numeric, utils.testReceivePort)
+      .sendPacketTo(packets.object, utils.testReceivePort)
+      .sendPacketTo(packets.unknown, utils.testReceivePort)
       .next(function() {
         callback.assert();
         done();
