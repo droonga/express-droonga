@@ -124,6 +124,11 @@ suite('Connection, simple communication', function() {
     return response;
   }
 
+  function createPacket(message, tag) {
+    tag = tag || 'test.message';
+    return [tag, Date.now(), message];
+  }
+
   function createMockedMessageCallback() {
     var mockedCallback = nodemock;
     var callback = function() {
@@ -184,17 +189,11 @@ suite('Connection, simple communication', function() {
       .takes(numericMessage)
       .takes(objectMessage);
 
-    var packets = {
-      string:  ['test.message', Date.now(), stringMessage],
-      numeric: ['test.message', Date.now(), numericMessage],
-      object:  ['test.message', Date.now(), objectMessage],
-      unknown: ['unknown, ignored', Date.now(), {}]
-    };
     utils
-      .sendPacketTo(packets.string, utils.testReceivePort)
-      .sendPacketTo(packets.numeric, utils.testReceivePort)
-      .sendPacketTo(packets.object, utils.testReceivePort)
-      .sendPacketTo(packets.unknown, utils.testReceivePort)
+      .sendPacketTo(createPacket(stringMessage), utils.testReceivePort)
+      .sendPacketTo(createPacket(numericMessage), utils.testReceivePort)
+      .sendPacketTo(createPacket(objectMessage), utils.testReceivePort)
+      .sendPacketTo(createPacket({}, 'unknown, ignored'), utils.testReceivePort)
       .next(function() {
         callback.assert();
         done();
@@ -204,7 +203,7 @@ suite('Connection, simple communication', function() {
       });
   });
 
-  test('request-response style messaging, success', function(done) {
+  test('request-response style messaging', function(done) {
     var callback = createMockedMessageCallback();
     var messages = [
       connection.emitMessage('first request', Math.random(), callback),
@@ -216,58 +215,25 @@ suite('Connection, simple communication', function() {
       createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
       createReplyEnvelopeFor(messages[2], 'third response', Math.random()),
       createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
+      createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0),
+      createReplyEnvelopeFor(messages[2], 'duplicated, ignored', 0)
     ];
+    responses[2].statusCode = 503; // make it as an error response
     callback
       .takes(null, responses[0])
       .takes(null, responses[1])
-      .takes(null, responses[2]);
+      .takes(responses[2].statusCode, responses[2]);
     Deferred
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 3, 'message should be sent');
       })
-      .sendPacketTo(['test.message', Date.now(), responses[0]],
-                    utils.testReceivePort)
-      .sendPacketTo(['test.message', Date.now(), responses[1]],
-                    utils.testReceivePort)
-      .sendPacketTo(['test.message', Date.now(), responses[2]],
-                    utils.testReceivePort)
-      .sendPacketTo(['test.message', Date.now(), responses[3]],
-                    utils.testReceivePort)
-      .wait(0.01)
-      .next(function() {
-        callback.assert();
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
-
-  test('request-response style messaging, error', function(done) {
-    var callback = createMockedMessageCallback();
-    var response;
-    var packet;
-    var message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback);
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest',
-                                                { command: 'foobar' }));
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 1, 'message should be sent');
-        assert.deepEqual(backend.received[0][2], message);
-
-        response = createReplyEnvelopeFor(message,
-                                          'testResponse',
-                                          'first call');
-        response.statusCode = 503;
-        callback.takes(503, response);
-        packet = ['test.message', Date.now(), response];
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
+      .sendPacketTo(createPacket(responses[0]), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses[1]), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses[2]), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses[3]), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses[4]), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses[5]), utils.testReceivePort)
       .wait(0.01)
       .next(function() {
         callback.assert();
