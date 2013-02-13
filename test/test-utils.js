@@ -257,12 +257,12 @@ function createExpectedEnvelope(type, body) {
 }
 exports.createExpectedEnvelope = createExpectedEnvelope;
 
-function createReplyEnvelopeFor(message, type, body) {
+function createReplyEnvelope(message, type, body) {
   var response = createEnvelope(type, body);
   response.inReplyTo = message.id;
   return response;
 }
-exports.createReplyEnvelopeFor = createReplyEnvelopeFor;
+exports.createReplyEnvelope = createReplyEnvelope;
 
 function createPacket(message, tag) {
   tag = tag || 'test.message';

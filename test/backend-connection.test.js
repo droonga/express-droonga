@@ -180,8 +180,8 @@ suite('Connection', function() {
           connection.emitMessage('second request', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random())
+          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'second response', Math.random())
         ];
         callback
           .takes(null, responses[0])
@@ -227,8 +227,8 @@ suite('Connection', function() {
           connection.emitMessage('second request', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random())
+          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'second response', Math.random())
         ];
         // make them error responses
         responses[0].statusCode = 502;
@@ -278,10 +278,10 @@ suite('Connection', function() {
           connection.emitMessage('second request', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random()),
-          utils.createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
-          utils.createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0)
+          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'second response', Math.random()),
+          utils.createReplyEnvelope(messages[0], 'duplicated, ignored', 0),
+          utils.createReplyEnvelope(messages[1], 'duplicated, ignored', 0)
         ];
         responses[1].statusCode = 503;
         callback
@@ -341,9 +341,9 @@ suite('Connection', function() {
         };
         var responses = {
           notTimedOut:
-            utils.createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
+            utils.createReplyEnvelope(messages.notTimedOut, 'ok', Math.random()),
           timedOut:
-            utils.createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
+            utils.createReplyEnvelope(messages.timedOut, 'ignored', Math.random())
         };
         callback
           .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
