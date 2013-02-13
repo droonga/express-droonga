@@ -254,7 +254,7 @@ suite('Socket.IO API', function() {
       expectedClientBody:     'raw request',
       backendCommand:         'reqrep-mod-event.response',
       backendBody:            'raw response',
-      expectedBackendCommand: 'reqrep-mod-event.mod.response',
+      expectedBackendCommand: 'reqrep-mod-event.response.mod',
       expectedBackendBody:    'raw response'        
     });
 
@@ -313,13 +313,13 @@ suite('Socket.IO API', function() {
     }
 
     testPubSub('basic', {
-      clientCommand:          'pubsub',
+      clientCommand:          'pubsub.subscribe',
       clientBody:             'raw request',
-      expectedClientCommand:  'pubsub',
+      expectedClientCommand:  'pubsub.subscribe',
       expectedClientBody:     'raw request',
-      backendCommand:         'pubsub.response',
+      backendCommand:         'pubsub',
       backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub.response',
+      expectedBackendCommand: 'pubsub',
       expectedBackendBody:    'raw response'        
     });
 
