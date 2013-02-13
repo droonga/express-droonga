@@ -268,6 +268,78 @@ suite('Socket.IO API', function() {
       expectedBackendCommand: 'reqrep-mod-body.response',
       expectedBackendBody:    'modified response'        
     });
+
+    test('multiple clients', function(done) {
+      var messages = [
+        '0-a',
+        '1-a',
+        '2-a',
+        '0-b',
+        '1-b',
+        '2-b'
+      ];
+      var clientReceiver;
+      setupApplication()
+        .createClientSockets(3)
+        .next(function(newClientSockets) {
+          clientSockets = clientSockets.concat(newClientSockets);
+          clientSockets[0].emit('reqrep', messages[0]);
+        }).wait(0.01).next(function() {
+          clientSockets[1].emit('reqrep', messages[1]);
+        }).wait(0.01).next(function() {
+          clientSockets[2].emit('reqrep', messages[2]);
+        }).wait(0.01).next(function() {
+          clientSockets[0].emit('reqrep', messages[3]);
+        }).wait(0.01).next(function() {
+          clientSockets[1].emit('reqrep', messages[4]);
+        }).wait(0.01).next(function() {
+          clientSockets[2].emit('reqrep', messages[5]);
+        }).wait(0.01).next(function() {
+          assert.deepEqual(getBackendReceivedBodies(), messages);
+
+          var responses = getBackendReceivedMessages().map(function(envelope) {
+            return utils.createReplyEnvelope(envelope, 'reqrep', envelope.body);
+          });
+
+          clientReceiver = nodemock
+            .mock('receive').takes('0:' + messages[0].body)
+            .mock('receive').takes('1:' + messages[1].body)
+            .mock('receive').takes('2:' + messages[2].body)
+            .mock('receive').takes('0:' + messages[3].body)
+            .mock('receive').takes('1:' + messages[4].body)
+            .mock('receive').takes('2:' + messages[5].body);
+          clientSockets[0].on('request-response', function(data) {
+            clientReceiver.receive('0:' + data);
+          });
+          clientSockets[1].on('request-response', function(data) {
+            clientReceiver.receive('1:' + data);
+          });
+          clientSockets[2].on('request-response', function(data) {
+            clientReceiver.receive('2:' + data);
+          });
+
+          return utils
+            .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
+            .wait(0.01)
+            .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
+            .wait(0.01)
+            .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
+            .wait(0.01)
+            .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
+            .wait(0.01)
+            .sendPacketTo(utils.createPacket(responses[4]), utils.testReceivePort)
+            .wait(0.01)
+            .sendPacketTo(utils.createPacket(responses[5]), utils.testReceivePort);
+        })
+        .wait(0.01)
+        .next(function() {
+          clientReceiver.assertThrows();
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 
   suite('publish-subscribe', function() {
