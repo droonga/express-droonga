@@ -139,7 +139,7 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('one way, front to back', function(done) {
+  test('one way: single client, front to back', function(done) {
     connection = utils.createMockedBackendConnection(testPlugin);
 
     var application = express();
@@ -183,7 +183,7 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('one way, back to front', function(done) {
+  test('one way: single client, back to front', function(done) {
     connection = utils.createMockedBackendConnection(testPlugin);
 
     var messages = [
@@ -223,6 +223,77 @@ suite('Socket.IO API', function() {
           .trigger(createEnvelope('publish-subscribe', messages[1]));
         connection.controllers['publish-subscribe']
           .trigger(createEnvelope('publish-subscribe', messages[2]));
+      })
+      .wait(0.01)
+      .next(function() {
+        clientReceiver.assertThrows();
+        done();
+      })
+      .error(function(error) {
+        done(error);
+      });
+  });
+
+  test('request-response style message: single client', function(done) {
+    connection = utils.createMockedBackendConnection(testPlugin);
+    var onReceived = [{}, {}, {}];
+    var messages = [
+      Math.random(),
+      Math.random(),
+      Math.random()
+    ];
+    var clientReceiver;
+
+    var application = express();
+    utils.setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+        socketIoAdaptor.register(application, server, {
+          connection: connection,
+          plugins: [testPlugin]
+        });
+        return utils.createClientSocket();
+      })
+      .next(function(newClientSocket) {
+        clientSocket = newClientSocket;
+        connection.assertThrows();
+
+        connection = connection
+          .mock('emitMessage')
+            .takes('request-response', messages[0], function() {}, {})
+            .ctrl(2, onReceived[0])
+          .mock('emitMessage')
+            .takes('request-response', messages[1], function() {}, {})
+            .ctrl(2, onReceived[1])
+          .mock('emitMessage')
+            .takes('request-response', messages[2], function() {}, {})
+            .ctrl(2, onReceived[2]);
+
+        clientSocket.emit('request-response', messages[0]);
+        clientSocket.emit('request-response', messages[1]);
+        clientSocket.emit('request-response', messages[2]);
+      })
+      .wait(0.01)
+      .next(function() {
+        connection.assertThrows();
+
+        clientReceiver = nodemock
+          .mock('receive')
+            .takes(messages[0])
+          .mock('receive')
+            .takes(messages[1])
+          .mock('receive')
+            .takes(messages[2]);
+        clientSocket.on('request-response', function(data) {
+          clientReceiver.receive(data);
+        });
+
+        onReceived[0].trigger(null,
+                              createEnvelope('request-response', messages[0]));
+        onReceived[1].trigger(null,
+                              createEnvelope('request-response', messages[1]));
+        onReceived[2].trigger(null,
+                              createEnvelope('request-response', messages[2]));
       })
       .wait(0.01)
       .next(function() {
