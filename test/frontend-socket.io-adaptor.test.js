@@ -155,11 +155,7 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-        return Deferred.parallel(
-          utils.createClientSocket(),
-          utils.createClientSocket(),
-          utils.createClientSocket()
-        );
+        return utils.createClientSockets(3);
       })
       .next(function(newClientSockets) {
         clientSockets = clientSockets.concat(newClientSockets);
@@ -204,21 +200,30 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('one way: single client, back to front', function(done) {
-    connection = utils.createMockedBackendConnection(testPlugin);
+  test('one way, back to front', function(done) {
+    connection = utils.createMockedBackendConnection(testPlugin, 3);
 
     var messages = [
+      Math.random(),
+      Math.random(),
+      Math.random(),
       Math.random(),
       Math.random(),
       Math.random()
     ];
     var clientReceiver = nodemock
           .mock('receive')
-            .takes(messages[0])
+            .takes(0, messages[0])
           .mock('receive')
-            .takes(messages[1])
+            .takes(1, messages[1])
           .mock('receive')
-            .takes(messages[2]);
+            .takes(2, messages[2])
+          .mock('receive')
+            .takes(0, messages[3])
+          .mock('receive')
+            .takes(1, messages[4])
+          .mock('receive')
+            .takes(2, messages[5]);
 
     var application = express();
     utils.setupServer(application)
@@ -228,22 +233,34 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-        return utils.createClientSocket();
+        return utils.createClientSockets(3);
       })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
+      .next(function(newClientSockets) {
+        clientSockets = clientSockets.concat(newClientSockets);
         connection.assertThrows();
 
         clientSockets[0].on('publish-subscribe', function(data) {
-          clientReceiver.receive(data);
+          clientReceiver.receive(0, data);
+        });
+        clientSockets[1].on('publish-subscribe', function(data) {
+          clientReceiver.receive(1, data);
+        });
+        clientSockets[2].on('publish-subscribe', function(data) {
+          clientReceiver.receive(2, data);
         });
 
-        connection.controllers['publish-subscribe']
+        connection.controllers[0]['publish-subscribe']
           .trigger(createEnvelope('publish-subscribe', messages[0]));
-        connection.controllers['publish-subscribe']
+        connection.controllers[1]['publish-subscribe']
           .trigger(createEnvelope('publish-subscribe', messages[1]));
-        connection.controllers['publish-subscribe']
+        connection.controllers[2]['publish-subscribe']
           .trigger(createEnvelope('publish-subscribe', messages[2]));
+        connection.controllers[0]['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[3]));
+        connection.controllers[1]['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[4]));
+        connection.controllers[2]['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[5]));
       })
       .wait(0.01)
       .next(function() {
@@ -255,10 +272,13 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('request-response style message: single client', function(done) {
-    connection = utils.createMockedBackendConnection(testPlugin);
-    var onReceived = [{}, {}, {}];
+  test('request-response style message', function(done) {
+    connection = utils.createMockedBackendConnection(testPlugin, 3);
+    var onReceived = [{}, {}, {}, {}, {}, {}];
     var messages = [
+      Math.random(),
+      Math.random(),
+      Math.random(),
       Math.random(),
       Math.random(),
       Math.random()
@@ -273,48 +293,51 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-        return utils.createClientSocket();
+        return utils.createClientSockets(3);
       })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
+      .next(function(newClientSockets) {
+        clientSockets = clientSockets.concat(newClientSockets);
         connection.assertThrows();
 
-        connection = connection
-          .mock('emitMessage')
-            .takes('request-response', messages[0], function() {}, {})
-            .ctrl(2, onReceived[0])
-          .mock('emitMessage')
-            .takes('request-response', messages[1], function() {}, {})
-            .ctrl(2, onReceived[1])
-          .mock('emitMessage')
-            .takes('request-response', messages[2], function() {}, {})
-            .ctrl(2, onReceived[2]);
+        for (var i = 0, maxi = messages.length; i < maxi; i++) {
+          connection = connection
+            .mock('emitMessage')
+              .takes('request-response', messages[i], function() {}, {})
+              .ctrl(2, onReceived[i]);
+        }
 
         clientSockets[0].emit('request-response', messages[0]);
-        clientSockets[0].emit('request-response', messages[1]);
-        clientSockets[0].emit('request-response', messages[2]);
+        clientSockets[1].emit('request-response', messages[1]);
+        clientSockets[2].emit('request-response', messages[2]);
+        clientSockets[0].emit('request-response', messages[3]);
+        clientSockets[1].emit('request-response', messages[4]);
+        clientSockets[2].emit('request-response', messages[5]);
       })
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
 
         clientReceiver = nodemock
-          .mock('receive')
-            .takes(messages[0])
-          .mock('receive')
-            .takes(messages[1])
-          .mock('receive')
-            .takes(messages[2]);
+          .mock('receive').takes(0, messages[0])
+          .mock('receive').takes(1, messages[1])
+          .mock('receive').takes(2, messages[2])
+          .mock('receive').takes(0, messages[3])
+          .mock('receive').takes(1, messages[4])
+          .mock('receive').takes(2, messages[5]);
         clientSockets[0].on('request-response', function(data) {
-          clientReceiver.receive(data);
+          clientReceiver.receive(0, data);
+        });
+        clientSockets[1].on('request-response', function(data) {
+          clientReceiver.receive(1, data);
+        });
+        clientSockets[2].on('request-response', function(data) {
+          clientReceiver.receive(2, data);
         });
 
-        onReceived[0].trigger(null,
-                              createEnvelope('request-response', messages[0]));
-        onReceived[1].trigger(null,
-                              createEnvelope('request-response', messages[1]));
-        onReceived[2].trigger(null,
-                              createEnvelope('request-response', messages[2]));
+        for (var i = 0, maxi = messages.length; i < maxi; i++) {
+          onReceived[i].trigger(null,
+                                createEnvelope('request-response', messages[i]));
+        }
       })
       .wait(0.01)
       .next(function() {

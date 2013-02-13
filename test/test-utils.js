@@ -137,6 +137,24 @@ function createClientSocket() {
   return deferred;
 }
 exports.createClientSocket = createClientSocket;
+Deferred.register('createClientSocket', function() { return createClientSocket.apply(this, arguments); });
+
+function createClientSockets(count) {
+  var sockets = [];
+  return Deferred.next(function loop() {
+    if (sockets.length < count) {
+      return createClientSocket()
+               .next(function(newSocket) {
+                 sockets.push(newSocket);
+               })
+               .next(loop);
+    } else {
+      return sockets;
+    }
+  });
+}
+exports.createClientSockets = createClientSockets;
+Deferred.register('createClientSockets', function() { return createClientSockets.apply(this, arguments); });
 
 function createMockedBackendConnection(socketCommands, clientCount) {
   socketCommands = socketCommands || {};
