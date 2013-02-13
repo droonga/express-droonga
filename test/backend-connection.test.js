@@ -70,10 +70,6 @@ suite('Connection, initialization', function() {
 suite('Connection, basic features', function() {
   var connection;
   var backend;
-  var setupDone;
-  function assertReady() {
-    assert.equal(setupDone, true, 'setup process is not finished yet!');
-  }
 
   setup(function(done) {
     createBackend()
@@ -87,7 +83,6 @@ suite('Connection, basic features', function() {
           maxRetyrCount: 3,
           retryDelay: 1
         });
-        setupDone = true;
         done();
       });
   });
@@ -101,7 +96,6 @@ suite('Connection, basic features', function() {
       connection.close();
       connection = undefined;
     }
-    setupDone = false;
   });
 
   function createExpectedEnvelope(type, body) {
@@ -130,15 +124,11 @@ suite('Connection, basic features', function() {
 
   test('sending message without response (volatile message)', function(done) {
     var message;
+    message = connection.emitMessage('testRequest', { command: 'foobar' });
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        message = connection.emitMessage('testRequest', { command: 'foobar' });
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -170,24 +160,19 @@ suite('Connection, basic features', function() {
     var callback = createMockedMessageCallback();
     var message;
     var packet;
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        connection.on('message', callback);
+    connection.on('message', callback);
 
-        var now = new Date();
-        message = {
-          id:         now.getTime(),
-          date:       now.toISOString(),
-          statusCode: 200,
-          type:       'testResponse',
-          body:       'first call'
-        };
-        callback.takes(message);
-        packet = ['test.message', Date.now(), message];
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
+    var now = new Date();
+    message = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      statusCode: 200,
+      type:       'testResponse',
+      body:       'first call'
+    };
+    callback.takes(message);
+    packet = ['test.message', Date.now(), message];
+    utils.sendPacketTo(packet, utils.testReceivePort)
       .next(function() {
         callback.assert();
 
@@ -216,17 +201,13 @@ suite('Connection, basic features', function() {
     var message;
     var response;
     var packet;
+    message = connection.emitMessage('testRequest',
+                                     { command: 'foobar' },
+                                     callback);
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback);
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -262,17 +243,13 @@ suite('Connection, basic features', function() {
     var message;
     var response;
     var packet;
+    message = connection.emitMessage('testRequest',
+                                     { command: 'foobar' },
+                                     callback);
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback);
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -301,18 +278,14 @@ suite('Connection, basic features', function() {
     var message;
     var response;
     var packet;
+    message = connection.emitMessage('testRequest',
+                                     { command: 'foobar' },
+                                     callback,
+                                     { timeout: 1000 });
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: 1000 });
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -345,19 +318,15 @@ suite('Connection, basic features', function() {
     var callback = createMockedMessageCallback();
     var message;
     var response;
+    callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
+    message = connection.emitMessage('testRequest',
+                                     { command: 'foobar' },
+                                     callback,
+                                     { timeout: 20 });
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
-        message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: 20 });
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -384,18 +353,14 @@ suite('Connection, basic features', function() {
     var message;
     var response;
     var packet;
+    message = connection.emitMessage('testRequest',
+                                     { command: 'foobar' },
+                                     callback,
+                                     { timeout: -1 });
+    assert.envelopeEqual(message,
+                         createExpectedEnvelope('testRequest',
+                                                { command: 'foobar' }));
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: -1 });
-        assert.envelopeEqual(message,
-                             createExpectedEnvelope('testRequest',
-                                                    { command: 'foobar' }));
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 1, 'message should be sent');
@@ -426,10 +391,6 @@ suite('Connection, basic features', function() {
 suite('Connection, to backend', function() {
   var connection;
   var backend;
-  var setupDone;
-  function assertReady() {
-    assert.equal(setupDone, true, 'setup process is not finished yet!');
-  }
 
   setup(function(done) {
     createBackend()
@@ -442,7 +403,6 @@ suite('Connection, to backend', function() {
           maxRetyrCount: 3,
           retryDelay: 1
         });
-        setupDone = true;
         done();
       });
   });
@@ -456,16 +416,11 @@ suite('Connection, to backend', function() {
       connection.close();
       connection = undefined;
     }
-    setupDone = false;
   });
 
   test('normal messaging', function(done) {
+    connection.emitMessage({ message: true });
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        connection.emitMessage({ message: true });
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length,
@@ -482,12 +437,8 @@ suite('Connection, to backend', function() {
   test('disconnected suddenly', function(done) {
     var errorHandler;
     var restartedBackend;
+    connection.emitMessage('test', { message: true });
     Deferred
-      .wait(0.01)
-      .next(function() {
-        assertReady();
-        connection.emitMessage('test', { message: true });
-      })
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length,
