@@ -102,7 +102,14 @@ suite('Connection', function() {
       return callback;
     }
 
+    function getBackendReceivedMessages() {
+      return backend.received.map(function(packet) {
+        return packet[2];
+      });
+    }
+
     suite('one way message', function() {
+
       test('from front to back', function(done) {
         var objectMessage = connection.emitMessage('object', { command: 'foobar' });
         assert.envelopeEqual(objectMessage,
@@ -121,9 +128,7 @@ suite('Connection', function() {
           .wait(0.01)
           .next(function() {
             assert.equal(backend.received.length, 3, 'messages should be sent');
-            assert.deepEqual([backend.received[0][2],
-                              backend.received[1][2],
-                              backend.received[2][2]],
+            assert.deepEqual(getBackendReceivedMessages(),
                              [objectMessage,
                               stringMessage,
                               numericMessage]);
@@ -178,7 +183,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(backend.received.length, 2, 'message should be sent');
+            assert.equal(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
@@ -223,7 +228,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(backend.received.length, 2, 'message should be sent');
+            assert.equal(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
@@ -268,7 +273,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(backend.received.length, 2, 'message should be sent');
+            assert.equal(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
@@ -329,7 +334,10 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(backend.received.length, 3, 'message should be sent');
+            assert.deepEqual(getBackendReceivedMessages(),
+                             [messages.notTimedOut,
+                              messages.timedOut,
+                              messages.permanent]);
             assert.deepEqual(
               { notTimedOut:
                   connection.listeners('reply:' + messages.notTimedOut.id).length,
