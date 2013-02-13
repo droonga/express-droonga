@@ -432,7 +432,7 @@ suite('Socket.IO API', function() {
         connection = connection
           .mock('emitMessage')
             .takes('builder', 'builder request', null, {});
-        clientSockets[0].on('builder.result', function(data) {
+        clientSockets[0].on('builder', function(data) {
           mockedReceiver.receive(data);
         });
         clientSockets[0].emit('builder', { requestMessage: true });
