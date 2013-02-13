@@ -101,184 +101,267 @@ suite('Connection, simple communication', function() {
     return callback;
   }
 
-  test('one way message from front to back', function(done) {
-    var objectMessage = connection.emitMessage('object', { command: 'foobar' });
-    assert.envelopeEqual(objectMessage,
-                         utils.createExpectedEnvelope('object',
-                                                { command: 'foobar' }));
+  suite('one way message', function() {
+    test('from front to back', function(done) {
+      var objectMessage = connection.emitMessage('object', { command: 'foobar' });
+      assert.envelopeEqual(objectMessage,
+                           utils.createExpectedEnvelope('object',
+                                                  { command: 'foobar' }));
 
-    var stringMessage = connection.emitMessage('string', 'string');
-    assert.envelopeEqual(stringMessage,
-                         utils.createExpectedEnvelope('string', 'string'));
+      var stringMessage = connection.emitMessage('string', 'string');
+      assert.envelopeEqual(stringMessage,
+                           utils.createExpectedEnvelope('string', 'string'));
 
-    var numericMessage = connection.emitMessage('numeric', 1234);
-    assert.envelopeEqual(numericMessage,
-                         utils.createExpectedEnvelope('numeric', 1234));
+      var numericMessage = connection.emitMessage('numeric', 1234);
+      assert.envelopeEqual(numericMessage,
+                           utils.createExpectedEnvelope('numeric', 1234));
 
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 3, 'messages should be sent');
-        assert.deepEqual([backend.received[0][2],
-                          backend.received[1][2],
-                          backend.received[2][2]],
-                         [objectMessage,
-                          stringMessage,
-                          numericMessage]);
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          assert.equal(backend.received.length, 3, 'messages should be sent');
+          assert.deepEqual([backend.received[0][2],
+                            backend.received[1][2],
+                            backend.received[2][2]],
+                           [objectMessage,
+                            stringMessage,
+                            numericMessage]);
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
+
+    test('from back to front', function(done) {
+      var callback = createMockedMessageCallback();
+      connection.on('message', callback);
+
+      var stringMessage = utils.createEnvelope('string', 'string');
+      var numericMessage = utils.createEnvelope('numeric', 1234);
+      var objectMessage = utils.createEnvelope('object', { value: true });
+      callback
+        .takes(stringMessage)
+        .takes(numericMessage)
+        .takes(objectMessage);
+
+      utils
+        .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(numericMessage), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(objectMessage), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket({}, 'unknown, ignored'), utils.testReceivePort)
+        .next(function() {
+          callback.assert();
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 
-  test('one way message from back to front', function(done) {
-    var callback = createMockedMessageCallback();
-    connection.on('message', callback);
+  suite('request-response', function() {
+    test('success', function(done) {
+      var callback = createMockedMessageCallback();
+      var messages = [
+        connection.emitMessage('first request', Math.random(), callback),
+        connection.emitMessage('second request', Math.random(), callback)
+      ];
+      var responses = [
+        utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
+        utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random())
+      ];
+      callback
+        .takes(null, responses[0])
+        .takes(null, responses[1]);
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          assert.equal(backend.received.length, 2, 'message should be sent');
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [1,1],
+            'response listeners should be registered'
+          );
+        })
+        .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
+        .wait(0.01)
+        .next(function() {
+          callback.assert();
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [0,0],
+            'response listeners should be removed'
+          );
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
 
-    var stringMessage = utils.createEnvelope('string', 'string');
-    var numericMessage = utils.createEnvelope('numeric', 1234);
-    var objectMessage = utils.createEnvelope('object', { value: true });
-    callback
-      .takes(stringMessage)
-      .takes(numericMessage)
-      .takes(objectMessage);
+    test('error', function(done) {
+      var callback = createMockedMessageCallback();
+      var messages = [
+        connection.emitMessage('first request', Math.random(), callback),
+        connection.emitMessage('second request', Math.random(), callback)
+      ];
+      var responses = [
+        utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
+        utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random())
+      ];
+      // make them error responses
+      responses[0].statusCode = 502;
+      responses[1].statusCode = 503;
+      callback
+        .takes(responses[0].statusCode, responses[0])
+        .takes(responses[1].statusCode, responses[1]);
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          assert.equal(backend.received.length, 2, 'message should be sent');
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [1,1],
+            'response listeners should be registered'
+          );
+        })
+        .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
+        .wait(0.01)
+        .next(function() {
+          callback.assert();
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [0,0],
+            'response listeners should be removed'
+          );
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
 
-    utils
-      .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(numericMessage), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(objectMessage), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket({}, 'unknown, ignored'), utils.testReceivePort)
-      .next(function() {
-        callback.assert();
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
+    test('duplicated', function(done) {
+      var callback = createMockedMessageCallback();
+      var messages = [
+        connection.emitMessage('first request', Math.random(), callback),
+        connection.emitMessage('second request', Math.random(), callback)
+      ];
+      var responses = [
+        utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
+        utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random()),
+        utils.createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
+        utils.createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0)
+      ];
+      responses[1].statusCode = 503;
+      callback
+        .takes(null, responses[0])
+        .takes(responses[1].statusCode, responses[1]);
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          assert.equal(backend.received.length, 2, 'message should be sent');
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [1,1],
+            'response listeners should be registered'
+          );
+        })
+        .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
+        .wait(0.01)
+        .next(function() {
+          callback.assert();
+          assert.deepEqual(
+            [connection.listeners('reply:' + messages[0].id).length,
+             connection.listeners('reply:' + messages[1].id).length],
+            [0,0],
+            'response listeners should be removed'
+          );
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
 
-  test('request-response style messaging', function(done) {
-    var callback = createMockedMessageCallback();
-    var messages = [
-      connection.emitMessage('first request', Math.random(), callback),
-      connection.emitMessage('second request', Math.random(), callback),
-      connection.emitMessage('third request', Math.random(), callback)
-    ];
-    var responses = [
-      utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random()),
-      utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
-      utils.createReplyEnvelopeFor(messages[2], 'third response', Math.random()),
-      utils.createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
-      utils.createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0),
-      utils.createReplyEnvelopeFor(messages[2], 'duplicated, ignored', 0)
-    ];
-    responses[2].statusCode = 503; // make it as an error response
-    callback
-      .takes(null, responses[0])
-      .takes(null, responses[1])
-      .takes(responses[2].statusCode, responses[2]);
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 3, 'message should be sent');
-        assert.deepEqual(
-          [connection.listeners('reply:' + messages[0].id).length,
-           connection.listeners('reply:' + messages[1].id).length,
-           connection.listeners('reply:' + messages[2].id).length],
-          [1,1,1],
-          'response listeners should be registered'
-        );
-      })
-      .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses[4]), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses[5]), utils.testReceivePort)
-      .wait(0.01)
-      .next(function() {
-        callback.assert();
-        assert.deepEqual(
-          [connection.listeners('reply:' + messages[0].id).length,
-           connection.listeners('reply:' + messages[1].id).length,
-           connection.listeners('reply:' + messages[2].id).length],
-          [0,0,0],
-          'response listeners should be removed'
-        );
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
-
-  test('request-response style messaging, timeout', function(done) {
-    var callback = createMockedMessageCallback();
-    var response;
-    var packet;
-    var messages = {
-      notTimedOut:
-        connection.emitMessage('not timed out',
-                               Math.random(),
-                               callback,
-                               { timeout: 1000 }),
-      timedOut:
-        connection.emitMessage('timed out',
-                               Math.random(),
-                               callback,
-                               { timeout: 20 }),
-      permanent:
-        connection.emitMessage('permanent',
-                               Math.random(),
-                               callback,
-                               { timeout: -1 })
-    };
-    var responses = {
-      notTimedOut:
-        utils.createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
-      timedOut:
-        utils.createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
-    };
-    callback
-      .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
-      .takes(null, responses.notTimedOut)
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 3, 'message should be sent');
-        assert.deepEqual(
-          { notTimedOut:
-              connection.listeners('reply:' + messages.notTimedOut.id).length,
-            timedOut:
-              connection.listeners('reply:' + messages.timedOut.id).length,
-            permanent:
-              connection.listeners('reply:' + messages.permanent.id).length },
-          { notTimedOut: 1, timedOut: 1, permanent: 1 },
-          'response listeners should be registered'
-        );
-      })
-      .wait(0.02)
-      .sendPacketTo(utils.createPacket(responses.notTimedOut), utils.testReceivePort)
-      .sendPacketTo(utils.createPacket(responses.timedOut), utils.testReceivePort)
-      .wait(0.01)
-      .next(function() {
-        callback.assert();
-        assert.deepEqual(
-          { notTimedOut:
-              connection.listeners('reply:' + messages.notTimedOut.id).length,
-            timedOut:
-              connection.listeners('reply:' + messages.timedOut.id).length,
-            permanent:
-              connection.listeners('reply:' + messages.permanent.id).length },
-          { notTimedOut: 0, timedOut: 0, permanent: 1 },
-          'response listener should be removed even if it is timed out'
-        );
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
+    test('timeout', function(done) {
+      var callback = createMockedMessageCallback();
+      var response;
+      var packet;
+      var messages = {
+        notTimedOut:
+          connection.emitMessage('not timed out',
+                                 Math.random(),
+                                 callback,
+                                 { timeout: 1000 }),
+        timedOut:
+          connection.emitMessage('timed out',
+                                 Math.random(),
+                                 callback,
+                                 { timeout: 20 }),
+        permanent:
+          connection.emitMessage('permanent',
+                                 Math.random(),
+                                 callback,
+                                 { timeout: -1 })
+      };
+      var responses = {
+        notTimedOut:
+          utils.createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
+        timedOut:
+          utils.createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
+      };
+      callback
+        .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
+        .takes(null, responses.notTimedOut)
+      Deferred
+        .wait(0.01)
+        .next(function() {
+          assert.equal(backend.received.length, 3, 'message should be sent');
+          assert.deepEqual(
+            { notTimedOut:
+                connection.listeners('reply:' + messages.notTimedOut.id).length,
+              timedOut:
+                connection.listeners('reply:' + messages.timedOut.id).length,
+              permanent:
+                connection.listeners('reply:' + messages.permanent.id).length },
+            { notTimedOut: 1, timedOut: 1, permanent: 1 },
+            'response listeners should be registered'
+          );
+        })
+        .wait(0.02)
+        .sendPacketTo(utils.createPacket(responses.notTimedOut), utils.testReceivePort)
+        .sendPacketTo(utils.createPacket(responses.timedOut), utils.testReceivePort)
+        .wait(0.01)
+        .next(function() {
+          callback.assert();
+          assert.deepEqual(
+            { notTimedOut:
+                connection.listeners('reply:' + messages.notTimedOut.id).length,
+              timedOut:
+                connection.listeners('reply:' + messages.timedOut.id).length,
+              permanent:
+                connection.listeners('reply:' + messages.permanent.id).length },
+            { notTimedOut: 0, timedOut: 0, permanent: 1 },
+            'response listener should be removed even if it is timed out'
+          );
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 });
 
