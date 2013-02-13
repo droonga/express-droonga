@@ -171,17 +171,16 @@ suite('Connection', function() {
       test('success', function(done) {
         var callback = createMockedMessageCallback();
 
-        // these events should not be emitted!
-        connection.on('first response', callback);
-        connection.on('second response', callback);
+        // this event should not be emitted, because it is supressed by reply:* event
+        connection.on('result', callback);
 
         var messages = [
-          connection.emitMessage('first request', Math.random(), callback),
-          connection.emitMessage('second request', Math.random(), callback)
+          connection.emitMessage('event', Math.random(), callback),
+          connection.emitMessage('event', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelope(messages[1], 'second response', Math.random())
+          utils.createReplyEnvelope(messages[0], 'result', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'result', Math.random())
         ];
         callback
           .takes(null, responses[0])
@@ -218,17 +217,16 @@ suite('Connection', function() {
       test('error', function(done) {
         var callback = createMockedMessageCallback();
 
-        // these events should not be emitted!
-        connection.on('first response', callback);
-        connection.on('second response', callback);
+        // this event should not be emitted, because it is supressed by reply:* event
+        connection.on('result', callback);
 
         var messages = [
-          connection.emitMessage('first request', Math.random(), callback),
-          connection.emitMessage('second request', Math.random(), callback)
+          connection.emitMessage('event', Math.random(), callback),
+          connection.emitMessage('event', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelope(messages[1], 'second response', Math.random())
+          utils.createReplyEnvelope(messages[0], 'result', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'result', Math.random())
         ];
         // make them error responses
         responses[0].statusCode = 502;
@@ -268,20 +266,18 @@ suite('Connection', function() {
       test('duplicated', function(done) {
         var callback = createMockedMessageCallback();
 
-        // these events should not be emitted!
-        connection.on('first response', callback);
-        connection.on('second response', callback);
-        connection.on('duplicated, ignored', callback);
+        // this event should not be emitted, because it is supressed by reply:* event
+        connection.on('result', callback);
 
         var messages = [
-          connection.emitMessage('first request', Math.random(), callback),
-          connection.emitMessage('second request', Math.random(), callback)
+          connection.emitMessage('event', Math.random(), callback),
+          connection.emitMessage('event', Math.random(), callback)
         ];
         var responses = [
-          utils.createReplyEnvelope(messages[0], 'first response', Math.random()),
-          utils.createReplyEnvelope(messages[1], 'second response', Math.random()),
-          utils.createReplyEnvelope(messages[0], 'duplicated, ignored', 0),
-          utils.createReplyEnvelope(messages[1], 'duplicated, ignored', 0)
+          utils.createReplyEnvelope(messages[0], 'result', Math.random()),
+          utils.createReplyEnvelope(messages[1], 'result', Math.random()),
+          utils.createReplyEnvelope(messages[0], 'result', 'duplicated, ignored'),
+          utils.createReplyEnvelope(messages[1], 'result', 'duplicated, ignored')
         ];
         responses[1].statusCode = 503;
         callback
