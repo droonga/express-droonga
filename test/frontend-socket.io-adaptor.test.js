@@ -20,9 +20,21 @@ suite('Socket.IO API', function() {
     'request-response': new model.SocketRequestResponse(),
     'pubsub': new model.SocketPublishSubscribe(),
     'foobar': new model.SocketPublishSubscribe(),
-    'builder': new model.SocketPublishSubscribe({
-      toBackend: function(event, data) { return [event, 'builder request']; },
-      toClient: function(event, data) { return [event, 'builder response'] }
+    'reqrep-mod-event': new model.SocketRequestResponse({
+      toBackend: function(event, data) { return [event + '.mod', data]; },
+      toClient: function(event, data) { return [event + '.mod', data]; }
+    }),
+    'reqrep-mod-body': new model.SocketRequestResponse({
+      toBackend: function(event, data) { return [event, 'modified request']; },
+      toClient: function(event, data) { return [event, 'modified response']; }
+    }),
+    'pubsub-mod-event': new model.SocketPublishSubscribe({
+      toBackend: function(event, data) { return [event + '.mod', data]; },
+      toClient: function(event, data) { return [event + '.mod', data]; }
+    }),
+    'pubsub-mod-body': new model.SocketPublishSubscribe({
+      toBackend: function(event, data) { return [event, 'modified request']; },
+      toClient: function(event, data) { return [event, 'modified response']; }
     }),
     'customevent': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return ['custom', data] },
@@ -57,6 +69,51 @@ suite('Socket.IO API', function() {
       server = undefined;
     }
   });
+
+  function setupApplication() {
+    var application = express();
+    return utils
+      .setupServer(application)
+      .next(function(newServer) {
+        server = newServer;
+      })
+      .createBackend()
+      .next(function(newBackend) {
+        backend = newBackend;
+        connection = new Connection({
+          tag:      'test',
+          hostName: 'localhost',
+          port:     utils.testSendPort,
+          receivePort: utils.testReceivePort,
+          maxRetyrCount: 3,
+          retryDelay: 1
+        });
+        socketIoAdaptor.register(application, server, {
+          tag:      'test',
+          connection: connection,
+          plugins: [testPlugin]
+        });
+        return application;
+      });
+  }
+
+  function getBackendReceivedMessages() {
+    return backend.received.map(function(packet) {
+      return packet[2];
+    });
+  }
+
+  function getBackendReceivedEvents() {
+    return getBackendReceivedMessages().map(function(message) {
+      return message.type;
+    });
+  }
+
+  function getBackendReceivedBodies() {
+    return getBackendReceivedMessages().map(function(message) {
+      return message.body;
+    });
+  }
 
   test('registeration of plugin commands', function(done) {
     var basePlugin = {
@@ -372,137 +429,138 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('front to back, extra command (without builder)', function(done) {
-    var extraController = {};
-    connection = utils.createMockedBackendConnection(testPlugin);
+  suite('toBackend/toClient filter', function() {
+    suite('request-response', function() {
+      function testReqRep(description, params) {
+        test(description, function(done) {
+          var mockedReceiver;
+          setupApplication()
+            .createClientSocket()
+            .next(function(newClientSocket) {
+              clientSockets.push(newClientSocket);
+              clientSockets[0].emit(params.clientCommand, params.clientBody);
+            })
+            .wait(0.01)
+            .next(function() {
+              assert.deepEqual(getBackendReceivedMessages().map(function(message) {
+                                 return { type: message.type,
+                                          body: message.body };
+                               }),
+                               [{ type: params.expectedClientCommand,
+                                  body: params.expectedClientBody }]);
 
-    var application = express();
-    utils.setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
-        socketIoAdaptor.register(application, server, {
-          connection: connection,
-          plugins: [testPlugin]
+              mockedReceiver = nodemock
+                .mock('receive')
+                  .takes(params.expectedBackendBody);
+              clientSockets[0].on(params.expectedBackendCommand, function(data) {
+                mockedReceiver.receive(data);
+              });
+
+              var request = getBackendReceivedMessages()[0];
+              var response = utils.createReplyEnvelope(request,
+                                                       params.backendCommand,
+                                                       params.backendBody);
+              return utils.sendPacketTo(utils.createPacket(response),
+                                        utils.testReceivePort)
+            })
+            .wait(0.01)
+            .next(function() {
+              mockedReceiver.assertThrows();
+              done();
+            })
+            .error(function(error) {
+              done(error);
+            });
         });
+      }
 
-        return utils.createClientSocket();
-      })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
-        connection.assertThrows();
-
-        var message = Math.random();
-        connection = connection
-          .mock('emitMessage')
-            .takes('foobar.subscribe', message, null, {});
-        clientSockets[0].emit('foobar.subscribe', message);
-      })
-      .wait(0.01)
-      .next(function() {
-        connection.assertThrows();
-        done();
-      })
-      .error(function(error) {
-        done(error);
+      testReqRep('modified event type', {
+        clientCommand:          'reqrep-mod-event',
+        clientBody:             'raw request',
+        expectedClientCommand:  'reqrep-mod-event.mod',
+        expectedClientBody:     'raw request',
+        backendCommand:         'reqrep-mod-event.response',
+        backendBody:            'raw response',
+        expectedBackendCommand: 'reqrep-mod-event.mod.response',
+        expectedBackendBody:    'raw response'        
       });
-  });
 
-  test('front to back, extra command (with builder)', function(done) {
-    var extraController = {};
-    connection = utils.createMockedBackendConnection(testPlugin);
-
-    var mockedReceiver = nodemock
-          .mock('receive')
-            .takes('builder response');
-
-    var application = express();
-    utils.setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
-        socketIoAdaptor.register(application, server, {
-          connection: connection,
-          plugins: [testPlugin]
-        });
-        return utils.createClientSocket();
-      })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
-        connection.assertThrows();
-
-        connection = connection
-          .mock('emitMessage')
-            .takes('builder.subscribe', 'builder request', null, {});
-        clientSockets[0].on('builder', function(data) {
-          mockedReceiver.receive(data);
-        });
-        clientSockets[0].emit('builder.subscribe', { requestMessage: true });
-      })
-      .wait(0.01)
-      .next(function() {
-        connection.assertThrows();
-        connection.controllers.builder.trigger({
-          statusCode: 200,
-          type: 'builder.result',
-          body: { responseMessage: true }
-        });
-      })
-      .wait(0.01)
-      .next(function() {
-        mockedReceiver.assertThrows();
-        done();
-      })
-      .error(function(error) {
-        done(error);
+      testReqRep('modified body', {
+        clientCommand:          'reqrep-mod-body',
+        clientBody:             'raw request',
+        expectedClientCommand:  'reqrep-mod-body',
+        expectedClientBody:     'modified request',
+        backendCommand:         'reqrep-mod-body.response',
+        backendBody:            'raw response',
+        expectedBackendCommand: 'reqrep-mod-body.response',
+        expectedBackendBody:    'modified response'        
       });
-  });
+    });
 
-  test('front to back, extra command (custom event name)', function(done) {
-    var extraController = {};
-    connection = utils.createMockedBackendConnection(testPlugin);
+    suite('publish-subscribe', function() {
+      function testPubSub(description, params) {
+        test(description, function(done) {
+          var mockedReceiver;
+          setupApplication()
+            .createClientSocket()
+            .next(function(newClientSocket) {
+              clientSockets.push(newClientSocket);
+              clientSockets[0].emit(params.clientCommand, params.clientBody);
+            })
+            .wait(0.01)
+            .next(function() {
+              assert.deepEqual(getBackendReceivedMessages().map(function(message) {
+                                 return { type: message.type,
+                                          body: message.body };
+                               }),
+                               [{ type: params.expectedClientCommand,
+                                  body: params.expectedClientBody }]);
 
-    var mockedReceiver = nodemock
-          .mock('receive')
-            .takes('custom response');
+              mockedReceiver = nodemock
+                .mock('receive')
+                  .takes(params.expectedBackendBody);
+              clientSockets[0].on(params.expectedBackendCommand, function(data) {
+                mockedReceiver.receive(data);
+              });
 
-    var application = express();
-    utils.setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
-        socketIoAdaptor.register(application, server, {
-          connection: connection,
-          plugins: [testPlugin]
+              var published = utils.createEnvelope(params.backendCommand,
+                                                   params.backendBody);
+              return utils.sendPacketTo(utils.createPacket(published),
+                                        utils.testReceivePort)
+            })
+            .wait(0.01)
+            .next(function() {
+              mockedReceiver.assertThrows();
+              done();
+            })
+            .error(function(error) {
+              done(error);
+            });
         });
-        return utils.createClientSocket();
-      })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
-        connection.assertThrows();
+      }
 
-        connection = connection
-          .mock('emitMessage')
-            .takes('custom.subscribe', { requestMessage: true }, null, {});
-        clientSockets[0].on('custom', function(data) {
-          mockedReceiver.receive(data);
-        });
-        clientSockets[0].emit('customevent.subscribe', { requestMessage: true });
-      })
-      .wait(0.01)
-      .next(function() {
-        connection.assertThrows();
-        connection.controllers.customevent.trigger({
-          statusCode: 200,
-          type: 'customevent',
-          body: { responseMessage: true }
-        });
-      })
-      .wait(0.01)
-      .next(function() {
-        mockedReceiver.assertThrows();
-        done();
-      })
-      .error(function(error) {
-        done(error);
+      testPubSub('modified event type', {
+        clientCommand:          'pubsub-mod-event.subscribe',
+        clientBody:             'raw request',
+        expectedClientCommand:  'pubsub-mod-event.mod.subscribe',
+        expectedClientBody:     'raw request',
+        backendCommand:         'pubsub-mod-event',
+        backendBody:            'raw response',
+        expectedBackendCommand: 'pubsub-mod-event.mod',
+        expectedBackendBody:    'raw response'        
       });
+
+      testPubSub('modified body', {
+        clientCommand:          'pubsub-mod-body.subscribe',
+        clientBody:             'raw request',
+        expectedClientCommand:  'pubsub-mod-body.subscribe',
+        expectedClientBody:     'modified request',
+        backendCommand:         'pubsub-mod-body',
+        backendBody:            'raw response',
+        expectedBackendCommand: 'pubsub-mod-body',
+        expectedBackendBody:    'modified response'        
+      });
+    });
   });
 });
 
