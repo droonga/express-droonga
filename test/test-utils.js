@@ -138,31 +138,40 @@ function createClientSocket() {
 }
 exports.createClientSocket = createClientSocket;
 
-function createMockedBackendConnection(socketCommands) {
+function createMockedBackendConnection(socketCommands, clientCount) {
   socketCommands = socketCommands || {};
+  clientCount = Math.max(clientCount || 0, 1);
   var connection = nodemock;
-  var onMessageControllers = {};
+  var onMessageControllers = [];
   var hasSocketCommand = false;
-  Object.keys(socketCommands).forEach(function(commandName) {
-    var command = socketCommands[commandName];
-    hasSocketCommand = hasSocketCommand ||
-                         model.SocketCommand.isInstance(command);
-    if (model.PublishSubscribe.isInstance(command)) {
-      onMessageControllers[commandName] = {};
+
+  for (var i = 0; i < clientCount; i++) {
+    onMessageControllers.push({});
+
+    Object.keys(socketCommands).forEach(function(commandName) {
+      var command = socketCommands[commandName];
+      hasSocketCommand = hasSocketCommand ||
+                           model.SocketCommand.isInstance(command);
+      if (model.PublishSubscribe.isInstance(command)) {
+        onMessageControllers[i][commandName] = {};
+        connection = connection
+          .mock('on')
+            .takes(commandName, function() {})
+            .ctrl(1, onMessageControllers[i][commandName]);
+      }
+    });
+
+    if (hasSocketCommand) {
+      onMessageControllers[i].error = {};
       connection = connection
         .mock('on')
-          .takes(commandName, function() {})
-          .ctrl(1, onMessageControllers[commandName]);
+          .takes('error', function() {})
+          .ctrl(1, onMessageControllers[i].error);
     }
-  });
-
-  if (hasSocketCommand) {
-    onMessageControllers.error = {};
-    connection = connection
-      .mock('on')
-        .takes('error', function() {})
-        .ctrl(1, onMessageControllers.error);
   }
+
+  if (clientCount == 1)
+    onMessageControllers = onMessageControllers[0];
 
   connection.controllers = onMessageControllers;
   return connection;
