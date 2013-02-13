@@ -18,7 +18,7 @@ suite('Socket.IO API', function() {
 
   var testPlugin = {
     'request-response': new model.SocketRequestResponse(),
-    'publish-subscribe': new model.SocketPublishSubscribe(),
+    'pubsub': new model.SocketPublishSubscribe(),
     'foobar': new model.SocketPublishSubscribe(),
     'builder': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return [event, 'builder request']; },
@@ -167,24 +167,24 @@ suite('Socket.IO API', function() {
         ];
         connection = connection
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[0], null, {})
+            .takes('pubsub', messages[0], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[1], null, {})
+            .takes('pubsub', messages[1], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[2], null, {})
+            .takes('pubsub', messages[2], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[3], null, {})
+            .takes('pubsub', messages[3], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[4], null, {})
+            .takes('pubsub', messages[4], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[5], null, {});
+            .takes('pubsub', messages[5], null, {});
 
-        clientSockets[0].emit('publish-subscribe', messages[0]);
-        clientSockets[1].emit('publish-subscribe', messages[1]);
-        clientSockets[2].emit('publish-subscribe', messages[2]);
-        clientSockets[0].emit('publish-subscribe', messages[3]);
-        clientSockets[1].emit('publish-subscribe', messages[4]);
-        clientSockets[2].emit('publish-subscribe', messages[5]);
+        clientSockets[0].emit('pubsub', messages[0]);
+        clientSockets[1].emit('pubsub', messages[1]);
+        clientSockets[2].emit('pubsub', messages[2]);
+        clientSockets[0].emit('pubsub', messages[3]);
+        clientSockets[1].emit('pubsub', messages[4]);
+        clientSockets[2].emit('pubsub', messages[5]);
       })
       .wait(0.01)
       .next(function() {
@@ -209,7 +209,7 @@ suite('Socket.IO API', function() {
           .mock('receive').takes('1' + messages[1])
           .mock('receive').takes('2' + messages[1]);
     var packets = messages.map(function(message) {
-      var envelope = utils.createEnvelope('publish-subscribe', message);
+      var envelope = utils.createEnvelope('pubsub', message);
       return utils.createPacket(envelope);
     });
 
@@ -239,13 +239,13 @@ suite('Socket.IO API', function() {
       .next(function(newClientSockets) {
         clientSockets = clientSockets.concat(newClientSockets);
 
-        clientSockets[0].on('publish-subscribe', function(data) {
+        clientSockets[0].on('pubsub', function(data) {
           clientReceiver.receive('0' + data);
         });
-        clientSockets[1].on('publish-subscribe', function(data) {
+        clientSockets[1].on('pubsub', function(data) {
           clientReceiver.receive('1' + data);
         });
-        clientSockets[2].on('publish-subscribe', function(data) {
+        clientSockets[2].on('pubsub', function(data) {
           clientReceiver.receive('2' + data);
         });
       })
