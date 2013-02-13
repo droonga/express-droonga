@@ -139,15 +139,29 @@ suite('Connection, simple communication', function() {
   }
 
   test('one way message from front to back', function(done) {
-    var message = connection.emitMessage('testRequest', { command: 'foobar' });
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest',
+    var objectMessage = connection.emitMessage('object', { command: 'foobar' });
+    assert.envelopeEqual(objectMessage,
+                         createExpectedEnvelope('object',
                                                 { command: 'foobar' }));
+
+    var stringMessage = connection.emitMessage('string', 'string');
+    assert.envelopeEqual(stringMessage,
+                         createExpectedEnvelope('string', 'string'));
+
+    var numericMessage = connection.emitMessage('numeric', 1234);
+    assert.envelopeEqual(numericMessage,
+                         createExpectedEnvelope('numeric', 1234));
+
     Deferred
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1, 'message should be sent');
-        assert.deepEqual(backend.received[0][2], message);
+        assert.equal(backend.received.length, 3, 'messages should be sent');
+        assert.deepEqual([backend.received[0][2],
+                          backend.received[1][2],
+                          backend.received[2][2]],
+                         [objectMessage,
+                          stringMessage,
+                          numericMessage]);
         done();
       })
       .error(function(error) {
