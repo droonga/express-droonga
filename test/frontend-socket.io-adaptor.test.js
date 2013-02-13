@@ -167,17 +167,17 @@ suite('Socket.IO API', function() {
         ];
         connection = connection
           .mock('emitMessage')
-            .takes('pubsub', messages[0], null, {})
+            .takes('pubsub.subscribe', messages[0], null, {})
           .mock('emitMessage')
-            .takes('pubsub', messages[1], null, {})
+            .takes('pubsub.subscribe', messages[1], null, {})
           .mock('emitMessage')
-            .takes('pubsub', messages[2], null, {})
+            .takes('pubsub.subscribe', messages[2], null, {})
           .mock('emitMessage')
-            .takes('pubsub', messages[3], null, {})
+            .takes('pubsub.subscribe', messages[3], null, {})
           .mock('emitMessage')
-            .takes('pubsub', messages[4], null, {})
+            .takes('pubsub.subscribe', messages[4], null, {})
           .mock('emitMessage')
-            .takes('pubsub', messages[5], null, {});
+            .takes('pubsub.subscribe', messages[5], null, {});
 
         clientSockets[0].emit('pubsub', messages[0]);
         clientSockets[1].emit('pubsub', messages[1]);
@@ -394,8 +394,8 @@ suite('Socket.IO API', function() {
         var message = Math.random();
         connection = connection
           .mock('emitMessage')
-            .takes('foobar', message, null, {});
-        clientSockets[0].emit('foobar', message);
+            .takes('foobar.subscribe', message, null, {});
+        clientSockets[0].emit('foobar.subscribe', message);
       })
       .wait(0.01)
       .next(function() {
@@ -431,11 +431,11 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('builder', 'builder request', null, {});
+            .takes('builder.subscribe', 'builder request', null, {});
         clientSockets[0].on('builder', function(data) {
           mockedReceiver.receive(data);
         });
-        clientSockets[0].emit('builder', { requestMessage: true });
+        clientSockets[0].emit('builder.subscribe', { requestMessage: true });
       })
       .wait(0.01)
       .next(function() {
@@ -480,18 +480,18 @@ suite('Socket.IO API', function() {
 
         connection = connection
           .mock('emitMessage')
-            .takes('custom', { requestMessage: true }, null, {});
+            .takes('custom.subscribe', { requestMessage: true }, null, {});
         clientSockets[0].on('custom', function(data) {
           mockedReceiver.receive(data);
         });
-        clientSockets[0].emit('customevent', { requestMessage: true });
+        clientSockets[0].emit('customevent.subscribe', { requestMessage: true });
       })
       .wait(0.01)
       .next(function() {
         connection.assertThrows();
         connection.controllers.customevent.trigger({
           statusCode: 200,
-          type: 'customevent.result',
+          type: 'customevent',
           body: { responseMessage: true }
         });
       })
