@@ -67,7 +67,7 @@ suite('Connection, initialization', function() {
   });
 });
 
-suite('Connection, basic features', function() {
+suite('Connection, simple communication', function() {
   var connection;
   var backend;
 
@@ -122,7 +122,7 @@ suite('Connection, basic features', function() {
     return response;
   }
 
-  test('sending message without response (volatile message)', function(done) {
+  test('one way message from front to back', function(done) {
     var message = connection.emitMessage('testRequest', { command: 'foobar' });
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
@@ -155,7 +155,7 @@ suite('Connection, basic features', function() {
     return callback;
   }
 
-  test('receiving message from the backend', function(done) {
+  test('one way message from back to front', function(done) {
     var callback = createMockedMessageCallback();
     connection.on('message', callback);
 
@@ -193,7 +193,7 @@ suite('Connection, basic features', function() {
       });
   });
 
-  test('sending message with one response, success', function(done) {
+  test('request-response style messaging, success', function(done) {
     var callback = createMockedMessageCallback();
     var response;
     var packet;
@@ -234,7 +234,7 @@ suite('Connection, basic features', function() {
       });
   });
 
-  test('sending message with one response, with error', function(done) {
+  test('request-response style messaging, error', function(done) {
     var callback = createMockedMessageCallback();
     var response;
     var packet;
@@ -268,7 +268,7 @@ suite('Connection, basic features', function() {
       });
   });
 
-  test('sending message with one response, timeout (not timed out)', function(done) {
+  test('request-response style messaging, timeout (not timed out)', function(done) {
     var callback = createMockedMessageCallback();
     var response;
     var packet;
@@ -308,7 +308,7 @@ suite('Connection, basic features', function() {
       });
   });
 
-  test('sending message with one response, timeout (timed out)', function(done) {
+  test('request-response style messaging, timeout (timed out)', function(done) {
     var callback = createMockedMessageCallback();
     var response;
     callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
@@ -341,7 +341,7 @@ suite('Connection, basic features', function() {
       });
   });
 
-  test('sending message with one response, timeout (ignored negative timeout)', function() {
+  test('request-response style messaging, timeout (ignored negative timeout)', function() {
     var callback = createMockedMessageCallback();
     var response;
     var packet;
