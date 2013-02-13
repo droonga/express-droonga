@@ -284,7 +284,7 @@ suite('Connection, simple communication', function() {
         createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
       timedOut:
         createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
-    ];
+    };
     callback
       .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
       .takes(null, responses.notTimedOut)
@@ -304,8 +304,8 @@ suite('Connection, simple communication', function() {
         );
       })
       .wait(0.02)
-      .sendPacketTo(responses.notTimedOut, utils.testReceivePort)
-      .sendPacketTo(responses.timedOut, utils.testReceivePort)
+      .sendPacketTo(createPacket(responses.notTimedOut), utils.testReceivePort)
+      .sendPacketTo(createPacket(responses.timedOut), utils.testReceivePort)
       .wait(0.01)
       .next(function() {
         callback.assert();
