@@ -98,27 +98,29 @@ suite('Connection, simple communication', function() {
     }
   });
 
-  function createExpectedEnvelope(type, body) {
-    return {
-      id:         TypeOf('string'),
-      date:       InstanceOf(Date),
+  function createEnvelope(type, body) {
+    var now = new Date();
+    var envelope = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
       replyTo:    'localhost:' + utils.testReceivePort,
       statusCode: 200,
       type:       type,
       body:       body
     };
+    return envelope;
+  }
+
+  function createExpectedEnvelope(type, body) {
+    var envelope = createEnvelope(type, body);
+    envelope.id = TypeOf('string');
+    envelope.date = InstanceOf(Date);
+    return envelope;
   }
 
   function createReplyEnvelopeFor(message, type, body) {
-    var now = new Date();
-    var response = {
-      id:         now.getTime(),
-      date:       now.toISOString(),
-      inReplyTo:  message.id,
-      statusCode: 200,
-      type:       type,
-      body:       body
-    };
+    var response = createEnvelope(type, body);
+    response.inReplyTo = message.id;
     return response;
   }
 
@@ -174,28 +176,9 @@ suite('Connection, simple communication', function() {
     var callback = createMockedMessageCallback();
     connection.on('message', callback);
 
-    var now = new Date();
-    var stringMessage = {
-      id:         now.getTime(),
-      date:       now.toISOString(),
-      statusCode: 200,
-      type:       'string',
-      body:       'first call'
-    };
-    var numericMessage = {
-      id:         now.getTime(),
-      date:       now.toISOString(),
-      statusCode: 200,
-      type:       'numeric',
-      body:       1234
-    };
-    var objectMessage = {
-      id:         now.getTime(),
-      date:       now.toISOString(),
-      statusCode: 200,
-      type:       'object',
-      body:       { value: true }
-    };
+    var stringMessage = createEnvelope('string', 'string');
+    var numericMessage = createEnvelope('numeric', 1234);
+    var objectMessage = createEnvelope('object', { value: true });
     callback
       .takes(stringMessage)
       .takes(numericMessage)
