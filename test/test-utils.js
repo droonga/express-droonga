@@ -190,10 +190,12 @@ function createStubbedBackendConnection() {
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
 
-function readyToDestroyMockedConnection(connection) {
+function readyToDestroyMockedConnection(connection, clientCount) {
   connection = connection
     .mock('removeListener')
       .takes('error', function() {});
+  if (clientCount)
+    connection = connection.times(clientCount);
   return connection;
 }
 exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;

@@ -35,7 +35,7 @@ suite('Socket.IO API', function() {
 
   teardown(function() {
     if (connection) {
-      utils.readyToDestroyMockedConnection(connection);
+      utils.readyToDestroyMockedConnection(connection, clientSockets.length);
       connection = undefined;
     }
     if (clientSockets.length) {
@@ -144,8 +144,8 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('one way: single client, front to back', function(done) {
-    connection = utils.createMockedBackendConnection(testPlugin);
+  test('one way, front to back', function(done) {
+    connection = utils.createMockedBackendConnection(testPlugin, 3);
 
     var application = express();
     utils.setupServer(application)
@@ -155,13 +155,20 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-        return utils.createClientSocket();
+        return Deferred.parallel(
+          utils.createClientSocket(),
+          utils.createClientSocket(),
+          utils.createClientSocket()
+        );
       })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
+      .next(function(newClientSockets) {
+        clientSockets = clientSockets.concat(newClientSockets);
         connection.assertThrows();
 
         var messages = [
+          Math.random(),
+          Math.random(),
+          Math.random(),
           Math.random(),
           Math.random(),
           Math.random()
@@ -172,11 +179,20 @@ suite('Socket.IO API', function() {
           .mock('emitMessage')
             .takes('publish-subscribe', messages[1], null, {})
           .mock('emitMessage')
-            .takes('publish-subscribe', messages[2], null, {});
+            .takes('publish-subscribe', messages[2], null, {})
+          .mock('emitMessage')
+            .takes('publish-subscribe', messages[3], null, {})
+          .mock('emitMessage')
+            .takes('publish-subscribe', messages[4], null, {})
+          .mock('emitMessage')
+            .takes('publish-subscribe', messages[5], null, {});
 
         clientSockets[0].emit('publish-subscribe', messages[0]);
-        clientSockets[0].emit('publish-subscribe', messages[1]);
-        clientSockets[0].emit('publish-subscribe', messages[2]);
+        clientSockets[1].emit('publish-subscribe', messages[1]);
+        clientSockets[2].emit('publish-subscribe', messages[2]);
+        clientSockets[0].emit('publish-subscribe', messages[3]);
+        clientSockets[1].emit('publish-subscribe', messages[4]);
+        clientSockets[2].emit('publish-subscribe', messages[5]);
       })
       .wait(0.01)
       .next(function() {
