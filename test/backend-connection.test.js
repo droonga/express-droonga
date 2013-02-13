@@ -123,8 +123,7 @@ suite('Connection, basic features', function() {
   }
 
   test('sending message without response (volatile message)', function(done) {
-    var message;
-    message = connection.emitMessage('testRequest', { command: 'foobar' });
+    var message = connection.emitMessage('testRequest', { command: 'foobar' });
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
@@ -158,12 +157,10 @@ suite('Connection, basic features', function() {
 
   test('receiving message from the backend', function(done) {
     var callback = createMockedMessageCallback();
-    var message;
-    var packet;
     connection.on('message', callback);
 
     var now = new Date();
-    message = {
+    var message = {
       id:         now.getTime(),
       date:       now.toISOString(),
       statusCode: 200,
@@ -171,7 +168,7 @@ suite('Connection, basic features', function() {
       body:       'first call'
     };
     callback.takes(message);
-    packet = ['test.message', Date.now(), message];
+    var packet = ['test.message', Date.now(), message];
     utils.sendPacketTo(packet, utils.testReceivePort)
       .next(function() {
         callback.assert();
@@ -198,12 +195,11 @@ suite('Connection, basic features', function() {
 
   test('sending message with one response, success', function(done) {
     var callback = createMockedMessageCallback();
-    var message;
     var response;
     var packet;
-    message = connection.emitMessage('testRequest',
-                                     { command: 'foobar' },
-                                     callback);
+    var message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback);
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
@@ -240,12 +236,11 @@ suite('Connection, basic features', function() {
 
   test('sending message with one response, with error', function(done) {
     var callback = createMockedMessageCallback();
-    var message;
     var response;
     var packet;
-    message = connection.emitMessage('testRequest',
-                                     { command: 'foobar' },
-                                     callback);
+    var message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback);
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
@@ -275,13 +270,12 @@ suite('Connection, basic features', function() {
 
   test('sending message with one response, timeout (not timed out)', function(done) {
     var callback = createMockedMessageCallback();
-    var message;
     var response;
     var packet;
-    message = connection.emitMessage('testRequest',
-                                     { command: 'foobar' },
-                                     callback,
-                                     { timeout: 1000 });
+    var message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout: 1000 });
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
@@ -316,13 +310,12 @@ suite('Connection, basic features', function() {
 
   test('sending message with one response, timeout (timed out)', function(done) {
     var callback = createMockedMessageCallback();
-    var message;
     var response;
     callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
-    message = connection.emitMessage('testRequest',
-                                     { command: 'foobar' },
-                                     callback,
-                                     { timeout: 20 });
+    var message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout: 20 });
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
@@ -350,13 +343,12 @@ suite('Connection, basic features', function() {
 
   test('sending message with one response, timeout (ignored negative timeout)', function() {
     var callback = createMockedMessageCallback();
-    var message;
     var response;
     var packet;
-    message = connection.emitMessage('testRequest',
-                                     { command: 'foobar' },
-                                     callback,
-                                     { timeout: -1 });
+    var message = connection.emitMessage('testRequest',
+                                         { command: 'foobar' },
+                                         callback,
+                                         { timeout: -1 });
     assert.envelopeEqual(message,
                          createExpectedEnvelope('testRequest',
                                                 { command: 'foobar' }));
