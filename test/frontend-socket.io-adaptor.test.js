@@ -13,7 +13,7 @@ var Connection = require('../lib/backend/connection').Connection;
 suite('Socket.IO API', function() {
   var connection;
   var server;
-  var clientSocket;
+  var clientSockets;
 
   var testPlugin = {
     'request-response': new model.SocketRequestResponse(),
@@ -29,14 +29,19 @@ suite('Socket.IO API', function() {
     })
   };
 
+  setup(function() {
+    clientSockets = [];
+  });
+
   teardown(function() {
     if (connection) {
       utils.readyToDestroyMockedConnection(connection);
       connection = undefined;
     }
-    if (clientSocket) {
-      clientSocket.disconnect();
-      clientSocket = undefined;
+    if (clientSockets.length) {
+      clientSockets.forEach(function(clientSocket) {
+        clientSocket.disconnect();
+      });
     }
     if (server) {
       server.close();
@@ -127,7 +132,7 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
       })
       .wait(0.01)
       .next(function() {
@@ -153,7 +158,7 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
         var messages = [
@@ -169,9 +174,9 @@ suite('Socket.IO API', function() {
           .mock('emitMessage')
             .takes('publish-subscribe', messages[2], null, {});
 
-        clientSocket.emit('publish-subscribe', messages[0]);
-        clientSocket.emit('publish-subscribe', messages[1]);
-        clientSocket.emit('publish-subscribe', messages[2]);
+        clientSockets[0].emit('publish-subscribe', messages[0]);
+        clientSockets[0].emit('publish-subscribe', messages[1]);
+        clientSockets[0].emit('publish-subscribe', messages[2]);
       })
       .wait(0.01)
       .next(function() {
@@ -210,10 +215,10 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
-        clientSocket.on('publish-subscribe', function(data) {
+        clientSockets[0].on('publish-subscribe', function(data) {
           clientReceiver.receive(data);
         });
 
@@ -255,7 +260,7 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
         connection = connection
@@ -269,9 +274,9 @@ suite('Socket.IO API', function() {
             .takes('request-response', messages[2], function() {}, {})
             .ctrl(2, onReceived[2]);
 
-        clientSocket.emit('request-response', messages[0]);
-        clientSocket.emit('request-response', messages[1]);
-        clientSocket.emit('request-response', messages[2]);
+        clientSockets[0].emit('request-response', messages[0]);
+        clientSockets[0].emit('request-response', messages[1]);
+        clientSockets[0].emit('request-response', messages[2]);
       })
       .wait(0.01)
       .next(function() {
@@ -284,7 +289,7 @@ suite('Socket.IO API', function() {
             .takes(messages[1])
           .mock('receive')
             .takes(messages[2]);
-        clientSocket.on('request-response', function(data) {
+        clientSockets[0].on('request-response', function(data) {
           clientReceiver.receive(data);
         });
 
@@ -321,14 +326,14 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
         var message = Math.random();
         connection = connection
           .mock('emitMessage')
             .takes('foobar', message, null, {});
-        clientSocket.emit('foobar', message);
+        clientSockets[0].emit('foobar', message);
       })
       .wait(0.01)
       .next(function() {
@@ -359,16 +364,16 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
         connection = connection
           .mock('emitMessage')
             .takes('builder', 'builder request', null, {});
-        clientSocket.on('builder.result', function(data) {
+        clientSockets[0].on('builder.result', function(data) {
           mockedReceiver.receive(data);
         });
-        clientSocket.emit('builder', { requestMessage: true });
+        clientSockets[0].emit('builder', { requestMessage: true });
       })
       .wait(0.01)
       .next(function() {
@@ -408,16 +413,16 @@ suite('Socket.IO API', function() {
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
-        clientSocket = newClientSocket;
+        clientSockets.push(newClientSocket);
         connection.assertThrows();
 
         connection = connection
           .mock('emitMessage')
             .takes('custom', { requestMessage: true }, null, {});
-        clientSocket.on('custom', function(data) {
+        clientSockets[0].on('custom', function(data) {
           mockedReceiver.receive(data);
         });
-        clientSocket.emit('customevent', { requestMessage: true });
+        clientSockets[0].emit('customevent', { requestMessage: true });
       })
       .wait(0.01)
       .next(function() {
