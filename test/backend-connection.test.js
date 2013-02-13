@@ -227,6 +227,13 @@ suite('Connection, simple communication', function() {
       .wait(0.01)
       .next(function() {
         assert.equal(backend.received.length, 3, 'message should be sent');
+        assert.deepEqual(
+          [connection.listeners('reply:' + messages[0].id).length,
+           connection.listeners('reply:' + messages[1].id).length,
+           connection.listeners('reply:' + messages[2].id).length],
+          [1,1,1],
+          'response listeners should be registered'
+        );
       })
       .sendPacketTo(createPacket(responses[0]), utils.testReceivePort)
       .sendPacketTo(createPacket(responses[1]), utils.testReceivePort)
@@ -237,6 +244,13 @@ suite('Connection, simple communication', function() {
       .wait(0.01)
       .next(function() {
         callback.assert();
+        assert.deepEqual(
+          [connection.listeners('reply:' + messages[0].id).length,
+           connection.listeners('reply:' + messages[1].id).length,
+           connection.listeners('reply:' + messages[2].id).length],
+          [0,0,0],
+          'response listeners should be removed'
+        );
         done();
       })
       .error(function(error) {
@@ -244,110 +258,67 @@ suite('Connection, simple communication', function() {
       });
   });
 
-  test('request-response style messaging, timeout (not timed out)', function(done) {
+  test('request-response style messaging, timeout', function(done) {
     var callback = createMockedMessageCallback();
     var response;
     var packet;
-    var message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: 1000 });
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest',
-                                                { command: 'foobar' }));
+    var messages = {
+      notTimedOut:
+        connection.emitMessage('not timed out',
+                               Math.random(),
+                               callback,
+                               { timeout: 1000 }),
+      timedOut:
+        connection.emitMessage('timed out',
+                               Math.random(),
+                               callback,
+                               { timeout: 20 }),
+      permanent:
+        connection.emitMessage('permanent',
+                               Math.random(),
+                               callback,
+                               { timeout: -1 })
+    };
+    var responses = {
+      notTimedOut:
+        createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
+      timedOut:
+        createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
+    ];
+    callback
+      .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
+      .takes(null, responses.notTimedOut)
     Deferred
       .wait(0.01)
       .next(function() {
-        assert.equal(backend.received.length, 1, 'message should be sent');
-        assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     1,
-                     'response listener should be still there');
-
-        response = createReplyEnvelopeFor(message,
-                                          'testResponse',
-                                          'first call');
-        callback.takes(null, response);
-        packet = ['test.message', Date.now(), response];
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
-      .wait(0.01)
-      .next(function() {
-        callback.assert();
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     0,
-                     'response listener should be removed');
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
-
-  test('request-response style messaging, timeout (timed out)', function(done) {
-    var callback = createMockedMessageCallback();
-    var response;
-    callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
-    var message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: 20 });
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest',
-                                                { command: 'foobar' }));
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 1, 'message should be sent');
-        assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     1,
-                     'response listener should be still there');
+        assert.equal(backend.received.length, 3, 'message should be sent');
+        assert.deepEqual(
+          { notTimedOut:
+              connection.listeners('reply:' + messages.notTimedOut.id).length,
+            timedOut:
+              connection.listeners('reply:' + messages.timedOut.id).length,
+            permanent:
+              connection.listeners('reply:' + messages.permanent.id).length },
+          { notTimedOut: 1, timedOut: 1, permanent: 1 },
+          'response listeners should be registered'
+        );
       })
       .wait(0.02)
-      .next(function() {
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     0,
-                     'response listener should be removed by timeout');
-        callback.assert();
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
-
-  test('request-response style messaging, timeout (ignored negative timeout)', function() {
-    var callback = createMockedMessageCallback();
-    var response;
-    var packet;
-    var message = connection.emitMessage('testRequest',
-                                         { command: 'foobar' },
-                                         callback,
-                                         { timeout: -1 });
-    assert.envelopeEqual(message,
-                         createExpectedEnvelope('testRequest',
-                                                { command: 'foobar' }));
-    Deferred
-      .wait(0.01)
-      .next(function() {
-        assert.equal(backend.received.length, 1, 'message should be sent');
-        assert.deepEqual(backend.received[0][2], message);
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     1,
-                     'response listener should be still there');
-
-        response = createReplyEnvelopeFor(message, 'testResponse', 'first call');
-        callback.takes(null, response);
-        packet = ['test.message', Date.now(), message];
-        return utils.sendPacketTo(packet, utils.testReceivePort);
-      })
+      .sendPacketTo(responses.notTimedOut, utils.testReceivePort)
+      .sendPacketTo(responses.timedOut, utils.testReceivePort)
       .wait(0.01)
       .next(function() {
         callback.assert();
-        assert.equal(connection.listeners('reply:' + message.id).length,
-                     0),
-                     'response listener should be removed';
+        assert.deepEqual(
+          { notTimedOut:
+              connection.listeners('reply:' + messages.notTimedOut.id).length,
+            timedOut:
+              connection.listeners('reply:' + messages.timedOut.id).length,
+            permanent:
+              connection.listeners('reply:' + messages.permanent.id).length },
+          { notTimedOut: 0, timedOut: 0, permanent: 1 },
+          'response listener should be removed even if it is timed out'
+        );
         done();
       })
       .error(function(error) {
