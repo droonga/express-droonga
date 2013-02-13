@@ -170,6 +170,11 @@ suite('Connection', function() {
     suite('request-response', function() {
       test('success', function(done) {
         var callback = createMockedMessageCallback();
+
+        // these events should not be emitted!
+        connection.on('first response', callback);
+        connection.on('second response', callback);
+
         var messages = [
           connection.emitMessage('first request', Math.random(), callback),
           connection.emitMessage('second request', Math.random(), callback)
@@ -212,6 +217,11 @@ suite('Connection', function() {
 
       test('error', function(done) {
         var callback = createMockedMessageCallback();
+
+        // these events should not be emitted!
+        connection.on('first response', callback);
+        connection.on('second response', callback);
+
         var messages = [
           connection.emitMessage('first request', Math.random(), callback),
           connection.emitMessage('second request', Math.random(), callback)
@@ -257,6 +267,12 @@ suite('Connection', function() {
 
       test('duplicated', function(done) {
         var callback = createMockedMessageCallback();
+
+        // these events should not be emitted!
+        connection.on('first response', callback);
+        connection.on('second response', callback);
+        connection.on('duplicated, ignored', callback);
+
         var messages = [
           connection.emitMessage('first request', Math.random(), callback),
           connection.emitMessage('second request', Math.random(), callback)
