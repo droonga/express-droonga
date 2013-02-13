@@ -16,6 +16,8 @@ suite('Socket.IO API', function() {
   var clientSocket;
 
   var testPlugin = {
+    'request-response': new model.SocketRequestResponse(),
+    'publish-subscribe': new model.SocketPublishSubscribe(),
     'foobar': new model.SocketPublishSubscribe(),
     'builder': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return [event, 'builder request']; },
@@ -24,8 +26,7 @@ suite('Socket.IO API', function() {
     'customevent': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return ['custom', data] },
       toClient: function(event, data) { return ['custom', 'custom response']; }
-    }),
-    'pubsub': new model.SocketPublishSubscribe()
+    })
   };
 
   teardown(function() {
@@ -93,6 +94,19 @@ suite('Socket.IO API', function() {
       });
   });
 
+  function createEnvelope(type, body) {
+    var now = new Date();
+    var envelope = {
+      id:         now.getTime(),
+      date:       now.toISOString(),
+      replyTo:    'localhost:' + utils.testReceivePort,
+      statusCode: 200,
+      type:       type,
+      body:       body
+    };
+    return envelope;
+  }
+
   test('initialization', function(done) {
     var mockedListener = nodemock
       .mock('connected');
@@ -106,7 +120,8 @@ suite('Socket.IO API', function() {
       .next(function(newServer) {
         server = newServer;
         socketIoAdaptor.register(application, server, {
-          connection: utils.createStubbedBackendConnection()
+          connection: utils.createStubbedBackendConnection(),
+          plugins: [testPlugin]
         });
 
         return utils.createClientSocket();
@@ -124,26 +139,39 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('front to back', function(done) {
-    connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule);
+  test('one way, front to back', function(done) {
+    connection = utils.createMockedBackendConnection(testPlugin);
 
     var application = express();
     utils.setupServer(application)
       .next(function(newServer) {
         server = newServer;
         socketIoAdaptor.register(application, server, {
-          connection: connection
+          connection: connection,
+          plugins: [testPlugin]
         });
-
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+        connection.assertThrows();
 
+        var messages = [
+          Math.random(),
+          Math.random(),
+          Math.random()
+        ];
         connection = connection
           .mock('emitMessage')
-            .takes('search', { requestMessage: true }, function() {}, {});
-        clientSocket.emit('search', { requestMessage: true });
+            .takes('publish-subscribe', messages[0], null, {})
+          .mock('emitMessage')
+            .takes('publish-subscribe', messages[1], null, {})
+          .mock('emitMessage')
+            .takes('publish-subscribe', messages[2], null, {});
+
+        clientSocket.emit('publish-subscribe', messages[0]);
+        clientSocket.emit('publish-subscribe', messages[1]);
+        clientSocket.emit('publish-subscribe', messages[2]);
       })
       .wait(0.01)
       .next(function() {
@@ -155,12 +183,21 @@ suite('Socket.IO API', function() {
       });
   });
 
-  test('back to front', function(done) {
+  test('one way, back to front', function(done) {
     connection = utils.createMockedBackendConnection(testPlugin);
 
+    var messages = [
+      Math.random(),
+      Math.random(),
+      Math.random()
+    ];
     var clientReceiver = nodemock
           .mock('receive')
-          .takes({ published: true });
+            .takes(messages[0])
+          .mock('receive')
+            .takes(messages[1])
+          .mock('receive')
+            .takes(messages[2]);
 
     var application = express();
     utils.setupServer(application)
@@ -170,24 +207,22 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
-
         connection.assertThrows();
 
-        clientSocket.on('pubsub', function(data) {
+        clientSocket.on('publish-subscribe', function(data) {
           clientReceiver.receive(data);
         });
 
-        var envelope = {
-          type:       'pubsub',
-          statusCode: 200,
-          body:       { published: true}
-        };
-        connection.controllers.pubsub.trigger(envelope);
+        connection.controllers['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[0]));
+        connection.controllers['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[1]));
+        connection.controllers['publish-subscribe']
+          .trigger(createEnvelope('publish-subscribe', messages[2]));
       })
       .wait(0.01)
       .next(function() {
@@ -216,11 +251,13 @@ suite('Socket.IO API', function() {
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+        connection.assertThrows();
 
+        var message = Math.random();
         connection = connection
           .mock('emitMessage')
-            .takes('foobar', { requestMessage: true }, null, {});
-        clientSocket.emit('foobar', { requestMessage: true });
+            .takes('foobar', message, null, {});
+        clientSocket.emit('foobar', message);
       })
       .wait(0.01)
       .next(function() {
@@ -248,11 +285,11 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+        connection.assertThrows();
 
         connection = connection
           .mock('emitMessage')
@@ -297,11 +334,11 @@ suite('Socket.IO API', function() {
           connection: connection,
           plugins: [testPlugin]
         });
-
         return utils.createClientSocket();
       })
       .next(function(newClientSocket) {
         clientSocket = newClientSocket;
+        connection.assertThrows();
 
         connection = connection
           .mock('emitMessage')
