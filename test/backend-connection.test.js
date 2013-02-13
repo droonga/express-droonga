@@ -109,7 +109,6 @@ suite('Connection', function() {
     }
 
     suite('one way message', function() {
-
       test('from front to back', function(done) {
         var objectMessage = connection.emitMessage('object', { command: 'foobar' });
         assert.envelopeEqual(objectMessage,
@@ -127,7 +126,6 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(backend.received.length, 3, 'messages should be sent');
             assert.deepEqual(getBackendReceivedMessages(),
                              [objectMessage,
                               stringMessage,
@@ -141,15 +139,18 @@ suite('Connection', function() {
 
       test('from back to front', function(done) {
         var callback = createMockedMessageCallback();
-        connection.on('message', callback);
+        connection.on('string', callback);
+        connection.on('numeric', callback);
+        connection.on('object', callback);
+        connection.on('unknown, ignored', callback);
 
         var stringMessage = utils.createEnvelope('string', 'string');
         var numericMessage = utils.createEnvelope('numeric', 1234);
         var objectMessage = utils.createEnvelope('object', { value: true });
         callback
-          .takes(stringMessage)
-          .takes(numericMessage)
-          .takes(objectMessage);
+          .takes(stringMessage.body)
+          .takes(numericMessage.body)
+          .takes(objectMessage.body);
 
         utils
           .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
@@ -183,7 +184,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(getBackendReceivedMessages(), messages);
+            assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
@@ -228,7 +229,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(getBackendReceivedMessages(), messages);
+            assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
@@ -273,7 +274,7 @@ suite('Connection', function() {
         Deferred
           .wait(0.01)
           .next(function() {
-            assert.equal(getBackendReceivedMessages(), messages);
+            assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
                connection.listeners('reply:' + messages[1].id).length],
