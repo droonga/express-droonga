@@ -7,20 +7,6 @@ var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
 var Connection = require('../lib/backend/connection').Connection;
-var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
-
-function createBackend() {
-  var deferred = new Deferred();
-  var backend = new FluentReceiver(utils.testSendPort);
-  backend.received = [];
-  backend.on('receive', function(data) {
-    backend.received.push(data);
-  });
-  backend.listen(function() {
-    return deferred.call(backend);
-  });
-  return deferred;
-}
 
 suite('Connection, initialization', function() {
   var connection;
@@ -72,7 +58,7 @@ suite('Connection, simple communication', function() {
   var backend;
 
   setup(function(done) {
-    createBackend()
+    utils.createBackend()
       .next(function(newBackend) {
         backend = newBackend;
         connection = new Connection({
@@ -98,37 +84,6 @@ suite('Connection, simple communication', function() {
     }
   });
 
-  function createEnvelope(type, body) {
-    var now = new Date();
-    var envelope = {
-      id:         now.getTime(),
-      date:       now.toISOString(),
-      replyTo:    'localhost:' + utils.testReceivePort,
-      statusCode: 200,
-      type:       type,
-      body:       body
-    };
-    return envelope;
-  }
-
-  function createExpectedEnvelope(type, body) {
-    var envelope = createEnvelope(type, body);
-    envelope.id = TypeOf('string');
-    envelope.date = InstanceOf(Date);
-    return envelope;
-  }
-
-  function createReplyEnvelopeFor(message, type, body) {
-    var response = createEnvelope(type, body);
-    response.inReplyTo = message.id;
-    return response;
-  }
-
-  function createPacket(message, tag) {
-    tag = tag || 'test.message';
-    return [tag, Date.now(), message];
-  }
-
   function createMockedMessageCallback() {
     var mockedCallback = nodemock;
     var callback = function() {
@@ -149,16 +104,16 @@ suite('Connection, simple communication', function() {
   test('one way message from front to back', function(done) {
     var objectMessage = connection.emitMessage('object', { command: 'foobar' });
     assert.envelopeEqual(objectMessage,
-                         createExpectedEnvelope('object',
+                         utils.createExpectedEnvelope('object',
                                                 { command: 'foobar' }));
 
     var stringMessage = connection.emitMessage('string', 'string');
     assert.envelopeEqual(stringMessage,
-                         createExpectedEnvelope('string', 'string'));
+                         utils.createExpectedEnvelope('string', 'string'));
 
     var numericMessage = connection.emitMessage('numeric', 1234);
     assert.envelopeEqual(numericMessage,
-                         createExpectedEnvelope('numeric', 1234));
+                         utils.createExpectedEnvelope('numeric', 1234));
 
     Deferred
       .wait(0.01)
@@ -181,19 +136,19 @@ suite('Connection, simple communication', function() {
     var callback = createMockedMessageCallback();
     connection.on('message', callback);
 
-    var stringMessage = createEnvelope('string', 'string');
-    var numericMessage = createEnvelope('numeric', 1234);
-    var objectMessage = createEnvelope('object', { value: true });
+    var stringMessage = utils.createEnvelope('string', 'string');
+    var numericMessage = utils.createEnvelope('numeric', 1234);
+    var objectMessage = utils.createEnvelope('object', { value: true });
     callback
       .takes(stringMessage)
       .takes(numericMessage)
       .takes(objectMessage);
 
     utils
-      .sendPacketTo(createPacket(stringMessage), utils.testReceivePort)
-      .sendPacketTo(createPacket(numericMessage), utils.testReceivePort)
-      .sendPacketTo(createPacket(objectMessage), utils.testReceivePort)
-      .sendPacketTo(createPacket({}, 'unknown, ignored'), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(numericMessage), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(objectMessage), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket({}, 'unknown, ignored'), utils.testReceivePort)
       .next(function() {
         callback.assert();
         done();
@@ -211,12 +166,12 @@ suite('Connection, simple communication', function() {
       connection.emitMessage('third request', Math.random(), callback)
     ];
     var responses = [
-      createReplyEnvelopeFor(messages[1], 'second response', Math.random()),
-      createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
-      createReplyEnvelopeFor(messages[2], 'third response', Math.random()),
-      createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
-      createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0),
-      createReplyEnvelopeFor(messages[2], 'duplicated, ignored', 0)
+      utils.createReplyEnvelopeFor(messages[1], 'second response', Math.random()),
+      utils.createReplyEnvelopeFor(messages[0], 'first response', Math.random()),
+      utils.createReplyEnvelopeFor(messages[2], 'third response', Math.random()),
+      utils.createReplyEnvelopeFor(messages[0], 'duplicated, ignored', 0),
+      utils.createReplyEnvelopeFor(messages[1], 'duplicated, ignored', 0),
+      utils.createReplyEnvelopeFor(messages[2], 'duplicated, ignored', 0)
     ];
     responses[2].statusCode = 503; // make it as an error response
     callback
@@ -235,12 +190,12 @@ suite('Connection, simple communication', function() {
           'response listeners should be registered'
         );
       })
-      .sendPacketTo(createPacket(responses[0]), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses[1]), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses[2]), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses[3]), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses[4]), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses[5]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[4]), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses[5]), utils.testReceivePort)
       .wait(0.01)
       .next(function() {
         callback.assert();
@@ -281,9 +236,9 @@ suite('Connection, simple communication', function() {
     };
     var responses = {
       notTimedOut:
-        createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
+        utils.createReplyEnvelopeFor(messages.notTimedOut, 'ok', Math.random()),
       timedOut:
-        createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
+        utils.createReplyEnvelopeFor(messages.timedOut, 'ignored', Math.random())
     };
     callback
       .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
@@ -304,8 +259,8 @@ suite('Connection, simple communication', function() {
         );
       })
       .wait(0.02)
-      .sendPacketTo(createPacket(responses.notTimedOut), utils.testReceivePort)
-      .sendPacketTo(createPacket(responses.timedOut), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses.notTimedOut), utils.testReceivePort)
+      .sendPacketTo(utils.createPacket(responses.timedOut), utils.testReceivePort)
       .wait(0.01)
       .next(function() {
         callback.assert();
@@ -332,7 +287,7 @@ suite('Connection, to backend', function() {
   var backend;
 
   setup(function(done) {
-    createBackend()
+    utils.createBackend()
       .next(function(newBackend) {
         backend = newBackend;
         connection = new Connection({
@@ -388,9 +343,7 @@ suite('Connection, to backend', function() {
         backend.close();
       })
       .wait(0.01)
-      .next(function() {
-        return createBackend();
-      })
+      .createBackend()
       .next(function(newBackend) {
         restartedBackend = newBackend;
 

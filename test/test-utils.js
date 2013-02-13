@@ -10,6 +10,7 @@ var socketIoDefaultCommandsModule =
   exports.socketIoDefaultCommandsModule =
     require('../lib/frontend/default-commands/socket.io');
 var model = require('../lib/model');
+var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
@@ -29,7 +30,7 @@ function connectTo(port) {
   return deferred;
 }
 exports.connectTo = connectTo;
-Deferred.register('connectTo', function() { return connectTo.apply(this, arguments); });
+Deferred.register('connectTo', connectTo);
 
 function sendPacketTo(packet, port) {
   var clientSocket;
@@ -53,7 +54,7 @@ function sendPacketTo(packet, port) {
     });
 }
 exports.sendPacketTo = sendPacketTo;
-Deferred.register('sendPacketTo', function() { return sendPacketTo.apply(this, arguments); });
+Deferred.register('sendPacketTo', sendPacketTo);
 
 
 function setupServer(handlerOrServer) {
@@ -137,7 +138,7 @@ function createClientSocket() {
   return deferred;
 }
 exports.createClientSocket = createClientSocket;
-Deferred.register('createClientSocket', function() { return createClientSocket.apply(this, arguments); });
+Deferred.register('createClientSocket', createClientSocket);
 
 function createClientSockets(count) {
   var sockets = [];
@@ -154,7 +155,7 @@ function createClientSockets(count) {
   });
 }
 exports.createClientSockets = createClientSockets;
-Deferred.register('createClientSockets', function() { return createClientSockets.apply(this, arguments); });
+Deferred.register('createClientSockets', createClientSockets);
 
 function createMockedBackendConnection(socketCommands, clientCount) {
   socketCommands = socketCommands || {};
@@ -217,6 +218,57 @@ function readyToDestroyMockedConnection(connection, clientCount) {
   return connection;
 }
 exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;
+
+function createBackend() {
+  var deferred = new Deferred();
+  var backend = new FluentReceiver(testSendPort);
+  backend.received = [];
+  backend.on('receive', function(data) {
+    backend.received.push(data);
+  });
+  backend.listen(function() {
+    return deferred.call(backend);
+  });
+  return deferred;
+}
+exports.createBackend = createBackend;
+Deferred.register('createBackend', createBackend);
+
+
+function createEnvelope(type, body) {
+  var now = new Date();
+  var envelope = {
+    id:         now.getTime(),
+    date:       now.toISOString(),
+    replyTo:    'localhost:' + testReceivePort,
+    statusCode: 200,
+    type:       type,
+    body:       body
+  };
+  return envelope;
+}
+exports.createEnvelope = createEnvelope;
+
+function createExpectedEnvelope(type, body) {
+  var envelope = createEnvelope(type, body);
+  envelope.id = TypeOf('string');
+  envelope.date = InstanceOf(Date);
+  return envelope;
+}
+exports.createExpectedEnvelope = createExpectedEnvelope;
+
+function createReplyEnvelopeFor(message, type, body) {
+  var response = createEnvelope(type, body);
+  response.inReplyTo = message.id;
+  return response;
+}
+exports.createReplyEnvelopeFor = createReplyEnvelopeFor;
+
+function createPacket(message, tag) {
+  tag = tag || 'test.message';
+  return [tag, Date.now(), message];
+}
+exports.createPacket = createPacket;
 
 
 function TypeOf(typeString) {
