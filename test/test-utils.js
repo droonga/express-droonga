@@ -5,12 +5,14 @@ var msgpack = require('msgpack');
 var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
+var express = require('express');
 
 var socketIoDefaultCommandsModule = 
   exports.socketIoDefaultCommandsModule =
     require('../lib/frontend/default-commands/socket.io');
 var model = require('../lib/model');
 var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
+var Connection = require('../lib/backend/connection').Connection;
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
