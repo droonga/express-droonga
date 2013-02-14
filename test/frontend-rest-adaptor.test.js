@@ -8,7 +8,6 @@ var express = require('express');
 var restAdaptor = require('../lib/frontend/rest-adaptor');
 var model = require('../lib/model');
 var restCommands = require('../lib/frontend/default-commands/rest');
-var Connection = require('../lib/backend/connection').Connection;
 
 suite('REST API', function() {
   test('registeration of plugin commands', function() {
@@ -82,30 +81,26 @@ suite('REST API', function() {
     var connection;
     var application;
     var server;
+    var backend;
 
-    setup(function() {
-      connection = utils.createMockedBackendConnection(testPlugin);
-      application = express();
+    setup(function(done) {
+      utils.setupApplication()
+        .next(function(result) {
+          backend = result.backend;
+          server = result.server;
+          connection = result.connection;
+          application = result.application;
+          done();
+        });
     });
 
     teardown(function() {
-      if (connection) {
-        utils.readyToDestroyMockedConnection(connection);
-        connection = undefined;
-      }
-      if (server) {
-        server.close();
-        server = undefined;
-      }
+      utils.teardownApplication({ backend:    backend,
+                                  server:     server,
+                                  connection: connection });
     });
 
     test('to the document root', function(done) {
-      var onReceive = {};
-      connection = connection
-        .mock('emitMessage')
-          .takes('api', 'api requested', function() {}, { 'timeout': null })
-          .ctrl(2, onReceive);
-
       restAdaptor.register(application, {
         prefix:     '',
         connection: connection,
@@ -113,18 +108,27 @@ suite('REST API', function() {
       });
 
       var responseBody;
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
-          utils.get('/path/to/api')
-            .next(function(response) {
-              responseBody = response.body;
-            });
-        })
+      utils.get('/path/to/api')
+        .next(function(response) {
+          responseBody = response.body;
+        });
+
+      Deferred
         .wait(0.01)
         .next(function() {
-          connection.assertThrows();
-          onReceive.trigger(null, { body: 'API OK?' });
+          assert.deepEqual(backend.getMessages().map(function(message) {
+                             return { type: message.type,
+                                      body: message.body };
+                           }),
+                           [{ type: 'api',
+                              body: 'api requested' }]);
+
+          var request = backend.getMessages()[0];
+          var response = utils.createReplyEnvelope(request,
+                                                   'api.result',
+                                                   'api OK?');
+          return utils.sendPacketTo(utils.createPacket(response),
+                                    utils.testReceivePort)
         })
         .wait(0.01)
         .next(function() {
@@ -137,12 +141,6 @@ suite('REST API', function() {
     });
 
     test('under specified path', function(done) {
-      var onReceive = {};
-      connection = connection
-        .mock('emitMessage')
-          .takes('api', 'api requested', function() {}, { 'timeout': null })
-          .ctrl(2, onReceive);
-
       restAdaptor.register(application, {
         prefix:     '/path/to/kotoumi',
         connection: connection,
@@ -150,18 +148,27 @@ suite('REST API', function() {
       });
 
       var responseBody;
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
-          utils.get('/path/to/kotoumi/path/to/api')
-            .next(function(response) {
-              responseBody = response.body;
-            });
-        })
+      utils.get('/path/to/kotoumi/path/to/api')
+        .next(function(response) {
+          responseBody = response.body;
+        });
+
+      Deferred
         .wait(0.01)
         .next(function() {
-          connection.assertThrows();
-          onReceive.trigger(null, { body: 'API OK?' });
+          assert.deepEqual(backend.getMessages().map(function(message) {
+                             return { type: message.type,
+                                      body: message.body };
+                           }),
+                           [{ type: 'api',
+                              body: 'api requested' }]);
+
+          var request = backend.getMessages()[0];
+          var response = utils.createReplyEnvelope(request,
+                                                   'api.result',
+                                                   'api OK?');
+          return utils.sendPacketTo(utils.createPacket(response),
+                                    utils.testReceivePort)
         })
         .wait(0.01)
         .next(function() {
@@ -186,17 +193,7 @@ suite('REST API', function() {
 
     test('search', function(done) {
       var receiverCallback = {};
-      var connection = {
-            emitMessage: function(type, message, callback, options) {
-              this.emitMessageCalledArguments.push({
-                type:     type,
-                message:  message,
-                callback: callback,
-                options:  options
-              });
-            },
-            emitMessageCalledArguments: []
-          };
+      var connection = utils.createStubbedBackendConnection();
       var application = express();
       restAdaptor.register(application, {
         prefix:     '',
