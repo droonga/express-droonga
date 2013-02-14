@@ -48,7 +48,7 @@ suite('Socket.IO API', function() {
     }
     utils.teardownApplication({ backend:    backend,
                                 server:     server,
-                                conncetion: connection });
+                                connection: connection });
   });
 
   test('registeration of plugin commands', function(done) {
