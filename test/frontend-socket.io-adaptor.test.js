@@ -142,6 +142,7 @@ suite('Socket.IO API', function() {
           .next(function(result) {
             server     = result.server;
             connection = result.connection;
+            backend    = result.backend;
             socketIoAdaptor.register(result.application, server, {
               tag:      'test',
               connection: connection,
@@ -234,6 +235,7 @@ suite('Socket.IO API', function() {
         .next(function(result) {
           server     = result.server;
           connection = result.connection;
+          backend    = result.backend;
           socketIoAdaptor.register(result.application, server, {
             tag:      'test',
             connection: connection,
@@ -310,6 +312,7 @@ suite('Socket.IO API', function() {
           .next(function(result) {
             server     = result.server;
             connection = result.connection;
+            backend    = result.backend;
             socketIoAdaptor.register(result.application, server, {
               tag:      'test',
               connection: connection,
@@ -396,6 +399,7 @@ suite('Socket.IO API', function() {
         .next(function(result) {
           server     = result.server;
           connection = result.connection;
+          backend    = result.backend;
           socketIoAdaptor.register(result.application, server, {
             tag:      'test',
             connection: connection,

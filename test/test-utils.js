@@ -231,7 +231,7 @@ function setupApplication() {
     .createBackend()
     .next(function(newBackend) {
       backend = newBackend;
-      connection = new Connection({
+      var connection = new Connection({
         tag:      'test',
         hostName: 'localhost',
         port:     testSendPort,
@@ -242,7 +242,8 @@ function setupApplication() {
       return {
         backend:     backend,
         server:      server,
-        application: application
+        application: application,
+        connection:  connection
       };
     });
 }
