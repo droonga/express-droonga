@@ -65,12 +65,9 @@ suite('Adaption for express application', function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
 
-          var request = backend.getMessages()[0];
-          var response = utils.createReplyEnvelope(request,
-                                                   'api.result',
-                                                   'api OK?');
-          return utils.sendPacketTo(utils.createPacket(response),
-                                    utils.testReceivePort)
+          return backend.sendResponse(backend.getMessages()[0],
+                                      'api.result',
+                                      'api OK?');
         })
         .wait(0.01)
         .next(function() {
@@ -101,12 +98,9 @@ suite('Adaption for express application', function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
 
-          var request = backend.getMessages()[0];
-          var response = utils.createReplyEnvelope(request,
-                                                   'api.result',
-                                                   'api OK?');
-          return utils.sendPacketTo(utils.createPacket(response),
-                                    utils.testReceivePort)
+          return backend.sendResponse(backend.getMessages()[0],
+                                      'api.result',
+                                      'api OK?');
         })
         .wait(0.01)
         .next(function() {
@@ -162,12 +156,8 @@ suite('Adaption for express application', function() {
         })
         .wait(0.01)
         .next(function() {
-          assert.deepEqual(backend.getMessages().map(function(message) {
-                             return { type: message.type,
-                                      body: message.body };
-                           }),
-                           [{ type: 'api',
-                              body: 'api requested' }]);
+          backend.assertReceived([{ type: 'api',
+                                    body: 'api requested' }]);
 
           mockedReceiver = nodemock
             .mock('receive')
@@ -176,12 +166,9 @@ suite('Adaption for express application', function() {
             mockedReceiver.receive(data);
           });
 
-          var request = backend.getMessages()[0];
-          var response = utils.createReplyEnvelope(request,
-                                                   'api.result',
-                                                   'api OK?');
-          return utils.sendPacketTo(utils.createPacket(response),
-                                    utils.testReceivePort)
+          return backend.sendResponse(backend.getMessages()[0],
+                                      'api.result',
+                                      'api OK?');
         })
         .wait(0.01)
         .next(function() {

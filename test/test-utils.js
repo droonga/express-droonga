@@ -270,6 +270,14 @@ function createBackend() {
                      }),
                      expectedMessages);
   };
+  backend.sendMessage = function(type, body) {
+    var response = createEnvelope(type, body);
+    return sendPacketTo(createPacket(response), testReceivePort)
+  };
+  backend.sendResponse = function(request, type, body) {
+    var response = createReplyEnvelope(request, type, body);
+    return sendPacketTo(createPacket(response), testReceivePort)
+  };
   return deferred;
 }
 exports.createBackend = createBackend;

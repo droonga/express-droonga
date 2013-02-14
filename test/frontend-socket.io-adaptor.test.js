@@ -165,12 +165,9 @@ suite('Socket.IO API', function() {
               mockedReceiver.receive(data);
             });
 
-            var request = backend.getMessages()[0];
-            var response = utils.createReplyEnvelope(request,
-                                                     params.backendCommand,
-                                                     params.backendBody);
-            return utils.sendPacketTo(utils.createPacket(response),
-                                      utils.testReceivePort)
+            return backend.sendResponse(backend.getMessages()[0],
+                                        params.backendCommand,
+                                        params.backendBody);
           })
           .wait(0.01)
           .next(function() {
@@ -331,10 +328,8 @@ suite('Socket.IO API', function() {
               mockedReceiver.receive(data);
             });
 
-            var published = utils.createEnvelope(params.backendCommand,
-                                                 params.backendBody);
-            return utils.sendPacketTo(utils.createPacket(published),
-                                      utils.testReceivePort)
+            return backend.sendMessage(params.backendCommand,
+                                       params.backendBody);
           })
           .wait(0.01)
           .next(function() {
