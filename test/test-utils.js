@@ -159,46 +159,6 @@ function createClientSockets(count) {
 exports.createClientSockets = createClientSockets;
 Deferred.register('createClientSockets', createClientSockets);
 
-function createMockedBackendConnection(socketCommands, clientCount) {
-  socketCommands = socketCommands || {};
-  clientCount = Math.max(clientCount || 0, 1);
-  var connection = nodemock;
-  var onMessageControllers = [];
-  var hasSocketCommand = false;
-
-  for (var i = 0; i < clientCount; i++) {
-    onMessageControllers.push({});
-
-    Object.keys(socketCommands).forEach(function(commandName) {
-      var command = socketCommands[commandName];
-      hasSocketCommand = hasSocketCommand ||
-                           model.SocketCommand.isInstance(command);
-      if (model.PublishSubscribe.isInstance(command)) {
-        onMessageControllers[i][commandName] = {};
-        connection = connection
-          .mock('on')
-            .takes(commandName, function() {})
-            .ctrl(1, onMessageControllers[i][commandName]);
-      }
-    });
-
-    if (hasSocketCommand) {
-      onMessageControllers[i].error = {};
-      connection = connection
-        .mock('on')
-          .takes('error', function() {})
-          .ctrl(1, onMessageControllers[i].error);
-    }
-  }
-
-  if (clientCount == 1)
-    onMessageControllers = onMessageControllers[0];
-
-  connection.controllers = onMessageControllers;
-  return connection;
-}
-exports.createMockedBackendConnection = createMockedBackendConnection;
-
 function createStubbedBackendConnection() {
   return {
     emitMessage: function(type, message, callback, options) {
