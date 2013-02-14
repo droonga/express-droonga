@@ -263,6 +263,13 @@ function createBackend() {
       return envelope.body;
     });
   };
+  backend.assertReceived = function(expectedMessages) {
+    assert.deepEqual(this.getMessages().map(function(message) {
+                       return { type: message.type,
+                                body: message.body };
+                     }),
+                     expectedMessages);
+  };
   return deferred;
 }
 exports.createBackend = createBackend;

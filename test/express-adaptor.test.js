@@ -62,12 +62,8 @@ suite('Adaption for express application', function() {
       Deferred
         .wait(0.01)
         .next(function() {
-          assert.deepEqual(backend.getMessages().map(function(message) {
-                             return { type: message.type,
-                                      body: message.body };
-                           }),
-                           [{ type: 'api',
-                              body: 'api requested' }]);
+          backend.assertReceived([{ type: 'api',
+                                    body: 'api requested' }]);
 
           var request = backend.getMessages()[0];
           var response = utils.createReplyEnvelope(request,
@@ -102,12 +98,8 @@ suite('Adaption for express application', function() {
       Deferred
         .wait(0.01)
         .next(function() {
-          assert.deepEqual(backend.getMessages().map(function(message) {
-                             return { type: message.type,
-                                      body: message.body };
-                           }),
-                           [{ type: 'api',
-                              body: 'api requested' }]);
+          backend.assertReceived([{ type: 'api',
+                                    body: 'api requested' }]);
 
           var request = backend.getMessages()[0];
           var response = utils.createReplyEnvelope(request,

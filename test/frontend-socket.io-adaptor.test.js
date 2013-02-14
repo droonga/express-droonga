@@ -155,12 +155,8 @@ suite('Socket.IO API', function() {
           })
           .wait(0.01)
           .next(function() {
-            assert.deepEqual(backend.getMessages().map(function(message) {
-                               return { type: message.type,
-                                        body: message.body };
-                             }),
-                             [{ type: params.expectedClientCommand,
-                                body: params.expectedClientBody }]);
+            backend.assertReceived([{ type: params.expectedClientCommand,
+                                      body: params.expectedClientBody }]);
 
             mockedReceiver = nodemock
               .mock('receive')
@@ -325,12 +321,8 @@ suite('Socket.IO API', function() {
           })
           .wait(0.01)
           .next(function() {
-            assert.deepEqual(backend.getMessages().map(function(message) {
-                               return { type: message.type,
-                                        body: message.body };
-                             }),
-                             [{ type: params.expectedClientCommand,
-                                body: params.expectedClientBody }]);
+            backend.assertReceived([{ type: params.expectedClientCommand,
+                                      body: params.expectedClientBody }]);
 
             mockedReceiver = nodemock
               .mock('receive')
