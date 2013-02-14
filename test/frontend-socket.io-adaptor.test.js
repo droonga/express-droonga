@@ -42,73 +42,15 @@ suite('Socket.IO API', function() {
   });
 
   teardown(function() {
-    if (backend) {
-      backend.close();
-      backend = undefined;
-    }
-    if (connection) {
-      if (typeof connection.close == 'function') { // real connection
-        connection.close();
-      } else { // mocked connection
-        utils.readyToDestroyMockedConnection(connection, clientSockets.length);
-      }
-      connection = undefined;
-    }
     if (clientSockets.length) {
       clientSockets.forEach(function(clientSocket) {
         clientSocket.disconnect();
       });
     }
-    if (server) {
-      server.close();
-      server = undefined;
-    }
+    utils.teardownApplication({ backend:    backend,
+                                server:     server,
+                                conncetion: connection });
   });
-
-  function setupApplication() {
-    var application = express();
-    return utils
-      .setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
-      })
-      .createBackend()
-      .next(function(newBackend) {
-        backend = newBackend;
-        connection = new Connection({
-          tag:      'test',
-          hostName: 'localhost',
-          port:     utils.testSendPort,
-          receivePort: utils.testReceivePort,
-          maxRetyrCount: 3,
-          retryDelay: 1
-        });
-        socketIoAdaptor.register(application, server, {
-          tag:      'test',
-          connection: connection,
-          plugins: [testPlugin]
-        });
-        return application;
-      });
-  }
-
-  function getBackendReceivedMessages() {
-    return backend.received.map(function(packet) {
-      return packet[2];
-    });
-  }
-
-  function getBackendReceivedEvents() {
-    return getBackendReceivedMessages().map(function(message) {
-      return message.type;
-    });
-  }
-
-  function getBackendReceivedBodies() {
-    return getBackendReceivedMessages().map(function(message) {
-      return message.body;
-    });
-  }
 
   test('registeration of plugin commands', function(done) {
     var basePlugin = {
@@ -196,7 +138,16 @@ suite('Socket.IO API', function() {
     function testReqRep(description, params) {
       test(description, function(done) {
         var mockedReceiver;
-        setupApplication()
+        utils.setupApplication()
+          .next(function(result) {
+            server     = result.server;
+            connection = result.connection;
+            socketIoAdaptor.register(result.application, server, {
+              tag:      'test',
+              connection: connection,
+              plugins: [testPlugin]
+            });
+          })
           .createClientSocket()
           .next(function(newClientSocket) {
             clientSockets.push(newClientSocket);
@@ -204,7 +155,7 @@ suite('Socket.IO API', function() {
           })
           .wait(0.01)
           .next(function() {
-            assert.deepEqual(getBackendReceivedMessages().map(function(message) {
+            assert.deepEqual(backend.getMessages().map(function(message) {
                                return { type: message.type,
                                         body: message.body };
                              }),
@@ -218,7 +169,7 @@ suite('Socket.IO API', function() {
               mockedReceiver.receive(data);
             });
 
-            var request = getBackendReceivedMessages()[0];
+            var request = backend.getMessages()[0];
             var response = utils.createReplyEnvelope(request,
                                                      params.backendCommand,
                                                      params.backendBody);
@@ -279,7 +230,16 @@ suite('Socket.IO API', function() {
         '2-b'
       ];
       var clientReceiver;
-      setupApplication()
+      utils.setupApplication()
+        .next(function(result) {
+          server     = result.server;
+          connection = result.connection;
+          socketIoAdaptor.register(result.application, server, {
+            tag:      'test',
+            connection: connection,
+            plugins: [testPlugin]
+          });
+        })
         .createClientSockets(3)
         .next(function(newClientSockets) {
           clientSockets = clientSockets.concat(newClientSockets);
@@ -295,9 +255,9 @@ suite('Socket.IO API', function() {
         }).wait(0.01).next(function() {
           clientSockets[2].emit('reqrep', messages[5]);
         }).wait(0.01).next(function() {
-          assert.deepEqual(getBackendReceivedBodies(), messages);
+          assert.deepEqual(backend.getBodies(), messages);
 
-          var responses = getBackendReceivedMessages().map(function(envelope) {
+          var responses = backend.getMessages().map(function(envelope) {
             return utils.createReplyEnvelope(envelope, 'reqrep', envelope.body);
           });
 
@@ -346,7 +306,16 @@ suite('Socket.IO API', function() {
     function testPubSub(description, params) {
       test(description, function(done) {
         var mockedReceiver;
-        setupApplication()
+        utils.setupApplication()
+          .next(function(result) {
+            server     = result.server;
+            connection = result.connection;
+            socketIoAdaptor.register(result.application, server, {
+              tag:      'test',
+              connection: connection,
+              plugins: [testPlugin]
+            });
+          })
           .createClientSocket()
           .next(function(newClientSocket) {
             clientSockets.push(newClientSocket);
@@ -354,7 +323,7 @@ suite('Socket.IO API', function() {
           })
           .wait(0.01)
           .next(function() {
-            assert.deepEqual(getBackendReceivedMessages().map(function(message) {
+            assert.deepEqual(backend.getMessages().map(function(message) {
                                return { type: message.type,
                                         body: message.body };
                              }),
@@ -423,7 +392,16 @@ suite('Socket.IO API', function() {
         'b'
       ];
       var clientReceiver;
-      setupApplication()
+      utils.setupApplication()
+        .next(function(result) {
+          server     = result.server;
+          connection = result.connection;
+          socketIoAdaptor.register(result.application, server, {
+            tag:      'test',
+            connection: connection,
+            plugins: [testPlugin]
+          });
+        })
         .createClientSockets(3)
         .next(function(newClientSockets) {
           clientSockets = clientSockets.concat(newClientSockets);
@@ -433,7 +411,7 @@ suite('Socket.IO API', function() {
         }).wait(0.01).next(function() {
           clientSockets[2].emit('pubsub.subscribe', 2);
         }).wait(0.01).next(function() {
-          assert.deepEqual(getBackendReceivedBodies(),
+          assert.deepEqual(backend.getBodies(),
                            [0, 1, 2]);
 
           var publisheds = messages.map(function(message) {

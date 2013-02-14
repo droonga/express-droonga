@@ -199,7 +199,16 @@ exports.createMockedBackendConnection = createMockedBackendConnection;
 
 function createStubbedBackendConnection() {
   return {
-    emitMessage: function() {},
+    emitMessage: function(type, message, callback, options) {
+      this.emitMessageCalledArguments.push({
+        type:     type,
+        message:  message,
+        callback: callback,
+        options:  options
+      });
+    },
+    emitMessageCalledArguments: [],
+
     emit: function() {},
     on: function() {},
     removeListener: function() {},
@@ -208,6 +217,53 @@ function createStubbedBackendConnection() {
   };
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
+
+function setupApplication() {
+  var application = express();
+  var server;
+  var backend;
+  return setupServer(application)
+    .next(function(newServer) {
+      server = newServer;
+    })
+    .createBackend()
+    .next(function(newBackend) {
+      backend = newBackend;
+      connection = new Connection({
+        tag:      'test',
+        hostName: 'localhost',
+        port:     testSendPort,
+        receivePort: testReceivePort,
+        maxRetyrCount: 3,
+        retryDelay: 1
+      });
+      return {
+        backend:     backend,
+        server:      server,
+        application: application
+      };
+    });
+}
+exports.setupApplication = setupApplication;
+Deferred.register('setupApplication', setupApplication);
+
+function teardownApplication(params) {
+  params = params || {};
+  if (params.backend) {
+    params.backend.close();
+    params.backend = undefined;
+  }
+  if (params.connection) {
+    params.connection.close();
+    params.connection = undefined;
+  }
+  if (params.server) {
+    params.server.close();
+    params.server = undefined;
+  }
+}
+exports.teardownApplication = teardownApplication;
+Deferred.register('teardownApplication', teardownApplication);
 
 function readyToDestroyMockedConnection(connection, clientCount) {
   connection = connection
@@ -229,6 +285,21 @@ function createBackend() {
   backend.listen(function() {
     return deferred.call(backend);
   });
+  backend.getMessages = function() {
+    return this.received.map(function(packet) {
+      return packet[2];
+    });
+  };
+  backend.getEvents = function() {
+    return this.getMessages().map(function(envelope) {
+      return envelope.type;
+    });
+  };
+  backend.getBodies = function() {
+    return this.getMessages().map(function(envelope) {
+      return envelope.body;
+    });
+  };
   return deferred;
 }
 exports.createBackend = createBackend;
