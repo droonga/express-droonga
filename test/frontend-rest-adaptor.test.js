@@ -107,10 +107,13 @@ suite('REST API', function() {
         plugins:    [testPlugin]
       });
 
-      var responseBody;
+      var mockedReceiver = nodemock
+            .mock('receive')
+              .takes('api OK');
+
       utils.get('/path/to/api')
         .next(function(response) {
-          responseBody = response.body;
+          mockedReceiver.receive(response.body);
         });
 
       Deferred
@@ -125,7 +128,7 @@ suite('REST API', function() {
         })
         .wait(0.01)
         .next(function() {
-          assert.equal(responseBody, 'api OK');
+          mockedReceiver.assertThrows();
           done();
         })
         .error(function(error) {
@@ -140,10 +143,13 @@ suite('REST API', function() {
         plugins:    [testPlugin]
       });
 
-      var responseBody;
+      var mockedReceiver = nodemock
+            .mock('receive')
+              .takes('api OK');
+
       utils.get('/path/to/kotoumi/path/to/api')
         .next(function(response) {
-          responseBody = response.body;
+          mockedReceiver.receive(response.body);
         });
 
       Deferred
@@ -158,7 +164,7 @@ suite('REST API', function() {
         })
         .wait(0.01)
         .next(function() {
-          assert.equal(responseBody, 'api OK');
+          mockedReceiver.assertThrows();
           done();
         })
         .error(function(error) {
