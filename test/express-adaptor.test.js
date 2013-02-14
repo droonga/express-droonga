@@ -10,66 +10,72 @@ var model = require('../lib/model');
 var Connection = require('../lib/backend/connection').Connection;
 
 suite('Adaption for express application', function() {
-  suite('REST API registeration', function() {
-    var testPlugin = {
-      api: new model.REST({
-        path: '/path/to/api',
-        toBackend: function(event, request) { return [event, 'api requested']; },
-        toClient: function(event, data) { return [event, 'api OK']; }
-      })
-    };
+  var testRestPlugin = {
+    api: new model.REST({
+      path: '/path/to/api',
+      toBackend: function(event, request) { return [event, 'api requested']; },
+      toClient: function(event, data) { return [event, 'api OK']; }
+    })
+  };
+  var testSocketPlugin = {
+    api: new model.SocketRequestResponse({
+      toBackend: function(event, data) { return [event, 'api requested']; },
+      toClient: function(event, data) { return [event, 'api OK']; }
+    })
+  };
 
+  suite('REST API registeration', function() {
+    var backend;
     var connection;
     var application;
     var server;
 
     setup(function(done) {
-      connection = utils.createMockedBackendConnection(testPlugin);
-      application = express();
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
+      utils.setupApplication()
+        .next(function(result) {
+          backend = result.backend;
+          server = result.server;
+          connection = result.connection;
+          application = result.application;
           done();
         });
     });
 
     teardown(function() {
-      if (connection) {
-        utils.readyToDestroyMockedConnection(connection);
-        connection = undefined;
-      }
-      if (server) {
-        server.close();
-        server = undefined;
-      }
+      utils.teardownApplication({ backend:    backend,
+                                  server:     server,
+                                  connection: connection });
     });
 
     test('to the document root', function(done) {
-      var onReceive = {};
-      connection = connection
-        .mock('emitMessage')
-          .takes('api', 'api requested', function() {}, { 'timeout': null })
-          .ctrl(2, onReceive);
-
       application.kotoumi({
         prefix:     '',
         connection: connection,
-        plugins:    [testPlugin]
+        plugins:    [testRestPlugin, testSocketPlugin]
       });
 
       var responseBody;
+      utils.get('/path/to/api')
+        .next(function(response) {
+          responseBody = response.body;
+        });
+
       Deferred
         .wait(0.01)
         .next(function() {
-          utils.get('/path/to/api')
-            .next(function(response) {
-              responseBody = response.body;
-            });
-        })
-        .wait(0.01)
-        .next(function() {
-          connection.assertThrows();
-          onReceive.trigger(null, { body: 'API OK?' });
+          assert.deepEqual(backend.getMessages().map(function(message) {
+                             return { type: message.type,
+                                      body: message.body };
+                           }),
+                           [{ type: 'api',
+                              body: 'api requested' }]);
+
+          var request = backend.getMessages()[0];
+          var response = utils.createReplyEnvelope(request,
+                                                   'api.result',
+                                                   'api OK?');
+          return utils.sendPacketTo(utils.createPacket(response),
+                                    utils.testReceivePort)
         })
         .wait(0.01)
         .next(function() {
@@ -82,31 +88,34 @@ suite('Adaption for express application', function() {
     });
 
     test('under specified path', function(done) {
-      var onReceive = {};
-      connection = connection
-        .mock('emitMessage')
-          .takes('api', 'api requested', function() {}, { 'timeout': null })
-          .ctrl(2, onReceive);
-
       application.kotoumi({
         prefix:     '/path/to/kotoumi',
         connection: connection,
-        plugins:    [testPlugin]
+        plugins:    [testRestPlugin, testSocketPlugin]
       });
 
       var responseBody;
+      utils.get('/path/to/kotoumi/path/to/api')
+        .next(function(response) {
+          responseBody = response.body;
+        });
+
       Deferred
         .wait(0.01)
         .next(function() {
-          utils.get('/path/to/kotoumi/path/to/api')
-            .next(function(response) {
-              responseBody = response.body;
-            });
-        })
-        .wait(0.01)
-        .next(function() {
-          connection.assertThrows();
-          onReceive.trigger(null, { body: 'API OK?' });
+          assert.deepEqual(backend.getMessages().map(function(message) {
+                             return { type: message.type,
+                                      body: message.body };
+                           }),
+                           [{ type: 'api',
+                              body: 'api requested' }]);
+
+          var request = backend.getMessages()[0];
+          var response = utils.createReplyEnvelope(request,
+                                                   'api.result',
+                                                   'api OK?');
+          return utils.sendPacketTo(utils.createPacket(response),
+                                    utils.testReceivePort)
         })
         .wait(0.01)
         .next(function() {
@@ -120,104 +129,72 @@ suite('Adaption for express application', function() {
   });
 
   suite('Socket.IO API registeration', function() {
+    var application;
     var connection;
     var server;
     var clientSocket;
+    var backend;
+
+    setup(function(done) {
+      utils.setupApplication()
+        .next(function(result) {
+          backend = result.backend;
+          server = result.server;
+          connection = result.connection;
+          application = result.application;
+          done();
+        });
+    });
 
     teardown(function() {
-      if (connection) {
-        utils.readyToDestroyMockedConnection(connection);
-        connection = undefined;
-      }
       if (clientSocket) {
         clientSocket.disconnect();
         clientSocket = undefined;
       }
-      if (server) {
-        server.close();
-        server = undefined;
-      }
+      utils.teardownApplication({ backend:    backend,
+                                  server:     server,
+                                  connection: connection });
     });
 
-    test('front to back', function(done) {
-      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule)
-        .mock('emitMessage')
-          .takes('search',
-                 { requestMessage: true },
-                 function() {},
-                 { timeout: 10 * 1000 });
+    test('request-response', function(done) {
+      application.kotoumi({
+        connection: connection,
+        server:     server,
+        plugins:    [testRestPlugin, testSocketPlugin]
+      });
 
-      var application = express();
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
-          application.kotoumi({
-            connection: connection,
-            server:     server
-          });
-
-          return utils.createClientSocket();
-        })
+      var mockedReceiver;
+      utils.createClientSocket()
         .next(function(newClientSocket) {
           clientSocket = newClientSocket;
-          clientSocket.emit('search', { requestMessage: true });
+          clientSocket.emit('api', 'request');
         })
         .wait(0.01)
         .next(function() {
-          connection.assertThrows();
-          done();
-        })
-        .error(function(error) {
-          done(error);
-        });
-    });
+          assert.deepEqual(backend.getMessages().map(function(message) {
+                             return { type: message.type,
+                                      body: message.body };
+                           }),
+                           [{ type: 'api',
+                              body: 'api requested' }]);
 
-    test('back to front', function(done) {
-      var onResponse = {};
-      connection = utils.createMockedBackendConnection(utils.socketIoDefaultCommandsModule)
-        .mock('emitMessage')
-          .takes('search',
-                 { requestMessage: true },
-                 function() {},
-                 { timeout: 10 * 1000 })
-          .ctrl(2, onResponse);
-
-      var clientReceiver = nodemock
+          mockedReceiver = nodemock
             .mock('receive')
-            .takes({ searchResult: true });
-
-      var application = express();
-      utils.setupServer(application)
-        .next(function(newServer) {
-          server = newServer;
-          application.kotoumi({
-            connection: connection,
-            server:     server
+              .takes('api OK');
+          clientSocket.on('api.result', function(data) {
+            mockedReceiver.receive(data);
           });
 
-          return utils.createClientSocket();
-        })
-        .next(function(newClientSocket) {
-          clientSocket = newClientSocket;
-
-          clientSocket.on('search.result', function(data) {
-            clientReceiver.receive(data);
-          });
-          clientSocket.emit('search', { requestMessage: true });
-        })
-        .wait(0.1)
-        .next(function() {
-          connection.assertThrows();
-          var envelope = {
-            statusCode: 200,
-            type:       'search.result',
-            body:       { searchResult: true}
-          };
-          onResponse.trigger(null, envelope);
+          var request = backend.getMessages()[0];
+          var response = utils.createReplyEnvelope(request,
+                                                   'api.result',
+                                                   'api OK?');
+          return utils.sendPacketTo(utils.createPacket(response),
+                                    utils.testReceivePort)
         })
         .wait(0.01)
         .next(function() {
-          clientReceiver.assertThrows();
+          mockedReceiver.assertThrows();
           done();
         })
         .error(function(error) {
