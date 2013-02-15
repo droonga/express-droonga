@@ -8,6 +8,8 @@ var client = require('socket.io-client');
 var express = require('express');
 
 var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
+exports.FluentReceiver = FluentReceiver;
+
 var Connection = require('../lib/backend/connection').Connection;
 
 var testSendPort = exports.testSendPort = 3333;
@@ -69,6 +71,7 @@ function setupServer(handlerOrServer) {
   return deferred;
 }
 exports.setupServer = setupServer;
+Deferred.register('setupServer', setupServer);
 
 function sendRequest(method, path, postData, headers) {
   var deferred = new Deferred();
@@ -237,13 +240,31 @@ exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;
 function createBackend() {
   var deferred = new Deferred();
   var backend = new FluentReceiver(testSendPort);
+
   backend.received = [];
   backend.on('receive', function(data) {
     backend.received.push(data);
+    if (backend.reservedResponses.length > 0) {
+      var response = backend.reservedResponses.shift();
+      if (typeof response == 'function')
+        response = response(data);
+      sendPacketTo(response, testReceivePort);
+    }
   });
-  backend.listen(function() {
-    return deferred.call(backend);
-  });
+
+  backend.reservedResponses = [];
+  backend.reserveResponse = function(response) {
+    backend.reservedResponses.push(response);
+  };
+
+  backend.assertReceived = function(expectedMessages) {
+    assert.deepEqual(this.getMessages().map(function(message) {
+                       return { type: message.type,
+                                body: message.body };
+                     }),
+                     expectedMessages);
+  };
+
   backend.getMessages = function() {
     return this.received.map(function(packet) {
       return packet[2];
@@ -259,13 +280,7 @@ function createBackend() {
       return envelope.body;
     });
   };
-  backend.assertReceived = function(expectedMessages) {
-    assert.deepEqual(this.getMessages().map(function(message) {
-                       return { type: message.type,
-                                body: message.body };
-                     }),
-                     expectedMessages);
-  };
+
   backend.sendMessage = function(type, body) {
     var response = createEnvelope(type, body);
     return sendPacketTo(createPacket(response), testReceivePort)
@@ -274,6 +289,11 @@ function createBackend() {
     var response = createReplyEnvelope(request, type, body);
     return sendPacketTo(createPacket(response), testReceivePort)
   };
+
+  backend.listen(function() {
+    return deferred.call(backend);
+  });
+
   return deferred;
 }
 exports.createBackend = createBackend;
