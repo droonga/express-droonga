@@ -227,16 +227,6 @@ function teardownApplication(params) {
 exports.teardownApplication = teardownApplication;
 Deferred.register('teardownApplication', teardownApplication);
 
-function readyToDestroyMockedConnection(connection, clientCount) {
-  connection = connection
-    .mock('removeListener')
-      .takes('error', function() {});
-  if (clientCount)
-    connection = connection.times(clientCount);
-  return connection;
-}
-exports.readyToDestroyMockedConnection = readyToDestroyMockedConnection;
-
 function createBackend() {
   var deferred = new Deferred();
   var backend = new FluentReceiver(testSendPort);
