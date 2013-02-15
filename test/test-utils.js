@@ -215,7 +215,10 @@ function teardownApplication(params) {
     params.backend.close();
     params.backend = undefined;
   }
-  if (params.connection) {
+  if (params.application && params.application.connection) {
+    params.application.connection.close();
+    params.application = undefined;
+  } else if (params.connection) {
     params.connection.close();
     params.connection = undefined;
   }
