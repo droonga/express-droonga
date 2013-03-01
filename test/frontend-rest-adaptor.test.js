@@ -138,7 +138,7 @@ suite('REST API', function() {
 
     test('under specified path', function(done) {
       restAdaptor.register(application, {
-        prefix:     '/path/to/kotoumi',
+        prefix:     '/path/to/droonga',
         connection: connection,
         plugins:    [testPlugin]
       });
@@ -147,7 +147,7 @@ suite('REST API', function() {
             .mock('receive')
               .takes('api OK');
 
-      utils.get('/path/to/kotoumi/path/to/api')
+      utils.get('/path/to/droonga/path/to/api')
         .next(function(response) {
           mockedReceiver.receive(response.body);
         });

@@ -1,8 +1,8 @@
 {
-  "name": "express-kotoumi",
+  "name": "express-droonga",
   "description": "A framework for building scalable realtime web API services for Express",
   "version": "0.0.1",
-  "author": "Kotoumi project <kotoumi@groonga.org>",
+  "author": "Droonga project <droonga@groonga.org>",
   "contributors": [
     {
       "name": "Daijiro MORI",

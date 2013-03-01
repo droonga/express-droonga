@@ -47,7 +47,7 @@ suite('Adaption for express application', function() {
     });
 
     test('to the document root', function(done) {
-      application.kotoumi({
+      application.droonga({
         prefix:     '',
         connection: connection,
         plugins:    [testRestPlugin, testSocketPlugin]
@@ -80,14 +80,14 @@ suite('Adaption for express application', function() {
     });
 
     test('under specified path', function(done) {
-      application.kotoumi({
-        prefix:     '/path/to/kotoumi',
+      application.droonga({
+        prefix:     '/path/to/droonga',
         connection: connection,
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
       var responseBody;
-      utils.get('/path/to/kotoumi/path/to/api')
+      utils.get('/path/to/droonga/path/to/api')
         .next(function(response) {
           responseBody = response.body;
         });
@@ -142,7 +142,7 @@ suite('Adaption for express application', function() {
     });
 
     test('request-response', function(done) {
-      application.kotoumi({
+      application.droonga({
         connection: connection,
         server:     server,
         plugins:    [testRestPlugin, testSocketPlugin]

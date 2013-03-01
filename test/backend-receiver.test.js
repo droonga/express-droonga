@@ -23,7 +23,7 @@ suite('FluentReceiver', function() {
             .takes({ message: true });
 
     receiver = new FluentReceiver();
-    receiver.on('kotoumi.message', function(data) {
+    receiver.on('droonga.message', function(data) {
       mockedReceiver.receive(data);
     });
     receiver.listen(function() {
@@ -35,7 +35,7 @@ suite('FluentReceiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = ['kotoumi.message', Date.now(), { message: true }];
+        var rawPacket = ['droonga.message', Date.now(), { message: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
@@ -56,7 +56,7 @@ suite('FluentReceiver', function() {
             .takes({ message2: true });
 
     receiver = new FluentReceiver();
-    receiver.on('kotoumi.message', function(data) {
+    receiver.on('droonga.message', function(data) {
       mockedReceiver.receive(data);
     });
     receiver.listen(function() {
@@ -68,7 +68,7 @@ suite('FluentReceiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = ['kotoumi.message', [[Date.now(), { message1: true }],
+        var rawPacket = ['droonga.message', [[Date.now(), { message1: true }],
                                              [Date.now(), { message2: true }]]];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
@@ -90,7 +90,7 @@ suite('FluentReceiver', function() {
             .takes({ message2: true });
 
     receiver = new FluentReceiver();
-    receiver.on('kotoumi.message', function(data) {
+    receiver.on('droonga.message', function(data) {
       mockedReceiver.receive(data);
     });
     receiver.listen(function() {
@@ -102,11 +102,11 @@ suite('FluentReceiver', function() {
       .next(function() {
         assert.notEqual(receiver.port, undefined);
 
-        var rawPacket = ['kotoumi.message', Date.now(), { message1: true }];
+        var rawPacket = ['droonga.message', Date.now(), { message1: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {
-        var rawPacket = ['kotoumi.message', Date.now(), { message2: true }];
+        var rawPacket = ['droonga.message', Date.now(), { message2: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
       .next(function() {

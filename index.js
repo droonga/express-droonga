@@ -4,7 +4,7 @@ var restAdaptor = require('./lib/frontend/rest-adaptor');
 var socketIoAdaptor = require('./lib/frontend/socket.io-adaptor');
 var dashboardHandler = require('./lib/frontend/dashboard-handler');
 
-express.application.kotoumi = function(params) {
+express.application.droonga = function(params) {
   params = params || {};
 
   params.connection = params.connection || new Connection(params);
