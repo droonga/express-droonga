@@ -310,7 +310,7 @@ exports.createEnvelope = createEnvelope;
 
 function createExpectedEnvelope(type, body) {
   var envelope = createEnvelope(type, body);
-  envelope.replyTo = new RegExp('^' + envelope.replyTo + '?connection_id=\\d+$');
+  envelope.replyTo = new RegExp('^' + envelope.replyTo + '\\?connection_id=\\d+$');
   envelope.id = TypeOf('string');
   envelope.date = InstanceOf(Date);
   return envelope;
