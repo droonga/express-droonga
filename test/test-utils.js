@@ -15,6 +15,7 @@ var Connection = require('../lib/backend/connection').Connection;
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
 var testServerPort = exports.testServerPort = 3335;
+var testTag = exports.testTag = 'test';
 
 
 function connectTo(port) {
@@ -191,7 +192,7 @@ function setupApplication() {
     .next(function(newBackend) {
       backend = newBackend;
       var connection = new Connection({
-        tag:      'test',
+        tag:      testTag,
         hostName: 'localhost',
         port:     testSendPort,
         receivePort: testReceivePort,

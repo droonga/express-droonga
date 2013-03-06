@@ -143,7 +143,7 @@ suite('Socket.IO API', function() {
             connection = result.connection;
             backend    = result.backend;
             socketIoAdaptor.register(result.application, server, {
-              tag:      'test',
+              tag:      utils.testTag,
               connection: connection,
               plugins: [testPlugin]
             });
@@ -229,7 +229,7 @@ suite('Socket.IO API', function() {
           connection = result.connection;
           backend    = result.backend;
           socketIoAdaptor.register(result.application, server, {
-            tag:      'test',
+            tag:      utils.testTag,
             connection: connection,
             plugins: [testPlugin]
           });
@@ -306,7 +306,7 @@ suite('Socket.IO API', function() {
             connection = result.connection;
             backend    = result.backend;
             socketIoAdaptor.register(result.application, server, {
-              tag:      'test',
+              tag:      utils.testTag,
               connection: connection,
               plugins: [testPlugin]
             });
@@ -387,7 +387,7 @@ suite('Socket.IO API', function() {
           connection = result.connection;
           backend    = result.backend;
           socketIoAdaptor.register(result.application, server, {
-            tag:      'test',
+            tag:      utils.testTag,
             connection: connection,
             plugins: [testPlugin]
           });

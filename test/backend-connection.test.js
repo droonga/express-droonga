@@ -396,7 +396,7 @@ suite('Connection', function() {
         .next(function(newBackend) {
           backend = newBackend;
           connection = new Connection({
-            tag:      'test',
+            tag:      utils.testTag,
             hostName: 'localhost',
             port:     utils.testSendPort,
             maxRetyrCount: 3,
