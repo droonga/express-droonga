@@ -299,7 +299,7 @@ function createEnvelope(type, body) {
   var envelope = {
     id:         now.getTime(),
     date:       now.toISOString(),
-    replyTo:    'localhost:' + testReceivePort,
+    replyTo:    'localhost:' + testReceivePort + '/' + testTag,
     statusCode: 200,
     type:       type,
     body:       body
@@ -310,6 +310,7 @@ exports.createEnvelope = createEnvelope;
 
 function createExpectedEnvelope(type, body) {
   var envelope = createEnvelope(type, body);
+  envelope.replyTo = new RegExp('^' + envelope.replyTo + '?connection_id=\\d+$');
   envelope.id = TypeOf('string');
   envelope.date = InstanceOf(Date);
   return envelope;
@@ -367,6 +368,8 @@ function assertEnvelopeEqual(actual, expected) {
       assert.typeOf(typeof actualValue,
                     expectedValue.typeString,
                     key + ' / ' + vs);
+    } else if (expectedValue.constructor.toString().indexOf('function RegExp') > -1) {
+      assert.match(actualValue, expectedValue, key + ' / ' + vs);
     } else {
       assert.deepEqual(actualValue, expectedValue, key + ' / ' + vs);
     }
