@@ -14,8 +14,6 @@
     }
   ],
   "dependencies": {
-    "express": ">=3.0",
-    "express-resource": "*",
     "fluent-logger": "*",
     "jade": "*",
     "less-middleware": "*",
@@ -24,6 +22,7 @@
   },
   "devDependencies": {
     "chai": "*",
+    "express": ">=3.0",
     "jsdeferred": "*",
     "mocha": "*",
     "nodemock": "*",
