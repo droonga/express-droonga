@@ -311,7 +311,7 @@ suite('Socket.IO API', function() {
         .createClientSockets(1)
         .next(function(newClientSocket) {
           clientSockets = clientSockets.concat(newClientSockets);
-          clientSockets[0].emit('reqrep', 'extra', 'name' 'message');
+          clientSockets[0].emit('reqrep', 'extra', 'name', 'message');
         }).wait(0.01).next(function() {
           assert.deepEqual(backend.getBodies(), ['message']);
 
