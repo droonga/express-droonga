@@ -309,7 +309,7 @@ suite('Socket.IO API', function() {
           });
         })
         .createClientSockets(1)
-        .next(function(newClientSocket) {
+        .next(function(newClientSockets) {
           clientSockets = clientSockets.concat(newClientSockets);
           clientSockets[0].emit('reqrep', 'extra', 'name', 'message');
         }).wait(0.01).next(function() {
