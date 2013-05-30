@@ -294,6 +294,49 @@ suite('Socket.IO API', function() {
           done(error);
         });
     });
+
+    test('event with suffix', function(done) {
+      var clientReceiver;
+      utils.setupApplication()
+        .next(function(result) {
+          server     = result.server;
+          connection = result.connection;
+          backend    = result.backend;
+          socketIoAdaptor.register(result.application, server, {
+            tag:      utils.testTag,
+            connection: connection,
+            plugins: [testPlugin]
+          });
+        })
+        .createClientSockets(1)
+        .next(function(newClientSocket) {
+          clientSockets = clientSockets.concat(newClientSockets);
+          clientSockets[0].emit('reqrep', 'extra', 'name' 'message');
+        }).wait(0.01).next(function() {
+          assert.deepEqual(backend.getBodies(), ['message']);
+
+          var responses = backend.getMessages().map(function(envelope) {
+            return utils.createReplyEnvelope(envelope, 'reqrep', envelope.body);
+          });
+
+          clientReceiver = nodemock
+            .mock('receive').takes('message');
+          clientSockets[0].on('reqrep.extra.name', function(data) {
+            clientReceiver.receive(data);
+          });
+
+          return utils
+            .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort);
+        })
+        .wait(0.01)
+        .next(function() {
+          clientReceiver.assertThrows();
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 
   suite('publish-subscribe', function() {
