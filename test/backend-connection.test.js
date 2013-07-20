@@ -441,7 +441,7 @@ suite('Connection', function() {
           var deferred = new Deferred();
           connection.emitMessage('test', { message: true }, null,
                                  {
-                                   emittedCallback: function () {
+                                   emittedCallback: function() {
                                      deferred.call();
                                    }
                                  });
