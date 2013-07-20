@@ -436,9 +436,17 @@ suite('Connection', function() {
     test('disconnected suddenly', function(done) {
       var errorHandler;
       var restartedBackend;
-      connection.emitMessage('test', { message: true });
       Deferred
-        .wait(0.01)
+        .next(function() {
+          var deferred = new Deferred();
+          connection.emitMessage('test', { message: true }, null,
+                                 {
+                                   emittedCallback: function () {
+                                     deferred.call();
+                                   }
+                                 });
+          return deferred;
+        })
         .next(function() {
           assert.equal(backend.received.length,
                        1,
