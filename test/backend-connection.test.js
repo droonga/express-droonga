@@ -455,9 +455,12 @@ suite('Connection', function() {
         .next(function() {
           assert.deepEqual(extractTags(backend.received),
                            ['test.message']);
-          backend.close();
+          var deferred = new Deferred();
+          backend.close(function() {
+            deferred.call();
+          });
+          return deferred;
         })
-        .wait(0.01)
         .createBackend()
         .next(function(newBackend) {
           restartedBackend = newBackend;
