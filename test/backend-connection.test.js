@@ -461,22 +461,27 @@ suite('Connection', function() {
           });
           return deferred;
         })
-        .createBackend()
-        .next(function(newBackend) {
-          restartedBackend = newBackend;
+        .next(function() {
+          var deferred = new Deferred();
 
           errorHandler = nodemock
             .mock('handle')
               .takes({});
           connection.on('error', function(error) {
             errorHandler.handle(error);
+            deferred.call();
           });
 
           connection.emitMessage('test', { message: true });
+
+          return deferred;
         })
-        .wait(0.1)
         .next(function() {
           errorHandler.assertThrows();
+        })
+        .createBackend()
+        .next(function(newBackend) {
+          restartedBackend = newBackend;
           assert.equal(backend.received.length,
                        1,
                        'no new message should be sent to the old backend' + JSON.stringify(backend.received));
