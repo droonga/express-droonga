@@ -491,17 +491,17 @@ suite('Connection', function() {
 
           var deferred = new Deferred();
           restartedBackend.once("receive", function() {
-            deferred.call();
+            restartedBackend.once("receive", function() {
+              deferred.call();
+            });
           });
           return deferred;
         })
         .next(function() {
-          assert.equal(backend.received.length,
-                       1,
-                       'no new message should be sent to the old backend' + JSON.stringify(backend.received));
-          assert.equal(restartedBackend.received.length,
-                       1,
-                       'message should be sent to the new backend' + JSON.stringify(restartedBackend.received));
+          assert.deepEqual(extractTypes(backend.received),
+                           ['type1']);
+          assert.deepEqual(extractTypes(restartedBackend.received),
+                           ['type2', 'type3']);
           done();
         })
         .error(function(error) {
