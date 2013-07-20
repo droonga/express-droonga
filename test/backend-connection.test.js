@@ -417,6 +417,13 @@ suite('Connection', function() {
       }
     });
 
+    function extractTags(messages) {
+      return messages.map(function(message) {
+        var tag = message[0];
+        return tag;
+      });
+    };
+
     test('normal messaging', function(done) {
       connection.emitMessage({ message: true });
       Deferred
@@ -446,11 +453,8 @@ suite('Connection', function() {
           return deferred;
         })
         .next(function() {
-          assert.equal(backend.received.length,
-                       1,
-                       'message should be sent: ' + JSON.stringify(backend.received));
-          assert.equal(backend.received[0][0], 'test.message');
-
+          assert.deepEqual(extractTags(backend.received),
+                           ['test.message']);
           backend.close();
         })
         .wait(0.01)
