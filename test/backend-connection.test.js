@@ -423,13 +423,6 @@ suite('Connection', function() {
       }
     });
 
-    function extractTypes(messages) {
-      return messages.map(function(message) {
-        var envelope = message[2];
-        return envelope.type;
-      });
-    };
-
     test('normal messaging', function(done) {
       connection.emitMessage({ message: true });
       Deferred
@@ -458,7 +451,7 @@ suite('Connection', function() {
           return deferred;
         })
         .next(function() {
-          assert.deepEqual(extractTypes(backend.received),
+          assert.deepEqual(backend.getEvents(),
                            ['type1']);
           var deferred = new Deferred();
           backend.close(function() {
@@ -487,9 +480,9 @@ suite('Connection', function() {
         .createBackend()
         .next(function(newBackend) {
           restartedBackend = newBackend;
-          assert.deepEqual(extractTypes(backend.received),
+          assert.deepEqual(backend.getEvents(),
                            ['type1']);
-          assert.deepEqual(extractTypes(restartedBackend.received),
+          assert.deepEqual(restartedBackend.getEvents(),
                            []);
 
           connection.emitMessage('type3', { message: true });
@@ -503,9 +496,9 @@ suite('Connection', function() {
           return deferred;
         })
         .next(function() {
-          assert.deepEqual(extractTypes(backend.received),
+          assert.deepEqual(backend.getEvents(),
                            ['type1']);
-          assert.deepEqual(extractTypes(restartedBackend.received),
+          assert.deepEqual(restartedBackend.getEvents(),
                            ['type2', 'type3']);
           done();
         })
