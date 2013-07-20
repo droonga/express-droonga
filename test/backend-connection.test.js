@@ -488,8 +488,13 @@ suite('Connection', function() {
                            []);
 
           connection.emitMessage('type3', { message: true });
+
+          var deferred = new Deferred();
+          restartedBackend.once("receive", function() {
+            deferred.call();
+          });
+          return deferred;
         })
-        .wait(0.01)
         .next(function() {
           assert.equal(backend.received.length,
                        1,
