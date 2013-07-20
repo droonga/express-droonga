@@ -447,7 +447,7 @@ suite('Connection', function() {
         .next(function() {
           var deferred = new Deferred();
           connection.emitMessage('type1', { message: true });
-          backend.once("receive", function() {
+          backend.once('receive', function() {
             deferred.call();
           });
           return deferred;
@@ -490,8 +490,8 @@ suite('Connection', function() {
           connection.emitMessage('type3', { message: true });
 
           var deferred = new Deferred();
-          restartedBackend.once("receive", function() {
-            restartedBackend.once("receive", function() {
+          restartedBackend.once('receive', function() {
+            restartedBackend.once('receive', function() {
               deferred.call();
             });
           });
