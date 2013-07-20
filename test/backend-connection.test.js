@@ -390,8 +390,10 @@ suite('Connection', function() {
   suite('to backend', function() {
     var connection;
     var backend;
+    var restartedBackend;
 
     setup(function(done) {
+      restartedBackend = undefined;
       utils.createBackend()
         .next(function(newBackend) {
           backend = newBackend;
@@ -410,6 +412,10 @@ suite('Connection', function() {
       if (backend) {
         backend.close();
         backend = undefined;
+      }
+      if (restartedBackend) {
+        restartedBackend.close();
+        restartedBackend = undefined;
       }
       if (connection) {
         connection.close();
@@ -442,7 +448,6 @@ suite('Connection', function() {
 
     test('disconnected suddenly', function(done) {
       var errorHandler;
-      var restartedBackend;
       Deferred
         .next(function() {
           var deferred = new Deferred();
