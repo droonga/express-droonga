@@ -482,12 +482,10 @@ suite('Connection', function() {
         .createBackend()
         .next(function(newBackend) {
           restartedBackend = newBackend;
-          assert.equal(backend.received.length,
-                       1,
-                       'no new message should be sent to the old backend' + JSON.stringify(backend.received));
-          assert.equal(restartedBackend.received.length,
-                       0,
-                       'message should be destroyed by socket error' + JSON.stringify(restartedBackend.received));
+          assert.deepEqual(extractTags(backend.received),
+                           ['test.message']);
+          assert.deepEqual(extractTags(restartedBackend.received),
+                           []);
 
           connection.emitMessage('test', { message: true });
         })
