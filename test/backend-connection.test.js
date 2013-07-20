@@ -417,10 +417,10 @@ suite('Connection', function() {
       }
     });
 
-    function extractTags(messages) {
+    function extractTypes(messages) {
       return messages.map(function(message) {
-        var tag = message[0];
-        return tag;
+        var envelope = message[2];
+        return envelope.type;
       });
     };
 
@@ -446,15 +446,15 @@ suite('Connection', function() {
       Deferred
         .next(function() {
           var deferred = new Deferred();
-          connection.emitMessage('test', { message: true });
+          connection.emitMessage('type1', { message: true });
           backend.once("receive", function() {
             deferred.call();
           });
           return deferred;
         })
         .next(function() {
-          assert.deepEqual(extractTags(backend.received),
-                           ['test.message']);
+          assert.deepEqual(extractTypes(backend.received),
+                           ['type1']);
           var deferred = new Deferred();
           backend.close(function() {
             deferred.call();
@@ -472,7 +472,7 @@ suite('Connection', function() {
             deferred.call();
           });
 
-          connection.emitMessage('test', { message: true });
+          connection.emitMessage('type2', { message: true });
 
           return deferred;
         })
@@ -482,12 +482,12 @@ suite('Connection', function() {
         .createBackend()
         .next(function(newBackend) {
           restartedBackend = newBackend;
-          assert.deepEqual(extractTags(backend.received),
-                           ['test.message']);
-          assert.deepEqual(extractTags(restartedBackend.received),
+          assert.deepEqual(extractTypes(backend.received),
+                           ['type1']);
+          assert.deepEqual(extractTypes(restartedBackend.received),
                            []);
 
-          connection.emitMessage('test', { message: true });
+          connection.emitMessage('type3', { message: true });
         })
         .wait(0.01)
         .next(function() {
