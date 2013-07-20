@@ -439,12 +439,10 @@ suite('Connection', function() {
       Deferred
         .next(function() {
           var deferred = new Deferred();
-          connection.emitMessage('test', { message: true }, null,
-                                 {
-                                   emittedCallback: function() {
-                                     deferred.call();
-                                   }
-                                 });
+          connection.emitMessage('test', { message: true });
+          backend.once("receive", function() {
+            deferred.call();
+          });
           return deferred;
         })
         .next(function() {
