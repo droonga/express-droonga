@@ -424,14 +424,15 @@ suite('Connection', function() {
     });
 
     test('normal messaging', function(done) {
-      connection.emitMessage({ message: true });
-      Deferred
-        .wait(0.01)
+      var deferred = new Deferred();
+      connection.emitMessage('type', { message: true });
+      backend.once('receive', function() {
+        deferred.call();
+      });
+      deferred
         .next(function() {
-          assert.equal(backend.received.length,
-                       1,
-                       'message should be sent: ' + JSON.stringify(backend.received));
-          assert.equal(backend.received[0][0], 'test.message');
+          assert.deepEqual(backend.getEvents(),
+                           ['type']);
           done();
         })
         .error(function(error) {
