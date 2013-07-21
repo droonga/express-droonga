@@ -100,7 +100,7 @@ suite('Adaption for express application', function() {
         })
         .wait(0.01)
         .next(function() {
-          assert.equal(responseBody, 'api OK');
+          assert.equal(responseBody, JSON.stringify('api OK'));
           done();
         })
         .error(function(error) {
