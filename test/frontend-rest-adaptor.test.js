@@ -107,28 +107,28 @@ suite('REST API', function() {
         plugins:    [testPlugin]
       });
 
-      var mockedReceiver = nodemock
-            .mock('receive')
-              .takes('api OK');
+      backend.reserveResponse(function(request) {
+        var tag = request[0];
+        var timestamp = 0;
+        var envelope = request[2];
+        return [
+          tag,
+          timestamp,
+          {
+            inReplyTo:  envelope.id,
+            statusCode: 200,
+            body:       'API response'
+          }
+        ];
+      });
 
       utils.get('/path/to/api')
         .next(function(response) {
-          mockedReceiver.receive(response.body);
-        });
-
-      Deferred
-        .wait(0.01)
-        .next(function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
-
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'api.result',
-                                      'api OK?');
-        })
-        .wait(0.01)
-        .next(function() {
-          mockedReceiver.assertThrows();
+          assert.deepEqual({ statusCode: 200,
+                             body:       JSON.stringify('api OK') },
+                           response);
           done();
         })
         .error(function(error) {
