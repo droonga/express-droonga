@@ -51,7 +51,7 @@ suite('Socket.IO API', function() {
                                 connection: connection });
   });
 
-  test('registeration of plugin commands', function(done) {
+  test('registration of plugin commands', function(done) {
     var basePlugin = {
       getCommand: new model.SocketRequestResponse(),
       putCommand: new model.SocketRequestResponse(),
