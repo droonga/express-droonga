@@ -73,3 +73,9 @@ Frontend applications can call raw APIs via Socket.IO. For example:
     socket.emit('search', { query: 'foobar' });
 
 In Socket.IO APIs, you'll send requests and receive results separately.
+
+## License
+
+The MIT License. See LICENSE for details.
+
+Copyright (c) 2013 Droonga project

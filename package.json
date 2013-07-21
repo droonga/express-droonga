@@ -13,6 +13,7 @@
       "email": "yuki@clear-code.com"
     }
   ],
+  "license": "MIT",
   "dependencies": {
     "fluent-logger": "*",
     "jade": "*",
