@@ -2,11 +2,11 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
-var utils = require('./test-utils');
+var utils = require('../test-utils');
 var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
-var Connection = require('../lib/backend/connection').Connection;
+var Connection = require('../../lib/backend/connection').Connection;
 
 suite('Connection', function() {
   suite('initialization', function() {

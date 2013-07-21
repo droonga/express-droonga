@@ -2,9 +2,9 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
-var utils = require('./test-utils');
+var utils = require('../test-utils');
 
-var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
+var FluentReceiver = require('../../lib/backend/receiver').FluentReceiver;
 
 suite('FluentReceiver', function() {
   var receiver;

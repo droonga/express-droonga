@@ -3,11 +3,11 @@ var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 var express = require('express');
 
-var utils = require('./test-utils');
+var utils = require('../test-utils');
 
-var socketIoAdaptor = require('../lib/frontend/socket.io-adaptor');
-var model = require('../lib/model');
-var scoketIoCommands = require('../lib/frontend/default-commands/socket.io');
+var socketIoAdaptor = require('../../lib/frontend/socket.io-adaptor');
+var model = require('../../lib/model');
+var scoketIoCommands = require('../../lib/frontend/default-commands/socket.io');
 
 suite('Socket.IO API', function() {
   var connection;
