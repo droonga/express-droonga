@@ -7,7 +7,7 @@ var express = require('express'),
 var application = express();
 var server = http.createServer(application);
 application.droonga({
-  prefix: '/droonga',
+  prefix: '',
   server: server
 });
 
