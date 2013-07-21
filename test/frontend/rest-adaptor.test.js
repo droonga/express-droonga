@@ -136,28 +136,21 @@ suite('REST API', function() {
         plugins:    [testPlugin]
       });
 
-      var mockedReceiver = nodemock
-            .mock('receive')
-              .takes('api OK');
+      backend.reserveResponse(function(request) {
+        return utils.createReplyPacket(request,
+                                       {
+                                         statusCode: 200,
+                                         body:       'API response',
+                                       });
+      });
 
       utils.get('/path/to/droonga/path/to/api')
         .next(function(response) {
-          mockedReceiver.receive(response.body);
-        });
-
-      Deferred
-        .wait(0.01)
-        .next(function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
-
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'api.result',
-                                      'api OK?');
-        })
-        .wait(0.01)
-        .next(function() {
-          mockedReceiver.assertThrows();
+          assert.deepEqual(response,
+                          { statusCode: 200,
+                            body:       JSON.stringify('api OK') });
           done();
         })
         .error(function(error) {
