@@ -108,18 +108,11 @@ suite('REST API', function() {
       });
 
       backend.reserveResponse(function(request) {
-        var tag = request[0];
-        var timestamp = 0;
-        var envelope = request[2];
-        return [
-          tag,
-          timestamp,
-          {
-            inReplyTo:  envelope.id,
-            statusCode: 200,
-            body:       'API response'
-          }
-        ];
+        return utils.createReplyPacket(request,
+                                       {
+                                         statusCode: 200,
+                                         body:       'API response',
+                                       });
       });
 
       utils.get('/path/to/api')

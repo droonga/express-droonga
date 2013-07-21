@@ -330,6 +330,15 @@ function createPacket(message, tag) {
 }
 exports.createPacket = createPacket;
 
+function createReplyPacket(requestPacket, envelope) {
+  var tag = requestPacket[0];
+  var timestamp = Date.now();
+  var requestEnvelope = requestPacket[2];
+  var replyEnvelope = Object.create(envelope);
+  envelope.inReplyTo = requestEnvelope.id;
+  return [tag, timestamp, replyEnvelope];
+}
+exports.createReplyPacket = createReplyPacket;
 
 function TypeOf(typeString) {
   if (!(this instanceof TypeOf))
