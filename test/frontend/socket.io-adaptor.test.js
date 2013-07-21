@@ -295,7 +295,7 @@ suite('Socket.IO API', function() {
         });
     });
 
-    test('event with suffix', function(done) {
+    test('event with options', function(done) {
       var clientReceiver;
       utils.setupApplication()
         .next(function(result) {
@@ -311,7 +311,8 @@ suite('Socket.IO API', function() {
         .createClientSockets(1)
         .next(function(newClientSockets) {
           clientSockets = clientSockets.concat(newClientSockets);
-          clientSockets[0].emit('reqrep', 'extra', 'name', 'message');
+          clientSockets[0].emit('reqrep', 'message',
+                                { responseEvent: 'reqrep.extra.name' });
         }).wait(0.01).next(function() {
           assert.deepEqual(backend.getBodies(), ['message']);
 
