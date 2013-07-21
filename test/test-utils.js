@@ -1,3 +1,4 @@
+var debug = require('../lib/debug');
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var net = require('net');
@@ -237,6 +238,7 @@ function createBackend() {
 
   backend.received = [];
   backend.on('receive', function(data) {
+    debug('test-utils.createBackend.receive %d', backend._id);
     backend.received.push(data);
     if (backend.reservedResponses.length > 0) {
       var response = backend.reservedResponses.shift();
