@@ -119,9 +119,9 @@ suite('REST API', function() {
         .next(function(response) {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
-          assert.deepEqual({ statusCode: 200,
-                             body:       JSON.stringify('api OK') },
-                           response);
+          assert.deepEqual(response,
+                          { statusCode: 200,
+                            body:       JSON.stringify('api OK') });
           done();
         })
         .error(function(error) {
