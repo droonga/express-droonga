@@ -3,11 +3,12 @@ var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 var express = require('express');
 
-var utils = require('../test-utils');
+var utils = require('../../test-utils');
 
-var socketIoAdaptor = require('../../lib/frontend/socket.io-adaptor');
-var model = require('../../lib/model');
-var scoketIoCommands = require('../../lib/frontend/default-commands/socket.io');
+var socketIoAPI = require('../../../lib/frontend/api/socket.io');
+var model = require('../../../lib/model');
+var scoketIoCommands =
+      require('../../../lib/frontend/api/default-commands/socket.io');
 
 suite('Socket.IO API', function() {
   var connection;
@@ -69,7 +70,7 @@ suite('Socket.IO API', function() {
       .next(function(newServer) {
         server = newServer;
 
-        var registeredCommands = socketIoAdaptor.register(application, server, {
+        var registeredCommands = socketIoAPI.register(application, server, {
           connection: utils.createStubbedBackendConnection(),
           plugins: [
             basePlugin,
@@ -113,7 +114,7 @@ suite('Socket.IO API', function() {
     utils.setupServer(application)
       .next(function(newServer) {
         server = newServer;
-        socketIoAdaptor.register(application, server, {
+        socketIoAPI.register(application, server, {
           connection: utils.createStubbedBackendConnection(),
           plugins: [testPlugin]
         });
@@ -142,7 +143,7 @@ suite('Socket.IO API', function() {
             server     = result.server;
             connection = result.connection;
             backend    = result.backend;
-            socketIoAdaptor.register(result.application, server, {
+            socketIoAPI.register(result.application, server, {
               tag:      utils.testTag,
               connection: connection,
               plugins: [testPlugin]
@@ -228,7 +229,7 @@ suite('Socket.IO API', function() {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
-          socketIoAdaptor.register(result.application, server, {
+          socketIoAPI.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
             plugins: [testPlugin]
@@ -302,7 +303,7 @@ suite('Socket.IO API', function() {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
-          socketIoAdaptor.register(result.application, server, {
+          socketIoAPI.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
             plugins: [testPlugin]
@@ -349,7 +350,7 @@ suite('Socket.IO API', function() {
             server     = result.server;
             connection = result.connection;
             backend    = result.backend;
-            socketIoAdaptor.register(result.application, server, {
+            socketIoAPI.register(result.application, server, {
               tag:      utils.testTag,
               connection: connection,
               plugins: [testPlugin]
@@ -430,7 +431,7 @@ suite('Socket.IO API', function() {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
-          socketIoAdaptor.register(result.application, server, {
+          socketIoAPI.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
             plugins: [testPlugin]

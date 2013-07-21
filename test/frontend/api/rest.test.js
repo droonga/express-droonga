@@ -2,12 +2,12 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
-var utils = require('../test-utils');
+var utils = require('../../test-utils');
 
 var express = require('express');
-var restAdaptor = require('../../lib/frontend/rest-adaptor');
-var model = require('../../lib/model');
-var restCommands = require('../../lib/frontend/default-commands/rest');
+var restAPI = require('../../../lib/frontend/api/rest');
+var model = require('../../../lib/model');
+var restCommands = require('../../../lib/frontend/api/default-commands/rest');
 
 suite('REST API', function() {
   test('registeration of plugin commands', function() {
@@ -41,7 +41,7 @@ suite('REST API', function() {
     };
 
     var application = express();
-    var registeredCommands = restAdaptor.register(application, {
+    var registeredCommands = restAPI.register(application, {
       prefix:     '',
       connection: utils.createStubbedBackendConnection(),
       plugins: [
@@ -101,7 +101,7 @@ suite('REST API', function() {
     });
 
     test('to the document root', function(done) {
-      restAdaptor.register(application, {
+      restAPI.register(application, {
         prefix:     '',
         connection: connection,
         plugins:    [testPlugin]
@@ -130,7 +130,7 @@ suite('REST API', function() {
     });
 
     test('under specified path', function(done) {
-      restAdaptor.register(application, {
+      restAPI.register(application, {
         prefix:     '/path/to/droonga',
         connection: connection,
         plugins:    [testPlugin]
@@ -173,7 +173,7 @@ suite('REST API', function() {
       var receiverCallback = {};
       var connection = utils.createStubbedBackendConnection();
       var application = express();
-      restAdaptor.register(application, {
+      restAPI.register(application, {
         prefix:     '',
         connection: connection
       });

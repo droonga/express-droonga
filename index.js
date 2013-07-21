@@ -1,7 +1,7 @@
 var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
-var restAdaptor = require('./lib/frontend/rest-adaptor');
-var socketIoAdaptor = require('./lib/frontend/socket.io-adaptor');
+var restAPI = require('./lib/frontend/api/rest');
+var socketIoAPI = require('./lib/frontend/api/socket.io');
 var dashboardHandler = require('./lib/frontend/dashboard-handler');
 
 express.application.droonga = function(params) {
@@ -13,10 +13,10 @@ express.application.droonga = function(params) {
   params.prefix = params.prefix || '';
   params.prefix = params.prefix.replace(/\/$/, '');
 
-  restAdaptor.register(this, params);
+  restAPI.register(this, params);
 
   if (params.server) {
-    socketIoAdaptor.register(this, params.server, params);
+    socketIoAPI.register(this, params.server, params);
     params.server.on('close', function() {
       // The connection can be mocked/stubbed. We don't need to close
       // such a fake connection.
