@@ -2,7 +2,7 @@ var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
 var restAPI = require('./lib/frontend/api/rest');
 var socketIoAPI = require('./lib/frontend/api/socket.io');
-var dashboardHandler = require('./lib/frontend/dashboard-handler');
+var dashboardUI = require('./lib/frontend/ui/dashboard');
 
 express.application.droonga = function(params) {
   params = params || {};
@@ -25,7 +25,7 @@ express.application.droonga = function(params) {
     });
   }
 
-  dashboardHandler.register(this, params);
+  dashboardUI.register(this, params);
 
   this.connection = connection;
   this.emitMessage = connection.emitMessage.bind(connection); // shorthand
