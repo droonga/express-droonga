@@ -53,25 +53,21 @@ suite('Adaption for express application', function() {
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
-      var responseBody;
+      backend.reserveResponse(function(request) {
+        return utils.createReplyPacket(request,
+                                       {
+                                         statusCode: 200,
+                                         body:       'API response',
+                                       });
+      });
+
       utils.get('/path/to/api')
         .next(function(response) {
-          responseBody = response.body;
-        });
-
-      Deferred
-        .wait(0.01)
-        .next(function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
-
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'api.result',
-                                      'api OK?');
-        })
-        .wait(0.01)
-        .next(function() {
-          assert.equal(responseBody, 'api OK');
+          assert.deepEqual(response,
+                           { statusCode: 200,
+                             body:       JSON.stringify('api OK') });
           done();
         })
         .error(function(error) {
