@@ -1,9 +1,9 @@
 var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
-var restAPI = require('./lib/frontend/api/rest');
-var groongaAPI = require('./lib/frontend/api/groonga');
-var socketIoAPI = require('./lib/frontend/api/socket.io');
-var dashboardUI = require('./lib/frontend/ui/dashboard');
+var restAPI = require('./lib/api/rest');
+var groongaAPI = require('./lib/api/groonga');
+var socketIoAPI = require('./lib/api/socket.io');
+var dashboardUI = require('./lib/ui/dashboard');
 
 express.application.droonga = function(params) {
   params = params || {};

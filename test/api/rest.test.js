@@ -2,12 +2,12 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
-var utils = require('../../test-utils');
+var utils = require('../test-utils');
 
 var express = require('express');
-var restAPI = require('../../../lib/frontend/api/rest');
-var model = require('../../../lib/model');
-var restCommands = require('../../../lib/frontend/api/default-commands/rest');
+var restAPI = require('../../lib/api/rest');
+var model = require('../../lib/model');
+var restCommands = require('../../lib/api/default-commands/rest');
 
 suite('REST API', function() {
   test('registeration of plugin commands', function() {
