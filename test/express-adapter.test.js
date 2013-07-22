@@ -6,7 +6,7 @@ var express = require('express');
 var utils = require('./test-utils');
 
 var adapter = require('../index');
-var model = require('../lib/model');
+var model = require('../lib/adapter/api/model');
 
 suite('Adaption for express application', function() {
   var testRestPlugin = {

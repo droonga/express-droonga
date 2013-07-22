@@ -6,7 +6,7 @@ var utils = require('../test-utils');
 
 var express = require('express');
 var httpAdapter = require('../../lib/adapter/http');
-var model = require('../../lib/model');
+var model = require('../../lib/adapter/api/model');
 var restAPI = require('../../lib/adapter/api/rest');
 var groongaAPI = require('../../lib/adapter/api/groonga');
 
