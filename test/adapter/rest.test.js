@@ -5,11 +5,11 @@ var Deferred = require('jsdeferred').Deferred;
 var utils = require('../test-utils');
 
 var express = require('express');
-var restAdapter = require('../../lib/adapter/rest');
+var httpAdapter = require('../../lib/adapter/http');
 var model = require('../../lib/model');
 var restCommands = require('../../lib/adapter/default-commands/rest');
 
-suite('REST Adapter', function() {
+suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
       getCommand: new model.REST({
@@ -41,7 +41,7 @@ suite('REST Adapter', function() {
     };
 
     var application = express();
-    var registeredCommands = restAdapter.register(application, {
+    var registeredCommands = httpAdapter.register(application, {
       prefix:     '',
       connection: utils.createStubbedBackendConnection(),
       plugins: [
@@ -101,7 +101,7 @@ suite('REST Adapter', function() {
     });
 
     test('to the document root', function(done) {
-      restAdapter.register(application, {
+      httpAdapter.register(application, {
         prefix:     '',
         connection: connection,
         plugins:    [testPlugin]
@@ -130,7 +130,7 @@ suite('REST Adapter', function() {
     });
 
     test('under specified path', function(done) {
-      restAdapter.register(application, {
+      httpAdapter.register(application, {
         prefix:     '/path/to/droonga',
         connection: connection,
         plugins:    [testPlugin]
@@ -173,7 +173,7 @@ suite('REST Adapter', function() {
       var receiverCallback = {};
       var connection = utils.createStubbedBackendConnection();
       var application = express();
-      restAdapter.register(application, {
+      httpAdapter.register(application, {
         prefix:     '',
         connection: connection
       });
