@@ -10,7 +10,7 @@ var model = require('../lib/model');
 
 suite('Adaption for express application', function() {
   var testRestPlugin = {
-    api: new model.REST({
+    api: new model.HTTPCommand({
       path: '/path/to/api',
       toBackend: function(event, request) { return [event, 'api requested']; },
       toClient: function(event, data) { return [event, 'api OK']; }

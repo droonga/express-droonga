@@ -12,29 +12,29 @@ var restAPI = require('../../lib/adapter/api/rest');
 suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
-      getCommand: new model.REST({
+      getCommand: new model.HTTPCommand({
         path: '/get'
       }),
-      putCommand: new model.REST({
+      putCommand: new model.HTTPCommand({
         method: 'PUT',
         path: '/put'
       }),
-      postCommand: new model.REST({
+      postCommand: new model.HTTPCommand({
         method: 'POST',
         path: '/post'
       }),
-      deleteCommand: new model.REST({
+      deleteCommand: new model.HTTPCommand({
         method: 'DELETE',
         path: '/delete'
       }),
       ignored: new model.SocketCommand()
     };
     var overridingPlugin = {
-      postCommand: new model.REST({
+      postCommand: new model.HTTPCommand({
         method: 'POST',
         path: '/post/overridden'
       }),
-      deleteCommand: new model.REST({
+      deleteCommand: new model.HTTPCommand({
         method: 'DELETE',
         path: '/delete/overridden'
       })
@@ -71,7 +71,7 @@ suite('HTTP Adapter', function() {
 
   suite('registeration', function() {
     var testPlugin = {
-      adapter: new model.REST({
+      adapter: new model.HTTPCommand({
         path: '/path/to/adapter',
         toBackend: function(event, request) { return [event, 'adapter requested']; },
         toClient: function(event, data) { return [event, 'adapter OK']; }

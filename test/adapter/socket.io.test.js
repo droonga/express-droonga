@@ -58,7 +58,7 @@ suite('Socket.IO Adapter', function() {
       putCommand: new model.SocketRequestResponse(),
       postCommand: new model.SocketRequestResponse(),
       deleteCommand: new model.SocketRequestResponse(),
-      ignored: new model.REST()
+      ignored: new model.HTTPCommand()
     };
     var overridingPlugin = {
       postCommand: new model.SocketRequestResponse(),
