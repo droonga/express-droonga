@@ -7,8 +7,8 @@ var utils = require('../test-utils');
 
 var socketIoAdapter = require('../../lib/adapter/socket.io');
 var model = require('../../lib/model');
-var scoketIoCommands =
-      require('../../lib/adapter/default-commands/socket.io');
+var scoketIoAPI =
+      require('../../lib/adapter/api/socket.io');
 
 suite('Socket.IO Adapter', function() {
   var connection;
@@ -86,7 +86,7 @@ suite('Socket.IO Adapter', function() {
         });
         assert.deepEqual(registeredCommands,
                          [{ name:       'search',
-                            definition: scoketIoCommands.search },
+                            definition: scoketIoAPI.search },
                           { name:       'getCommand',
                             definition: basePlugin.getCommand },
                           { name:       'putCommand',

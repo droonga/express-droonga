@@ -7,7 +7,7 @@ var utils = require('../test-utils');
 var express = require('express');
 var httpAdapter = require('../../lib/adapter/http');
 var model = require('../../lib/model');
-var restCommands = require('../../lib/adapter/default-commands/rest');
+var restAPI = require('../../lib/adapter/api/rest');
 
 suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
@@ -58,7 +58,7 @@ suite('HTTP Adapter', function() {
     });
     assert.deepEqual(registeredCommands,
                      [{ name:       'search',
-                        definition: restCommands.search },
+                        definition: restAPI.search },
                       { name:       'getCommand',
                         definition: basePlugin.getCommand },
                       { name:       'putCommand',

@@ -2,8 +2,7 @@ var assert = require('chai').assert;
 
 var utils = require('./test-utils');
 
-var builders =
- require('../lib/adapter/default-commands/rest-request-builder');
+var builders = require('../lib/adapter/api/rest-request-builder');
 
 suite('building message from REST adapter request', function() {
   suite('search', function() {
