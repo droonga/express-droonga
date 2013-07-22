@@ -7,8 +7,7 @@ var utils = require('../test-utils');
 
 var socketIoAdapter = require('../../lib/adapter/socket.io');
 var model = require('../../lib/adapter/api/model');
-var scoketIoAPI =
-      require('../../lib/adapter/api/socket.io');
+var scoketIoAPI = require('../../lib/adapter/api/socket.io');
 
 suite('Socket.IO Adapter', function() {
   var connection;
