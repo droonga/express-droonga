@@ -3,9 +3,9 @@ var assert = require('chai').assert;
 var utils = require('./test-utils');
 
 var builders =
- require('../lib/api/default-commands/rest-request-builder');
+ require('../lib/adapter/default-commands/rest-request-builder');
 
-suite('building message from REST API request', function() {
+suite('building message from REST adapter request', function() {
   suite('search', function() {
     var outputAll = {
       startTime:   true,

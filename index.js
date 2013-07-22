@@ -1,8 +1,8 @@
 var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
-var restAPI = require('./lib/api/rest');
-var groongaAPI = require('./lib/api/groonga');
-var socketIoAPI = require('./lib/api/socket.io');
+var restAdapter = require('./lib/adapter/rest');
+var groongaAdapter = require('./lib/adapter/groonga');
+var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
 
 express.application.droonga = function(params) {
@@ -14,11 +14,11 @@ express.application.droonga = function(params) {
   params.prefix = params.prefix || '';
   params.prefix = params.prefix.replace(/\/$/, '');
 
-  restAPI.register(this, params);
-  groongaAPI.register(this, params);
+  restAdapter.register(this, params);
+  groongaAdapter.register(this, params);
 
   if (params.server) {
-    socketIoAPI.register(this, params.server, params);
+    socketIoAdapter.register(this, params.server, params);
     params.server.on('close', function() {
       // The connection can be mocked/stubbed. We don't need to close
       // such a fake connection.

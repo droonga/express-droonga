@@ -5,11 +5,11 @@ var Deferred = require('jsdeferred').Deferred;
 var utils = require('../test-utils');
 
 var express = require('express');
-var restAPI = require('../../lib/api/rest');
+var restAdapter = require('../../lib/adapter/rest');
 var model = require('../../lib/model');
-var restCommands = require('../../lib/api/default-commands/rest');
+var restCommands = require('../../lib/adapter/default-commands/rest');
 
-suite('REST API', function() {
+suite('REST Adapter', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
       getCommand: new model.REST({
@@ -41,7 +41,7 @@ suite('REST API', function() {
     };
 
     var application = express();
-    var registeredCommands = restAPI.register(application, {
+    var registeredCommands = restAdapter.register(application, {
       prefix:     '',
       connection: utils.createStubbedBackendConnection(),
       plugins: [
@@ -71,10 +71,10 @@ suite('REST API', function() {
 
   suite('registeration', function() {
     var testPlugin = {
-      api: new model.REST({
-        path: '/path/to/api',
-        toBackend: function(event, request) { return [event, 'api requested']; },
-        toClient: function(event, data) { return [event, 'api OK']; }
+      adapter: new model.REST({
+        path: '/path/to/adapter',
+        toBackend: function(event, request) { return [event, 'adapter requested']; },
+        toClient: function(event, data) { return [event, 'adapter OK']; }
       })
     };
 
@@ -101,7 +101,7 @@ suite('REST API', function() {
     });
 
     test('to the document root', function(done) {
-      restAPI.register(application, {
+      restAdapter.register(application, {
         prefix:     '',
         connection: connection,
         plugins:    [testPlugin]
@@ -111,17 +111,17 @@ suite('REST API', function() {
         return utils.createReplyPacket(request,
                                        {
                                          statusCode: 200,
-                                         body:       'API response',
+                                         body:       'Adapter response',
                                        });
       });
 
-      utils.get('/path/to/api')
+      utils.get('/path/to/adapter')
         .next(function(response) {
-          backend.assertReceived([{ type: 'api',
-                                    body: 'api requested' }]);
+          backend.assertReceived([{ type: 'adapter',
+                                    body: 'adapter requested' }]);
           assert.deepEqual(response,
                           { statusCode: 200,
-                            body:       JSON.stringify('api OK') });
+                            body:       JSON.stringify('adapter OK') });
           done();
         })
         .error(function(error) {
@@ -130,7 +130,7 @@ suite('REST API', function() {
     });
 
     test('under specified path', function(done) {
-      restAPI.register(application, {
+      restAdapter.register(application, {
         prefix:     '/path/to/droonga',
         connection: connection,
         plugins:    [testPlugin]
@@ -140,17 +140,17 @@ suite('REST API', function() {
         return utils.createReplyPacket(request,
                                        {
                                          statusCode: 200,
-                                         body:       'API response',
+                                         body:       'Adapter response',
                                        });
       });
 
-      utils.get('/path/to/droonga/path/to/api')
+      utils.get('/path/to/droonga/path/to/adapter')
         .next(function(response) {
-          backend.assertReceived([{ type: 'api',
-                                    body: 'api requested' }]);
+          backend.assertReceived([{ type: 'adapter',
+                                    body: 'adapter requested' }]);
           assert.deepEqual(response,
                           { statusCode: 200,
-                            body:       JSON.stringify('api OK') });
+                            body:       JSON.stringify('adapter OK') });
           done();
         })
         .error(function(error) {
@@ -173,7 +173,7 @@ suite('REST API', function() {
       var receiverCallback = {};
       var connection = utils.createStubbedBackendConnection();
       var application = express();
-      restAPI.register(application, {
+      restAdapter.register(application, {
         prefix:     '',
         connection: connection
       });
