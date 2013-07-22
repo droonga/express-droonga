@@ -5,7 +5,7 @@ var express = require('express');
 
 var utils = require('./test-utils');
 
-var adaptor = require('../index');
+var adapter = require('../index');
 var model = require('../lib/model');
 
 suite('Adaption for express application', function() {
