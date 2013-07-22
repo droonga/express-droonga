@@ -8,6 +8,7 @@ var express = require('express');
 var httpAdapter = require('../../lib/adapter/http');
 var model = require('../../lib/model');
 var restAPI = require('../../lib/adapter/api/rest');
+var groongaAPI = require('../../lib/adapter/api/groonga');
 
 suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
@@ -59,6 +60,8 @@ suite('HTTP Adapter', function() {
     assert.deepEqual(registeredCommands,
                      [{ name:       'search',
                         definition: restAPI.search },
+                      { name:       'groonga',
+                        definition: groongaAPI.groonga },
                       { name:       'getCommand',
                         definition: basePlugin.getCommand },
                       { name:       'putCommand',

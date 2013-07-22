@@ -1,7 +1,6 @@
 var express = require('express');
 var Connection = require('./lib/backend/connection').Connection;
 var httpAdapter = require('./lib/adapter/http');
-var groongaAdapter = require('./lib/adapter/groonga');
 var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
 
@@ -15,7 +14,6 @@ express.application.droonga = function(params) {
   params.prefix = params.prefix.replace(/\/$/, '');
 
   httpAdapter.register(this, params);
-  groongaAdapter.register(this, params);
 
   if (params.server) {
     socketIoAdapter.register(this, params.server, params);
