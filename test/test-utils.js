@@ -8,10 +8,10 @@ var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
 var express = require('express');
 
-var FluentReceiver = require('../lib/backend/receiver').FluentReceiver;
+var FluentReceiver = require('../lib/droonga-protocol/receiver').FluentReceiver;
 exports.FluentReceiver = FluentReceiver;
 
-var Connection = require('../lib/backend/connection').Connection;
+var Connection = require('../lib/droonga-protocol/connection').Connection;
 
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;

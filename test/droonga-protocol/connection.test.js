@@ -6,7 +6,7 @@ var utils = require('../test-utils');
 var TypeOf = utils.TypeOf;
 var InstanceOf = utils.InstanceOf;
 
-var Connection = require('../../lib/backend/connection').Connection;
+var Connection = require('../../lib/droonga-protocol/connection').Connection;
 
 suite('Connection', function() {
   suite('initialization', function() {

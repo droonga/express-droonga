@@ -4,7 +4,7 @@ var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../test-utils');
 
-var FluentReceiver = require('../../lib/backend/receiver').FluentReceiver;
+var FluentReceiver = require('../../lib/droonga-protocol/receiver').FluentReceiver;
 
 suite('FluentReceiver', function() {
   var receiver;

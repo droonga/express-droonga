@@ -1,5 +1,5 @@
 var express = require('express');
-var Connection = require('./lib/backend/connection').Connection;
+var Connection = require('./lib/droonga-protocol/connection').Connection;
 var httpAdapter = require('./lib/adapter/http');
 var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
