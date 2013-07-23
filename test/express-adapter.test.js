@@ -12,13 +12,13 @@ suite('Adaption for express application', function() {
   var testRestPlugin = {
     api: new model.HTTPCommand({
       path: '/path/to/api',
-      toBackend: function(event, request) { return [event, 'api requested']; },
+      requestConverter: function(event, request) { return [event, 'api requested']; },
       responseConverter: function(event, data) { return [event, 'api OK']; }
     })
   };
   var testSocketPlugin = {
     api: new model.SocketRequestResponse({
-      toBackend: function(event, data) { return [event, 'api requested']; },
+      requestConverter: function(event, data) { return [event, 'api requested']; },
       responseConverter: function(event, data) { return [event, 'api OK']; }
     })
   };
