@@ -19,20 +19,20 @@ suite('Socket.IO Adapter', function() {
     'reqrep': new model.SocketRequestResponse(),
     'reqrep-mod-event': new model.SocketRequestResponse({
       toBackend: function(event, data) { return [event + '.mod', data]; },
-      toClient: function(event, data) { return [event + '.mod', data]; }
+      responseConverter: function(event, data) { return [event + '.mod', data]; }
     }),
     'reqrep-mod-body': new model.SocketRequestResponse({
       toBackend: function(event, data) { return [event, 'modified request']; },
-      toClient: function(event, data) { return [event, 'modified response']; }
+      responseConverter: function(event, data) { return [event, 'modified response']; }
     }),
     'pubsub': new model.SocketPublishSubscribe(),
     'pubsub-mod-event': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return [event + '.mod', data]; },
-      toClient: function(event, data) { return [event + '.mod', data]; }
+      responseConverter: function(event, data) { return [event + '.mod', data]; }
     }),
     'pubsub-mod-body': new model.SocketPublishSubscribe({
       toBackend: function(event, data) { return [event, 'modified request']; },
-      toClient: function(event, data) { return [event, 'modified response']; }
+      responseConverter: function(event, data) { return [event, 'modified response']; }
     })
   };
 

@@ -77,7 +77,7 @@ suite('HTTP Adapter', function() {
       adapter: new model.HTTPCommand({
         path: '/path/to/adapter',
         toBackend: function(event, request) { return [event, 'adapter requested']; },
-        toClient: function(event, data) { return [event, 'adapter OK']; }
+        responseConverter: function(event, data) { return [event, 'adapter OK']; }
       })
     };
 
