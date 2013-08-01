@@ -18,21 +18,37 @@ suite('Socket.IO Adapter', function() {
   var testPlugin = {
     'reqrep': new command.SocketRequestResponse(),
     'reqrep-mod-event': new command.SocketRequestResponse({
-      requestConverter: function(event, data) { return [event + '.mod', data]; },
-      responseConverter: function(event, data) { return [event + '.mod', data]; }
+      onRequest: function(data, connection) {
+        connection.emit('reqrep-mod-event.mod', data);
+      },
+      onResponse: function(data, socket) {
+        socket.emit('reqrep-mod-event.mod', data);
+      }
     }),
     'reqrep-mod-body': new command.SocketRequestResponse({
-      requestConverter: function(event, data) { return [event, 'modified request']; },
-      responseConverter: function(event, data) { return [event, 'modified response']; }
+      onRequest: function(data, connection) {
+        connection.emit('reqrep-mod-body', 'modified request');
+      },
+      onResponse: function(data, socket) {
+        socket.emit('reqrep-mod-body', 'modified response');
+      }
     }),
     'pubsub': new command.SocketPublishSubscribe(),
     'pubsub-mod-event': new command.SocketPublishSubscribe({
-      requestConverter: function(event, data) { return [event + '.mod', data]; },
-      responseConverter: function(event, data) { return [event + '.mod', data]; }
+      onRequest: function(data, connection) {
+        connection.emit('pubsub-mod-event.mod', data);
+      },
+      onResponse: function(data, socket) {
+        socket.emit('pubsub-mod-event.mod', data);
+      }
     }),
     'pubsub-mod-body': new command.SocketPublishSubscribe({
-      requestConverter: function(event, data) { return [event, 'modified request']; },
-      responseConverter: function(event, data) { return [event, 'modified response']; }
+      onSubscribe: function(data, connection) {
+        connection.emit('pubsub-mod-body', 'modified request');
+      },
+      onPublish: function(data, socket) {
+        socket.emit('pubsub-mod-body', 'modified response');
+      }
     })
   };
 

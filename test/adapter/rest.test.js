@@ -76,8 +76,12 @@ suite('HTTP Adapter', function() {
     var testPlugin = {
       adapter: new command.HTTPCommand({
         path: '/path/to/adapter',
-        requestConverter: function(event, request) { return [event, 'adapter requested']; },
-        responseConverter: function(event, data) { return [event, 'adapter OK']; }
+        onRequest: function(request, connection) {
+          connection.emit('adapter', 'adapter requested');
+        },
+        onResponse: function(data, response) {
+          response.jsonp('adapter OK', 200);
+        }
       })
     };
 
