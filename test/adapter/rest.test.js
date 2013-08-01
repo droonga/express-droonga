@@ -6,36 +6,36 @@ var utils = require('../test-utils');
 
 var express = require('express');
 var httpAdapter = require('../../lib/adapter/http');
-var model = require('../../lib/adapter/api/model');
+var command = require('../../lib/adapter/command');
 var restAPI = require('../../lib/adapter/api/rest');
 var groongaAPI = require('../../lib/adapter/api/groonga');
 
 suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
-      getCommand: new model.HTTPCommand({
+      getCommand: new command.HTTPCommand({
         path: '/get'
       }),
-      putCommand: new model.HTTPCommand({
+      putCommand: new command.HTTPCommand({
         method: 'PUT',
         path: '/put'
       }),
-      postCommand: new model.HTTPCommand({
+      postCommand: new command.HTTPCommand({
         method: 'POST',
         path: '/post'
       }),
-      deleteCommand: new model.HTTPCommand({
+      deleteCommand: new command.HTTPCommand({
         method: 'DELETE',
         path: '/delete'
       }),
-      ignored: new model.SocketCommand()
+      ignored: new command.SocketCommand()
     };
     var overridingPlugin = {
-      postCommand: new model.HTTPCommand({
+      postCommand: new command.HTTPCommand({
         method: 'POST',
         path: '/post/overridden'
       }),
-      deleteCommand: new model.HTTPCommand({
+      deleteCommand: new command.HTTPCommand({
         method: 'DELETE',
         path: '/delete/overridden'
       })
@@ -74,7 +74,7 @@ suite('HTTP Adapter', function() {
 
   suite('registeration', function() {
     var testPlugin = {
-      adapter: new model.HTTPCommand({
+      adapter: new command.HTTPCommand({
         path: '/path/to/adapter',
         requestConverter: function(event, request) { return [event, 'adapter requested']; },
         responseConverter: function(event, data) { return [event, 'adapter OK']; }

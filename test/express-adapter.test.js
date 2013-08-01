@@ -6,18 +6,18 @@ var express = require('express');
 var utils = require('./test-utils');
 
 var adapter = require('../index');
-var model = require('../lib/adapter/api/model');
+var command = require('../lib/adapter/command');
 
 suite('Adaption for express application', function() {
   var testRestPlugin = {
-    api: new model.HTTPCommand({
+    api: new command.HTTPCommand({
       path: '/path/to/api',
       requestConverter: function(event, request) { return [event, 'api requested']; },
       responseConverter: function(event, data) { return [event, 'api OK']; }
     })
   };
   var testSocketPlugin = {
-    api: new model.SocketRequestResponse({
+    api: new command.SocketRequestResponse({
       requestConverter: function(event, data) { return [event, 'api requested']; },
       responseConverter: function(event, data) { return [event, 'api OK']; }
     })

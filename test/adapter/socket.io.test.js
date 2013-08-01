@@ -6,7 +6,7 @@ var express = require('express');
 var utils = require('../test-utils');
 
 var socketIoAdapter = require('../../lib/adapter/socket.io');
-var model = require('../../lib/adapter/api/model');
+var command = require('../../lib/adapter/command');
 var scoketIoAPI = require('../../lib/adapter/api/socket.io');
 
 suite('Socket.IO Adapter', function() {
@@ -16,21 +16,21 @@ suite('Socket.IO Adapter', function() {
   var backend;
 
   var testPlugin = {
-    'reqrep': new model.SocketRequestResponse(),
-    'reqrep-mod-event': new model.SocketRequestResponse({
+    'reqrep': new command.SocketRequestResponse(),
+    'reqrep-mod-event': new command.SocketRequestResponse({
       requestConverter: function(event, data) { return [event + '.mod', data]; },
       responseConverter: function(event, data) { return [event + '.mod', data]; }
     }),
-    'reqrep-mod-body': new model.SocketRequestResponse({
+    'reqrep-mod-body': new command.SocketRequestResponse({
       requestConverter: function(event, data) { return [event, 'modified request']; },
       responseConverter: function(event, data) { return [event, 'modified response']; }
     }),
-    'pubsub': new model.SocketPublishSubscribe(),
-    'pubsub-mod-event': new model.SocketPublishSubscribe({
+    'pubsub': new command.SocketPublishSubscribe(),
+    'pubsub-mod-event': new command.SocketPublishSubscribe({
       requestConverter: function(event, data) { return [event + '.mod', data]; },
       responseConverter: function(event, data) { return [event + '.mod', data]; }
     }),
-    'pubsub-mod-body': new model.SocketPublishSubscribe({
+    'pubsub-mod-body': new command.SocketPublishSubscribe({
       requestConverter: function(event, data) { return [event, 'modified request']; },
       responseConverter: function(event, data) { return [event, 'modified response']; }
     })
@@ -53,15 +53,15 @@ suite('Socket.IO Adapter', function() {
 
   test('registration of plugin commands', function(done) {
     var basePlugin = {
-      getCommand: new model.SocketRequestResponse(),
-      putCommand: new model.SocketRequestResponse(),
-      postCommand: new model.SocketRequestResponse(),
-      deleteCommand: new model.SocketRequestResponse(),
-      ignored: new model.HTTPCommand()
+      getCommand: new command.SocketRequestResponse(),
+      putCommand: new command.SocketRequestResponse(),
+      postCommand: new command.SocketRequestResponse(),
+      deleteCommand: new command.SocketRequestResponse(),
+      ignored: new command.HTTPCommand()
     };
     var overridingPlugin = {
-      postCommand: new model.SocketRequestResponse(),
-      deleteCommand: new model.SocketRequestResponse()
+      postCommand: new command.SocketRequestResponse(),
+      deleteCommand: new command.SocketRequestResponse()
     };
 
     var application = express();
