@@ -22,7 +22,7 @@ suite('Socket.IO Adapter', function() {
         connection.emit('reqrep-mod-event.mod', data);
       },
       onResponse: function(data, socket) {
-        socket.emit('reqrep-mod-event.mod', data);
+        socket.emit('reqrep-mod-event.response.mod', data);
       }
     }),
     'reqrep-mod-body': new command.SocketRequestResponse({
@@ -30,21 +30,21 @@ suite('Socket.IO Adapter', function() {
         connection.emit('reqrep-mod-body', 'modified request');
       },
       onResponse: function(data, socket) {
-        socket.emit('reqrep-mod-body', 'modified response');
+        socket.emit('reqrep-mod-body.response', 'modified response');
       }
     }),
     'pubsub': new command.SocketPublishSubscribe(),
     'pubsub-mod-event': new command.SocketPublishSubscribe({
-      onRequest: function(data, connection) {
-        connection.emit('pubsub-mod-event.mod', data);
+      onSubscribe: function(data, connection) {
+        connection.emit('pubsub-mod-event.mod.subscribe', data);
       },
-      onResponse: function(data, socket) {
+      onPublish: function(data, socket) {
         socket.emit('pubsub-mod-event.mod', data);
       }
     }),
     'pubsub-mod-body': new command.SocketPublishSubscribe({
       onSubscribe: function(data, connection) {
-        connection.emit('pubsub-mod-body', 'modified request');
+        connection.emit('pubsub-mod-body.subscribe', 'modified request');
       },
       onPublish: function(data, socket) {
         socket.emit('pubsub-mod-body', 'modified response');

@@ -26,7 +26,7 @@ suite('Adaption for express application', function() {
         connection.emit('api', 'api requested');
       },
       onResponse: function(data, socket) {
-        socket.emit('api', 'api OK');
+        socket.emit('api.response', 'api OK');
       }
     })
   };
@@ -166,12 +166,12 @@ suite('Adaption for express application', function() {
           mockedReceiver = nodemock
             .mock('receive')
               .takes('api OK');
-          clientSocket.on('api.result', function(data) {
+          clientSocket.on('api.response', function(data) {
             mockedReceiver.receive(data);
           });
 
           return backend.sendResponse(backend.getMessages()[0],
-                                      'api.result',
+                                      'api.response',
                                       'api OK?');
         })
         .wait(0.01)
