@@ -12,14 +12,22 @@ suite('Adaption for express application', function() {
   var testRestPlugin = {
     api: new command.HTTPCommand({
       path: '/path/to/api',
-      requestConverter: function(event, request) { return [event, 'api requested']; },
-      responseConverter: function(event, data) { return [event, 'api OK']; }
+      onRequest: function(request, connection) {
+        connection.emit('api', 'api requested');
+      },
+      onResponse: function(data, response) {
+        response.jsonp('api OK', 200);
+      }
     })
   };
   var testSocketPlugin = {
     api: new command.SocketRequestResponse({
-      requestConverter: function(event, data) { return [event, 'api requested']; },
-      responseConverter: function(event, data) { return [event, 'api OK']; }
+      onRequest: function(data, connection) {
+        connection.emit('api', 'api requested');
+      },
+      onResponse: function(data, socket) {
+        socket.emit('api', 'api OK');
+      }
     })
   };
 
