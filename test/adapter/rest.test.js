@@ -201,7 +201,8 @@ suite('HTTP Adapter', function() {
                 source: 'foo',
                 query:  'bar',
                 output: {
-                  elements: utils.allElements
+                  elements: utils.allElements,
+                  attributes: []
                 }
               }
             }

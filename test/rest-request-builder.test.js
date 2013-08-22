@@ -21,7 +21,8 @@ suite('building message from REST adapter request', function() {
             source: 'test_table',
             query:  'foobar',
             output: {
-              elements: utils.allElements
+              elements: utils.allElements,
+              attributes: []
             }
           }
         }
@@ -55,8 +56,8 @@ suite('building message from REST adapter request', function() {
             limit:   100,
             matchTo: ['realname', 'nickname'],
             sortBy:  ['-realname', '-nickname'],
-            attributes: ['realname', 'nickname', 'age', 'job'],
             output: {
+              attributes: ['realname', 'nickname', 'age', 'job'],
               elements: utils.allElements
             }
           }
