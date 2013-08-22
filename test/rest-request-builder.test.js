@@ -6,16 +6,6 @@ var builders = require('../lib/adapter/api/rest-request-builder');
 
 suite('building message from REST adapter request', function() {
   suite('search', function() {
-    var outputAll = {
-      elements: [
-        'startTime',
-        'elapsedTime',
-        'count',
-        'attributes',
-        'records'
-      ]
-    };
-
     test('simple query', function() {
       var fakeRequest = {
         params: {
@@ -30,7 +20,9 @@ suite('building message from REST adapter request', function() {
           result: {
             source: 'test_table',
             query:  'foobar',
-            output: outputAll
+            output: {
+              elements: utils.allElements
+            }
           }
         }
       };
@@ -64,7 +56,9 @@ suite('building message from REST adapter request', function() {
             matchTo: ['realname', 'nickname'],
             sortBy:  ['-realname', '-nickname'],
             attributes: ['realname', 'nickname', 'age', 'job'],
-            output:  outputAll
+            output: {
+              elements: utils.allElements
+            }
           }
         }
       };

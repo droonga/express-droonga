@@ -409,12 +409,10 @@ function assertEqualJSON(actual, expected) {
 }
 assert.equalJSON = assertEqualJSON;
 
-exports.outputAll = {
-  elements: [
-    'startTime',
-    'elapsedTime',
-    'count',
-    'attributes',
-    'records'
-  ]
-};
+exports.allElements = [
+  'startTime',
+  'elapsedTime',
+  'count',
+  'attributes',
+  'records'
+];

@@ -200,7 +200,9 @@ suite('HTTP Adapter', function() {
               result: {
                 source: 'foo',
                 query:  'bar',
-                output: utils.outputAll
+                output: {
+                  elements: utils.allElements
+                }
               }
             }
           };
