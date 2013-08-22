@@ -7,11 +7,13 @@ var builders = require('../lib/adapter/api/rest-request-builder');
 suite('building message from REST adapter request', function() {
   suite('search', function() {
     var outputAll = {
-      startTime:   true,
-      elapsedTime: true,
-      count:       true,
-      attributes:  true,
-      recodes:     true
+      elements: [
+        'startTime',
+        'elapsedTime',
+        'count',
+        'attributes',
+        'records'
+      ]
     };
 
     test('simple query', function() {
