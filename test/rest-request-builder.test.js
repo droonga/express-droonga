@@ -53,12 +53,12 @@ suite('building message from REST adapter request', function() {
             source:  'people',
             query:   'foobar',
             offset:  10,
-            limit:   100,
             matchTo: ['realname', 'nickname'],
             sortBy:  ['-realname', '-nickname'],
             output: {
               attributes: ['realname', 'nickname', 'age', 'job'],
-              elements: utils.allElements
+              elements: utils.allElements,
+              limit:   100,
             }
           }
         }
