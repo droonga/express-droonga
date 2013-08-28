@@ -199,7 +199,9 @@ suite('HTTP Adapter', function() {
             queries: {
               result: {
                 source: 'foo',
-                query:  'bar',
+                condition: {
+                  query: 'bar'
+                },
                 output: {
                   elements: utils.allElements,
                   attributes: []

@@ -19,7 +19,9 @@ suite('building message from REST adapter request', function() {
         queries: {
           result: {
             source: 'test_table',
-            query:  'foobar',
+            condition: {
+              query:  'foobar'
+            },
             output: {
               elements: utils.allElements,
               attributes: []
@@ -51,9 +53,11 @@ suite('building message from REST adapter request', function() {
         queries: {
           result: {
             source:  'people',
-            query:   'foobar',
+            condition: {
+              query:   'foobar',
+              matchTo: ['realname', 'nickname'],
+            },
             offset:  10,
-            matchTo: ['realname', 'nickname'],
             sortBy:  ['-realname', '-nickname'],
             output: {
               attributes: ['realname', 'nickname', 'age', 'job'],
