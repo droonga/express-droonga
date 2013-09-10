@@ -8,6 +8,7 @@ var application = express();
 var server = http.createServer(application);
 application.droonga({
   prefix: '',
+  dataset: 'example',
   server: server
 });
 

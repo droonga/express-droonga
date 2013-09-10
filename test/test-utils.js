@@ -194,6 +194,7 @@ function setupApplication() {
       backend = newBackend;
       var connection = new Connection({
         tag:      testTag,
+        dataset:  'test-dataset',
         hostName: 'localhost',
         port:     testSendPort,
         receivePort: testReceivePort,
@@ -303,6 +304,7 @@ function createEnvelope(type, body) {
     date:       now.toISOString(),
     replyTo:    'localhost:' + testReceivePort + '/' + testTag,
     statusCode: 200,
+    dataset:    'test-dataset',
     type:       type,
     body:       body
   };
