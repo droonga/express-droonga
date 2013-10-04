@@ -225,7 +225,6 @@ suite('HTTP Adapter', function() {
       var receiverCallback = {};
       var connection = utils.createStubbedBackendConnection();
       var application = express();
-      application.use(express.bodyParser());
       httpAdapter.register(application, {
         prefix:     '',
         connection: connection
