@@ -230,7 +230,8 @@ suite('HTTP Adapter', function() {
         connection: connection
       });
       var searchQueries = {
-        source: 'table'
+        source: 'table',
+        condition: { query: '検索', matchTo: ['body'] }
       };
       utils.setupServer(application)
         .next(function(newServer) {
