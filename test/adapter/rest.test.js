@@ -220,6 +220,43 @@ suite('HTTP Adapter', function() {
           done(error);
         });
     });
+
+    test('droonga', function(done) {
+      var receiverCallback = {};
+      var connection = utils.createStubbedBackendConnection();
+      var application = express();
+      application.use(express.bodyParser());
+      httpAdapter.register(application, {
+        prefix:     '',
+        connection: connection
+      });
+      var searchQueries = {
+        source: 'table'
+      };
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          utils.post('/droonga/search', JSON.stringify({ queries: searchQueries }));
+        })
+        .wait(0.1)
+        .next(function() {
+          assert.equal(1, connection.emitMessageCalledArguments.length);
+          var args = connection.emitMessageCalledArguments[0];
+          assert.equal(args.type, 'search');
+
+          var expected = {
+            queries: searchQueries,
+            timeout: 1000,
+            type:    'droonga-search'
+          };
+          assert.equalJSON(args.message, expected);
+
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 });
 
