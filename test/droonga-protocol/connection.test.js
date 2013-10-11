@@ -124,13 +124,22 @@ suite('Connection', function() {
         assert.envelopeEqual(numericMessage,
                              utils.createExpectedEnvelope('numeric', 1234));
 
+        var messageForAnotherDataset = connection.emitMessage('message',
+                                                              'another',
+                                                              { dataset: 'another' });
+        assert.envelopeEqual(messageForAnotherDataset,
+                             utils.createExpectedEnvelope('message',
+                                                          'another',
+                                                          { dataset: 'another' }));
+
         Deferred
           .wait(0.01)
           .next(function() {
             assert.deepEqual(getBackendReceivedMessages(),
                              [objectMessage,
                               stringMessage,
-                              numericMessage]);
+                              numericMessage,
+                              messageForAnotherDataset]);
             done();
           })
           .error(function(error) {
