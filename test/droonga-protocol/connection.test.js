@@ -64,7 +64,7 @@ suite('Connection', function() {
           backend = newBackend;
           connection = new Connection({
             tag:      'test',
-            dataset:  'test-dataset',
+            defaultDataset: 'test-dataset',
             hostName: 'localhost',
             port:     utils.testSendPort,
             receivePort: utils.testReceivePort,

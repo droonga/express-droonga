@@ -194,7 +194,7 @@ function setupApplication() {
       backend = newBackend;
       var connection = new Connection({
         tag:      testTag,
-        dataset:  'test-dataset',
+        defaultDataset: 'test-dataset',
         hostName: 'localhost',
         port:     testSendPort,
         receivePort: testReceivePort,
@@ -297,14 +297,15 @@ exports.createBackend = createBackend;
 Deferred.register('createBackend', createBackend);
 
 
-function createEnvelope(type, body) {
+function createEnvelope(type, body, options) {
+  options = options || {};
   var now = new Date();
   var envelope = {
     id:         now.getTime(),
     date:       now.toISOString(),
     replyTo:    'localhost:' + testReceivePort + '/' + testTag,
     statusCode: 200,
-    dataset:    'test-dataset',
+    dataset:    options.dataset || 'test-dataset',
     type:       type,
     body:       body
   };
