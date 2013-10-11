@@ -114,7 +114,7 @@ suite('Connection', function() {
         var objectMessage = connection.emitMessage('object', { command: 'foobar' });
         assert.envelopeEqual(objectMessage,
                              utils.createExpectedEnvelope('object',
-                                                    { command: 'foobar' }));
+                                                          { command: 'foobar' }));
 
         var stringMessage = connection.emitMessage('string', 'string');
         assert.envelopeEqual(stringMessage,
