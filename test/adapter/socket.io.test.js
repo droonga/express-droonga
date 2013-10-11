@@ -38,7 +38,7 @@ suite('Socket.IO Adapter', function() {
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.subscribe', data);
       },
-      onPublish: function(data, socket) {
+      onNotify: function(data, socket) {
         socket.emit('pubsub-mod-event.mod', data);
       }
     }),
@@ -46,7 +46,7 @@ suite('Socket.IO Adapter', function() {
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-body.subscribe', 'modified request');
       },
-      onPublish: function(data, socket) {
+      onNotify: function(data, socket) {
         socket.emit('pubsub-mod-body', 'modified response');
       }
     })
