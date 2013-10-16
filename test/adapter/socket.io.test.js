@@ -120,6 +120,8 @@ suite('Socket.IO Adapter', function() {
         assert.deepEqual(registeredCommands,
                          [{ name:       'search',
                             definition: scoketIoAPI.search },
+                         [{ name:       'watch',
+                            definition: scoketIoAPI.watch },
                           { name:       'getCommand',
                             definition: basePlugin.getCommand },
                           { name:       'putCommand',
