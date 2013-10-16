@@ -110,7 +110,7 @@ suite('Connection', function() {
     }
 
     suite('one way message', function() {
-      test('from front to back', function(done) {
+      test('from front to back, with callback', function(done) {
         var callback = function() {};
 
         var objectMessage = connection.emitMessage('object', { command: 'foobar' }, callback);
