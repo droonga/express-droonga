@@ -66,10 +66,10 @@ suite('HTTP Adapter', function() {
     assert.deepEqual(registeredCommands,
                      [{ name:       'search',
                         definition: restAPI.search },
-                      { name:       'droonga',
-                        definition: droongaAPI.droonga },
                       { name:       'groonga',
                         definition: groongaAPI.groonga },
+                      { name:       'droonga',
+                        definition: droongaAPI.droonga },
                       { name:       'getCommand',
                         definition: basePlugin.getCommand },
                       { name:       'putCommand',
@@ -202,7 +202,13 @@ suite('HTTP Adapter', function() {
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connection: connection
+        connection: connection,
+        plugins: [
+          api.API_REST,
+          api.API_SOCKET_IO,
+          api.API_GROONGA,
+          api.API_DROONGA
+        ]
       });
       utils.setupServer(application)
         .next(function(newServer) {
@@ -244,7 +250,13 @@ suite('HTTP Adapter', function() {
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connection: connection
+        connection: connection,
+        plugins: [
+          api.API_REST,
+          api.API_SOCKET_IO,
+          api.API_GROONGA,
+          api.API_DROONGA
+        ]
       });
       var searchQueries = {
         source: 'table',
