@@ -167,51 +167,51 @@ suite('Socket.IO Adapter', function() {
       });
   });
 
-    function testReqRep(test, description, params) {
-      test(description, function(done) {
-        var mockedReceiver;
-        utils.setupApplication()
-          .next(function(result) {
-            server     = result.server;
-            connection = result.connection;
-            backend    = result.backend;
-            socketIoAdapter.register(result.application, server, {
-              tag:      utils.testTag,
-              connection: connection,
-              plugins: [testPlugin]
-            });
-          })
-          .createClientSocket()
-          .next(function(newClientSocket) {
-            clientSockets.push(newClientSocket);
-            clientSockets[0].emit(params.clientCommand, params.clientBody);
-          })
-          .wait(0.01)
-          .next(function() {
-            backend.assertReceived([{ type: params.expectedClientCommand,
-                                      body: params.expectedClientBody }]);
-
-            mockedReceiver = nodemock
-              .mock('receive')
-                .takes(params.expectedBackendBody);
-            clientSockets[0].on(params.expectedBackendCommand, function(data) {
-              mockedReceiver.receive(data);
-            });
-
-            return backend.sendResponse(backend.getMessages()[0],
-                                        params.backendCommand,
-                                        params.backendBody);
-          })
-          .wait(0.01)
-          .next(function() {
-            mockedReceiver.assertThrows();
-            done();
-          })
-          .error(function(error) {
-            done(error);
+  function testReqRep(test, description, params) {
+    test(description, function(done) {
+      var mockedReceiver;
+      utils.setupApplication()
+        .next(function(result) {
+          server     = result.server;
+          connection = result.connection;
+          backend    = result.backend;
+          socketIoAdapter.register(result.application, server, {
+            tag:      utils.testTag,
+            connection: connection,
+            plugins: [testPlugin]
           });
-      });
-    }
+        })
+        .createClientSocket()
+        .next(function(newClientSocket) {
+          clientSockets.push(newClientSocket);
+          clientSockets[0].emit(params.clientCommand, params.clientBody);
+        })
+        .wait(0.01)
+        .next(function() {
+          backend.assertReceived([{ type: params.expectedClientCommand,
+                                    body: params.expectedClientBody }]);
+
+          mockedReceiver = nodemock
+            .mock('receive')
+              .takes(params.expectedBackendBody);
+          clientSockets[0].on(params.expectedBackendCommand, function(data) {
+            mockedReceiver.receive(data);
+          });
+
+          return backend.sendResponse(backend.getMessages()[0],
+                                      params.backendCommand,
+                                      params.backendBody);
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.assertThrows();
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
+  }
 
   suite('request-response', function() {
     testReqRep(test, 'basic', {
@@ -385,7 +385,7 @@ suite('Socket.IO Adapter', function() {
   });
 
   suite('publish-subscribe', function() {
-    test(test, 'basic', {
+    testReqRep(test, 'basic', {
       clientCommand:          'pubsub.subscribe',
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub.subscribe',
@@ -396,7 +396,7 @@ suite('Socket.IO Adapter', function() {
       expectedBackendBody:    'raw response'        
     });
 
-    test(test, 'modified event type', {
+    testReqRep(test, 'modified event type', {
       clientCommand:          'pubsub-mod-event.subscribe',
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub-mod-event.mod.subscribe',
@@ -407,7 +407,7 @@ suite('Socket.IO Adapter', function() {
       expectedBackendBody:    'raw response'        
     });
 
-    test(test, 'modified body', {
+    testReqRep(test, 'modified body', {
       clientCommand:          'pubsub-mod-body.subscribe',
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub-mod-body.subscribe',
