@@ -31,6 +31,6 @@ express.application.droonga = function(params) {
   this.emitMessage = connection.emitMessage.bind(connection); // shorthand
 }
 
-requre('./lib/adapter/api').exportTo(exports);
+require('./lib/adapter/api').exportTo(exports);
 
 exports.command = require('./lib/adapter/command');
