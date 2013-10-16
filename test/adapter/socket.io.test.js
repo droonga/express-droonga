@@ -417,6 +417,120 @@ suite('Socket.IO Adapter', function() {
       expectedBackendCommand: 'pubsub-mod-body.subscribe.response',
       expectedBackendBody:    'modified response'        
     });
+
+    test('notification', function(done) {
+      var mockedReceiver;
+      // step 0: setup
+      utils.setupApplication()
+        .next(function(result) {
+          server     = result.server;
+          connection = result.connection;
+          backend    = result.backend;
+          socketIoAdapter.register(result.application, server, {
+            tag:      utils.testTag,
+            connection: connection,
+            plugins: [testPlugin]
+          });
+        })
+        .createClientSocket()
+        .next(function(newClientSocket) {
+          clientSockets.push(newClientSocket);
+          clientSockets[0].on('pubsub.subscribe.response', function(data) {
+            mockedReceiver.receive(data);
+          });
+          clientSockets[0].on('pubsub.unsubscribe.response', function(data) {
+            mockedReceiver.receive(data);
+          });
+          clientSockets[0].on('pubsub.notification', function(data) {
+            mockedReceiver.receive(data);
+          });
+
+      // step 1: notifications before subscribing
+          mockedReceiver = nodemock
+            .mock('receive').takes('nothing');
+          return backend.sendMessage('pubsub.notification',
+                                     'never notified');
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.receive('nothing');
+          mockedReceiver.assertThrows();
+
+      // step 2: subscribe
+          clientSockets[0].emit('pubsub.subscribe', 'subscribe!');
+        })
+        .wait(0.01)
+        .next(function() {
+          backend.assertReceived([{ type: 'pubsub.subscribe',
+                                    body: 'subscribe!' }]);
+
+          mockedReceiver = nodemock
+            .mock('receive')
+              .takes('subscribed!');
+          return backend.sendResponse(backend.getMessages()[0],
+                                      'pubsub.subscribe.response',
+                                      'subscribed!');
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.assertThrows();
+
+      // step 3: notifications while subscribing
+          mockedReceiver = nodemock
+            .mock('receive').takes('notified 1')
+            .mock('receive').takes('notified 2')
+            .mock('receive').takes('notified 3');
+          return backend.sendMessage('pubsub.notification',
+                                     'notified 1');
+        })
+        .next(function() {
+          return backend.sendMessage('pubsub.notification',
+                                     'notified 2');
+        })
+        .next(function() {
+          return backend.sendMessage('pubsub.notification',
+                                     'notified 3');
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.assertThrows();
+
+      // step 4: unsubscribe
+          clientSockets[0].emit('pubsub.unsubscribe', 'unsubscribe!');
+        })
+        .wait(0.01)
+        .next(function() {
+          backend.assertReceived([{ type: 'pubsub.unsubscribe',
+                                    body: 'unsubscribe!' }]);
+
+          mockedReceiver = nodemock
+            .mock('receive')
+              .takes('unsubscribed!');
+          return backend.sendResponse(backend.getMessages()[0],
+                                      'pubsub.unsubscribe.response',
+                                      'unsubscribed!');
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.assertThrows();
+
+      // step 5: notifications after unsubscribing
+          mockedReceiver = nodemock
+            .mock('receive').takes('nothing');
+          return backend.sendMessage('pubsub.notification',
+                                     'never notified');
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedReceiver.receive('nothing');
+          mockedReceiver.assertThrows();
+
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
 });
 
