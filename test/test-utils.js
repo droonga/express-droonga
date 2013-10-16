@@ -303,7 +303,7 @@ function createEnvelope(type, body, options) {
   var envelope = {
     id:         now.getTime(),
     date:       now.toISOString(),
-    replyTo:    'localhost:' + testReceivePort + '/' + testTag,
+    from:       'localhost:' + testReceivePort + '/' + testTag,
     statusCode: 200,
     dataset:    options.dataset || 'test-dataset',
     type:       type,
@@ -316,11 +316,12 @@ exports.createEnvelope = createEnvelope;
 function createExpectedEnvelope(type, body, options) {
   var envelope = createEnvelope(type, body);
   envelope.id = TypeOf('string');
+  envelope.from = new RegExp('^' + envelope.from + '\\?connection_id=\\d+$');
   envelope.date = InstanceOf(Date);
   if (options && options.dataset)
     envelope.dataset = options.dataset;
   if (options && options.requireReply)
-    envelope.replyTo = new RegExp('^' + envelope.replyTo + '\\?connection_id=\\d+$');
+    envelope.replyTo = envelope.from;
   return envelope;
 }
 exports.createExpectedEnvelope = createExpectedEnvelope;
