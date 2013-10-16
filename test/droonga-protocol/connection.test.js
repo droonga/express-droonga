@@ -111,21 +111,24 @@ suite('Connection', function() {
 
     suite('one way message', function() {
       test('from front to back', function(done) {
-        var objectMessage = connection.emitMessage('object', { command: 'foobar' });
+        var callback = function() {};
+
+        var objectMessage = connection.emitMessage('object', { command: 'foobar' }, callback);
         assert.envelopeEqual(objectMessage,
                              utils.createExpectedEnvelope('object',
                                                           { command: 'foobar' }));
 
-        var stringMessage = connection.emitMessage('string', 'string');
+        var stringMessage = connection.emitMessage('string', 'string', callback);
         assert.envelopeEqual(stringMessage,
                              utils.createExpectedEnvelope('string', 'string'));
 
-        var numericMessage = connection.emitMessage('numeric', 1234);
+        var numericMessage = connection.emitMessage('numeric', 1234, callback);
         assert.envelopeEqual(numericMessage,
                              utils.createExpectedEnvelope('numeric', 1234));
 
         var messageForAnotherDataset = connection.emitMessage('message',
                                                               'another',
+                                                              callback,
                                                               { dataset: 'another' });
         assert.envelopeEqual(messageForAnotherDataset,
                              utils.createExpectedEnvelope('message',

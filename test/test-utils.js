@@ -313,11 +313,13 @@ function createEnvelope(type, body, options) {
 }
 exports.createEnvelope = createEnvelope;
 
-function createExpectedEnvelope(type, body) {
+function createExpectedEnvelope(type, body, options) {
   var envelope = createEnvelope(type, body);
   envelope.replyTo = new RegExp('^' + envelope.replyTo + '\\?connection_id=\\d+$');
   envelope.id = TypeOf('string');
   envelope.date = InstanceOf(Date);
+  if (options && options.dataset)
+    envelope.dataset = options.dataset;
   return envelope;
 }
 exports.createExpectedEnvelope = createExpectedEnvelope;
