@@ -237,7 +237,11 @@ function createBackend() {
   var deferred = new Deferred();
   var backend = new FluentReceiver(testSendPort);
 
-  backend.received = [];
+  backend.clearMessages = function() {
+    this.received = [];
+  };
+
+  backend.clearMessages();
   backend.on('receive', function(data) {
     debug('test-utils.createBackend.receive %d', backend._id);
     backend.received.push(data);

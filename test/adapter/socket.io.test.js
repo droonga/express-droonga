@@ -496,6 +496,7 @@ suite('Socket.IO Adapter', function() {
           mockedReceiver.assertThrows();
 
       // step 4: unsubscribe
+          backend.clearMessages();
           clientSockets[0].emit('pubsub.unsubscribe', 'unsubscribe!');
         })
         .wait(0.01)
