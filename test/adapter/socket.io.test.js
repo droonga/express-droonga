@@ -7,6 +7,7 @@ var utils = require('../test-utils');
 
 var socketIoAdapter = require('../../lib/adapter/socket.io');
 var command = require('../../lib/adapter/command');
+var api = require('../../lib/adapter/api');
 var scoketIoAPI = require('../../lib/adapter/api/socket.io');
 
 suite('Socket.IO Adapter', function() {
@@ -106,6 +107,10 @@ suite('Socket.IO Adapter', function() {
         var registeredCommands = socketIoAdapter.register(application, server, {
           connection: utils.createStubbedBackendConnection(),
           plugins: [
+            api.API_REST,
+            api.API_SOCKET_IO,
+            api.API_GROONGA,
+            api.API_DROONGA,
             basePlugin,
             overridingPlugin
           ]
@@ -151,7 +156,13 @@ suite('Socket.IO Adapter', function() {
         server = newServer;
         socketIoAdapter.register(application, server, {
           connection: utils.createStubbedBackendConnection(),
-          plugins: [testPlugin]
+          plugins: [
+            api.API_REST,
+            api.API_SOCKET_IO,
+            api.API_GROONGA,
+            api.API_DROONGA,
+            testPlugin
+          ]
         });
 
         return utils.createClientSocket();
@@ -180,7 +191,13 @@ suite('Socket.IO Adapter', function() {
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
-            plugins: [testPlugin]
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              testPlugin
+            ]
           });
         })
         .createClientSocket()
@@ -267,7 +284,13 @@ suite('Socket.IO Adapter', function() {
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
-            plugins: [testPlugin]
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              testPlugin
+            ]
           });
         })
         .createClientSockets(3)
@@ -341,7 +364,13 @@ suite('Socket.IO Adapter', function() {
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
-            plugins: [testPlugin]
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              testPlugin
+            ]
           });
         })
         .createClientSockets(1)
@@ -431,7 +460,13 @@ suite('Socket.IO Adapter', function() {
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connection: connection,
-            plugins: [testPlugin]
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              testPlugin
+            ]
           });
         })
         .createClientSocket()

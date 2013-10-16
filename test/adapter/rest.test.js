@@ -7,6 +7,7 @@ var utils = require('../test-utils');
 var express = require('express');
 var httpAdapter = require('../../lib/adapter/http');
 var command = require('../../lib/adapter/command');
+var api = require('../../lib/adapter/api');
 var restAPI = require('../../lib/adapter/api/rest');
 var droongaAPI = require('../../lib/adapter/api/droonga');
 var groongaAPI = require('../../lib/adapter/api/groonga');
@@ -47,6 +48,10 @@ suite('HTTP Adapter', function() {
       prefix:     '',
       connection: utils.createStubbedBackendConnection(),
       plugins: [
+        api.API_REST,
+        api.API_SOCKET_IO,
+        api.API_GROONGA,
+        api.API_DROONGA,
         basePlugin,
         overridingPlugin
       ]
@@ -114,7 +119,13 @@ suite('HTTP Adapter', function() {
       httpAdapter.register(application, {
         prefix:     '',
         connection: connection,
-        plugins:    [testPlugin]
+        plugins:    [
+          api.API_REST,
+          api.API_SOCKET_IO,
+          api.API_GROONGA,
+          api.API_DROONGA,
+          testPlugin
+        ]
       });
 
       backend.reserveResponse(function(request) {
@@ -143,7 +154,13 @@ suite('HTTP Adapter', function() {
       httpAdapter.register(application, {
         prefix:     '/path/to/droonga',
         connection: connection,
-        plugins:    [testPlugin]
+        plugins:    [
+          api.API_REST,
+          api.API_SOCKET_IO,
+          api.API_GROONGA,
+          api.API_DROONGA,
+          testPlugin
+        ]
       });
 
       backend.reserveResponse(function(request) {
