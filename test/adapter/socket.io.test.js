@@ -38,16 +38,34 @@ suite('Socket.IO Adapter', function() {
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.subscribe', data);
       },
+      onSubscribeResponse: function(data, socket) {
+        socket.emit('pubsub-mod-event.mod.subscribe.response', data);
+      },
+      onUnsubscribe: function(data, connection) {
+        connection.emit('pubsub-mod-event.mod.unsubscribe', data);
+      },
+      onUnsubscribeResponse: function(data, socket) {
+        socket.emit('pubsub-mod-event.mod.unsubscribe.response', data);
+      },
       onNotify: function(data, socket) {
-        socket.emit('pubsub-mod-event.mod', data);
+        socket.emit('pubsub-mod-event.mod.notification', data);
       }
     }),
     'pubsub-mod-body': new command.SocketPublishSubscribe({
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-body.subscribe', 'modified request');
       },
+      onSubscribeResponse: function(data, socket) {
+        socket.emit('pubsub-mod-body.subscribe.response', 'modified response');
+      },
+      onUnsubscribe: function(data, connection) {
+        connection.emit('pubsub-mod-body.unsubscribe', 'modified request');
+      },
+      onUnsubscribeResponse: function(data, socket) {
+        socket.emit('pubsub-mod-body.unsubscribe.response', 'modified response');
+      },
       onNotify: function(data, socket) {
-        socket.emit('pubsub-mod-body', 'modified response');
+        socket.emit('pubsub-mod-body.notification', 'modified response');
       }
     })
   };
@@ -398,8 +416,9 @@ suite('Socket.IO Adapter', function() {
               mockedReceiver.receive(data);
             });
 
-            return backend.sendMessage(params.backendCommand,
-                                       params.backendBody);
+            return backend.sendResponse(backend.getMessages()[0],
+                                        params.backendCommand,
+                                        params.backendBody);
           })
           .wait(0.01)
           .next(function() {
@@ -417,9 +436,9 @@ suite('Socket.IO Adapter', function() {
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub.subscribe',
       expectedClientBody:     'raw request',
-      backendCommand:         'pubsub',
+      backendCommand:         'pubsub.subscribe.response',
       backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub',
+      expectedBackendCommand: 'pubsub.subscribe.response',
       expectedBackendBody:    'raw response'        
     });
 
@@ -428,9 +447,9 @@ suite('Socket.IO Adapter', function() {
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub-mod-event.mod.subscribe',
       expectedClientBody:     'raw request',
-      backendCommand:         'pubsub-mod-event',
+      backendCommand:         'pubsub-mod-event.subscribe.response',
       backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub-mod-event.mod',
+      expectedBackendCommand: 'pubsub-mod-event.mod.subscribe.response',
       expectedBackendBody:    'raw response'        
     });
 
@@ -439,75 +458,10 @@ suite('Socket.IO Adapter', function() {
       clientBody:             'raw request',
       expectedClientCommand:  'pubsub-mod-body.subscribe',
       expectedClientBody:     'modified request',
-      backendCommand:         'pubsub-mod-body',
+      backendCommand:         'pubsub-mod-body.subscribe.response',
       backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub-mod-body',
+      expectedBackendCommand: 'pubsub-mod-body.subscribe.response',
       expectedBackendBody:    'modified response'        
-    });
-
-    test('multiple clients', function(done) {
-      var messages = [
-        'a',
-        'b'
-      ];
-      var clientReceiver;
-      utils.setupApplication()
-        .next(function(result) {
-          server     = result.server;
-          connection = result.connection;
-          backend    = result.backend;
-          socketIoAdapter.register(result.application, server, {
-            tag:      utils.testTag,
-            connection: connection,
-            plugins: [testPlugin]
-          });
-        })
-        .createClientSockets(3)
-        .next(function(newClientSockets) {
-          clientSockets = clientSockets.concat(newClientSockets);
-          clientSockets[0].emit('pubsub.subscribe', 0);
-        }).wait(0.01).next(function() {
-          clientSockets[1].emit('pubsub.subscribe', 1);
-        }).wait(0.01).next(function() {
-          clientSockets[2].emit('pubsub.subscribe', 2);
-        }).wait(0.01).next(function() {
-          assert.deepEqual(backend.getBodies(),
-                           [0, 1, 2]);
-
-          var publisheds = messages.map(function(message) {
-            return utils.createEnvelope('pubsub', message);
-          });
-
-          clientReceiver = nodemock
-            .mock('receive').takes('0:' + messages[0])
-            .mock('receive').takes('1:' + messages[0])
-            .mock('receive').takes('2:' + messages[0])
-            .mock('receive').takes('0:' + messages[1])
-            .mock('receive').takes('1:' + messages[1])
-            .mock('receive').takes('2:' + messages[1]);
-          clientSockets[0].on('pubsub', function(data) {
-            clientReceiver.receive('0:' + data);
-          });
-          clientSockets[1].on('pubsub', function(data) {
-            clientReceiver.receive('1:' + data);
-          });
-          clientSockets[2].on('pubsub', function(data) {
-            clientReceiver.receive('2:' + data);
-          });
-
-          return utils
-            .sendPacketTo(utils.createPacket(publisheds[0]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(publisheds[1]), utils.testReceivePort);
-        })
-        .wait(0.01)
-        .next(function() {
-          clientReceiver.assertThrows();
-          done();
-        })
-        .error(function(error) {
-          done(error);
-        });
     });
   });
 });
