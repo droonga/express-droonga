@@ -110,21 +110,63 @@ suite('Connection', function() {
     }
 
     suite('one way message', function() {
+      test('from front to back, without callback', function(done) {
+        var objectMessage = connection.emitMessage('object', { command: 'foobar' });
+        assert.envelopeEqual(objectMessage,
+                             utils.createExpectedEnvelope('object',
+                                                          { command: 'foobar' }));
+
+        var stringMessage = connection.emitMessage('string', 'string');
+        assert.envelopeEqual(stringMessage,
+                             utils.createExpectedEnvelope('string', 'string'));
+
+        var numericMessage = connection.emitMessage('numeric', 1234);
+        assert.envelopeEqual(numericMessage,
+                             utils.createExpectedEnvelope('numeric', 1234));
+
+        var messageForAnotherDataset = connection.emitMessage('message',
+                                                              'another',
+                                                              { dataset: 'another' });
+        assert.envelopeEqual(messageForAnotherDataset,
+                             utils.createExpectedEnvelope('message',
+                                                          'another',
+                                                          { dataset: 'another' }));
+
+        Deferred
+          .wait(0.01)
+          .next(function() {
+            assert.deepEqual(getBackendReceivedMessages(),
+                             [objectMessage,
+                              stringMessage,
+                              numericMessage,
+                              messageForAnotherDataset]);
+            done();
+          })
+          .error(function(error) {
+            done(error);
+          });
+      });
+
       test('from front to back, with callback', function(done) {
         var callback = function() {};
 
         var objectMessage = connection.emitMessage('object', { command: 'foobar' }, callback);
         assert.envelopeEqual(objectMessage,
                              utils.createExpectedEnvelope('object',
-                                                          { command: 'foobar' }));
+                                                          { command: 'foobar' },
+                                                          { requireReply: true }));
 
         var stringMessage = connection.emitMessage('string', 'string', callback);
         assert.envelopeEqual(stringMessage,
-                             utils.createExpectedEnvelope('string', 'string'));
+                             utils.createExpectedEnvelope('string',
+                                                          'string',
+                                                          { requireReply: true }));
 
         var numericMessage = connection.emitMessage('numeric', 1234, callback);
         assert.envelopeEqual(numericMessage,
-                             utils.createExpectedEnvelope('numeric', 1234));
+                             utils.createExpectedEnvelope('numeric',
+                                                          1234,
+                                                          { requireReply: true }));
 
         var messageForAnotherDataset = connection.emitMessage('message',
                                                               'another',
@@ -133,7 +175,8 @@ suite('Connection', function() {
         assert.envelopeEqual(messageForAnotherDataset,
                              utils.createExpectedEnvelope('message',
                                                           'another',
-                                                          { dataset: 'another' }));
+                                                          { dataset: 'another',
+                                                            requireReply: true } }));
 
         Deferred
           .wait(0.01)
