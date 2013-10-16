@@ -176,7 +176,7 @@ suite('Connection', function() {
                              utils.createExpectedEnvelope('message',
                                                           'another',
                                                           { dataset: 'another',
-                                                            requireReply: true } }));
+                                                            requireReply: true }));
 
         Deferred
           .wait(0.01)
