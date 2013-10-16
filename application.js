@@ -4,11 +4,6 @@ var express = require('express'),
     droonga = require('./index'),
     http = require('http');
 
-var builtInRestAPI = require('./lib/adapter/api/rest');
-var builtInSocketIoAPI = require('./lib/adapter/api/socket.io');
-var builtInGroongaAPI = require('./lib/adapter/api/groonga');
-var builtInDroongaAPI = require('./lib/adapter/api/droonga');
-
 var application = express();
 var server = http.createServer(application);
 application.droonga({
@@ -16,10 +11,10 @@ application.droonga({
   defaultDataset: 'example',
   server: server,
   plugins: [
-    builtInRestAPI,
-    builtInSocketIoAPI,
-    builtInGroongaAPI,
-    builtInDroongaAPI
+    droonga.API_REST,
+    droonga.API_SOCKET_IO,
+    droonga.API_GROONGA,
+    droonga.API_DROONGA
   ]
 });
 
