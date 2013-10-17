@@ -39,13 +39,13 @@ suite('Socket.IO Adapter', function() {
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.subscribe', data);
       },
-      onSubscribeResponse: function(data, socket) {
+      onSubscribed: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.subscribe.response', data);
       },
       onUnsubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.unsubscribe', data);
       },
-      onUnsubscribeResponse: function(data, socket) {
+      onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.unsubscribe.response', data);
       },
       onNotify: function(data, socket) {
@@ -56,13 +56,13 @@ suite('Socket.IO Adapter', function() {
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-body.subscribe', 'modified request');
       },
-      onSubscribeResponse: function(data, socket) {
+      onSubscribed: function(data, socket) {
         socket.emit('pubsub-mod-body.subscribe.response', 'modified response');
       },
       onUnsubscribe: function(data, connection) {
         connection.emit('pubsub-mod-body.unsubscribe', 'modified request');
       },
-      onUnsubscribeResponse: function(data, socket) {
+      onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-body.unsubscribe.response', 'modified response');
       },
       onNotify: function(data, socket) {
