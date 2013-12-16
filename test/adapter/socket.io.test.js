@@ -106,9 +106,9 @@ suite('Socket.IO Adapter', function() {
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
-
+          connection = utils.createStubbedBackendConnection();
           var registeredCommands = socketIoAdapter.register(application, server, {
-            connection: utils.createStubbedBackendConnection(),
+            connection: connection,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -157,8 +157,9 @@ suite('Socket.IO Adapter', function() {
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
+          connection = utils.createStubbedBackendConnection();
           socketIoAdapter.register(application, server, {
-            connection: utils.createStubbedBackendConnection(),
+            connection: connection,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
