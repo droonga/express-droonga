@@ -85,6 +85,7 @@ suite('Socket.IO Adapter', function() {
                                 connection: connection });
   }
 
+suite('registration', function() {
   setup(setupEnvironment);
   teardown(teardownEnvironment);
 
@@ -181,6 +182,7 @@ suite('Socket.IO Adapter', function() {
         done(error);
       });
   });
+});
 
   function testReqRep(test, description, params) {
     test(description, function(done) {
