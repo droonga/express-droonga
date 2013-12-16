@@ -171,6 +171,9 @@ function createStubbedBackendConnection() {
       });
     },
     emitMessageCalledArguments: [],
+    getRouteToSelf: function() {
+      return 'localhost:' + testReceivePort + '/' + testTag;
+    },
 
     emit: function() {},
     on: function() {},
