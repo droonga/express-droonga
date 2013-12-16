@@ -71,11 +71,10 @@ suite('Socket.IO Adapter', function() {
     })
   };
 
-  setup(function() {
+  function setupEnvironment() {
     clientSockets = [];
-  });
-
-  teardown(function() {
+  }
+  function teardownEnvironment() {
     if (clientSockets.length) {
       clientSockets.forEach(function(clientSocket) {
         clientSocket.disconnect();
@@ -84,7 +83,10 @@ suite('Socket.IO Adapter', function() {
     utils.teardownApplication({ backend:    backend,
                                 server:     server,
                                 connection: connection });
-  });
+  }
+
+  setup(setupEnvironment);
+  teardown(teardownEnvironment);
 
   test('registration of plugin commands', function(done) {
     var basePlugin = {
@@ -233,6 +235,9 @@ suite('Socket.IO Adapter', function() {
   }
 
   suite('request-response', function() {
+    setup(setupEnvironment);
+    teardown(teardownEnvironment);
+
     testReqRep(test, 'basic', {
       clientCommand:          'reqrep',
       clientBody:             'raw request',
@@ -416,6 +421,9 @@ suite('Socket.IO Adapter', function() {
   });
 
   suite('publish-subscribe', function() {
+    setup(setupEnvironment);
+    teardown(teardownEnvironment);
+
     testReqRep(test, 'basic', {
       clientCommand:          'pubsub.subscribe',
       clientBody:             'raw request',
