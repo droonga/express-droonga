@@ -85,104 +85,104 @@ suite('Socket.IO Adapter', function() {
                                 connection: connection });
   }
 
-suite('registration', function() {
-  setup(setupEnvironment);
-  teardown(teardownEnvironment);
+  suite('registration', function() {
+    setup(setupEnvironment);
+    teardown(teardownEnvironment);
 
-  test('registration of plugin commands', function(done) {
-    var basePlugin = {
-      getCommand: new command.SocketRequestResponse(),
-      putCommand: new command.SocketRequestResponse(),
-      postCommand: new command.SocketRequestResponse(),
-      deleteCommand: new command.SocketRequestResponse(),
-      ignored: new command.HTTPRequestResponse()
-    };
-    var overridingPlugin = {
-      postCommand: new command.SocketRequestResponse(),
-      deleteCommand: new command.SocketRequestResponse()
-    };
+    test('registration of plugin commands', function(done) {
+      var basePlugin = {
+        getCommand: new command.SocketRequestResponse(),
+        putCommand: new command.SocketRequestResponse(),
+        postCommand: new command.SocketRequestResponse(),
+        deleteCommand: new command.SocketRequestResponse(),
+        ignored: new command.HTTPRequestResponse()
+      };
+      var overridingPlugin = {
+        postCommand: new command.SocketRequestResponse(),
+        deleteCommand: new command.SocketRequestResponse()
+      };
 
-    var application = express();
-    utils.setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
+      var application = express();
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
 
-        var registeredCommands = socketIoAdapter.register(application, server, {
-          connection: utils.createStubbedBackendConnection(),
-          plugins: [
-            api.API_REST,
-            api.API_SOCKET_IO,
-            api.API_GROONGA,
-            api.API_DROONGA,
-            basePlugin,
-            overridingPlugin
-          ]
+          var registeredCommands = socketIoAdapter.register(application, server, {
+            connection: utils.createStubbedBackendConnection(),
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              basePlugin,
+              overridingPlugin
+            ]
+          });
+
+          registeredCommands = registeredCommands.map(function(command) {
+            return {
+              name:       command.name,
+              definition: command.definition
+            };
+          });
+          assert.deepEqual(registeredCommands,
+                           [{ name:       'search',
+                              definition: scoketIoAPI.search },
+                            { name:       'watch',
+                              definition: scoketIoAPI.watch },
+                            { name:       'getCommand',
+                              definition: basePlugin.getCommand },
+                            { name:       'putCommand',
+                              definition: basePlugin.putCommand },
+                            { name:       'postCommand',
+                              definition: overridingPlugin.postCommand },
+                            { name:       'deleteCommand',
+                              definition: overridingPlugin.deleteCommand }]);
+          done();
+        })
+        .error(function(error) {
+          done(error);
         });
-
-        registeredCommands = registeredCommands.map(function(command) {
-          return {
-            name:       command.name,
-            definition: command.definition
-          };
-        });
-        assert.deepEqual(registeredCommands,
-                         [{ name:       'search',
-                            definition: scoketIoAPI.search },
-                          { name:       'watch',
-                            definition: scoketIoAPI.watch },
-                          { name:       'getCommand',
-                            definition: basePlugin.getCommand },
-                          { name:       'putCommand',
-                            definition: basePlugin.putCommand },
-                          { name:       'postCommand',
-                            definition: overridingPlugin.postCommand },
-                          { name:       'deleteCommand',
-                            definition: overridingPlugin.deleteCommand }]);
-        done();
-      })
-      .error(function(error) {
-        done(error);
-      });
-  });
-
-  test('initialization', function(done) {
-    var mockedListener = nodemock
-      .mock('connected');
-
-    var application = express();
-    application.on('connection', function(socket) {
-      mockedListener.connected();
     });
 
-    utils.setupServer(application)
-      .next(function(newServer) {
-        server = newServer;
-        socketIoAdapter.register(application, server, {
-          connection: utils.createStubbedBackendConnection(),
-          plugins: [
-            api.API_REST,
-            api.API_SOCKET_IO,
-            api.API_GROONGA,
-            api.API_DROONGA,
-            testPlugin
-          ]
-        });
+    test('initialization', function(done) {
+      var mockedListener = nodemock
+        .mock('connected');
 
-        return utils.createClientSocket();
-      })
-      .next(function(newClientSocket) {
-        clientSockets.push(newClientSocket);
-      })
-      .wait(0.01)
-      .next(function() {
-        mockedListener.assertThrows();
-        done();
-      })
-      .error(function(error) {
-        done(error);
+      var application = express();
+      application.on('connection', function(socket) {
+        mockedListener.connected();
       });
+
+      utils.setupServer(application)
+        .next(function(newServer) {
+          server = newServer;
+          socketIoAdapter.register(application, server, {
+            connection: utils.createStubbedBackendConnection(),
+            plugins: [
+              api.API_REST,
+              api.API_SOCKET_IO,
+              api.API_GROONGA,
+              api.API_DROONGA,
+              testPlugin
+            ]
+          });
+
+          return utils.createClientSocket();
+        })
+        .next(function(newClientSocket) {
+          clientSockets.push(newClientSocket);
+        })
+        .wait(0.01)
+        .next(function() {
+          mockedListener.assertThrows();
+          done();
+        })
+        .error(function(error) {
+          done(error);
+        });
+    });
   });
-});
 
   function testReqRep(test, description, params) {
     test(description, function(done) {
