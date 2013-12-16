@@ -58,7 +58,7 @@ suite('Connection', function() {
     var connection;
     var backend;
 
-    setup(function(done) {
+    function setupEnvironment(done) {
       utils.createBackend()
         .next(function(newBackend) {
           backend = newBackend;
@@ -73,9 +73,9 @@ suite('Connection', function() {
           });
           done();
         });
-    });
+    }
 
-    teardown(function() {
+    function teardownEnvironment() {
       if (backend) {
         backend.close();
         backend = undefined;
@@ -84,7 +84,7 @@ suite('Connection', function() {
         connection.close();
         connection = undefined;
       }
-    });
+    }
 
     function createMockedMessageCallback() {
       var mockedCallback = nodemock;
@@ -110,6 +110,9 @@ suite('Connection', function() {
     }
 
     suite('one way message', function() {
+      setup(setupEnvironment);
+      teardown(teardownEnvironment);
+
       test('from front to back, without callback', function(done) {
         var objectMessage = connection.emitMessage('object', { command: 'foobar' });
         assert.envelopeEqual(objectMessage,
@@ -224,6 +227,9 @@ suite('Connection', function() {
     });
 
     suite('request-response', function() {
+      setup(setupEnvironment);
+      teardown(teardownEnvironment);
+
       test('success', function(done) {
         var callback = createMockedMessageCallback();
 
