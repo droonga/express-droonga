@@ -10,7 +10,7 @@ var command = require('../lib/adapter/command');
 
 suite('Adaption for express application', function() {
   var testRestPlugin = {
-    api: new command.HTTPCommand({
+    api: new command.RequestResponseHTTPCommand({
       path: '/path/to/api',
       onRequest: function(request, connection) {
         connection.emit('api', 'api requested');

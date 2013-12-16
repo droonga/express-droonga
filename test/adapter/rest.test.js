@@ -15,29 +15,29 @@ var groongaAPI = require('../../lib/adapter/api/groonga');
 suite('HTTP Adapter', function() {
   test('registeration of plugin commands', function() {
     var basePlugin = {
-      getCommand: new command.HTTPCommand({
+      getCommand: new command.RequestResponseHTTPCommand({
         path: '/get'
       }),
-      putCommand: new command.HTTPCommand({
+      putCommand: new command.RequestResponseHTTPCommand({
         method: 'PUT',
         path: '/put'
       }),
-      postCommand: new command.HTTPCommand({
+      postCommand: new command.RequestResponseHTTPCommand({
         method: 'POST',
         path: '/post'
       }),
-      deleteCommand: new command.HTTPCommand({
+      deleteCommand: new command.RequestResponseHTTPCommand({
         method: 'DELETE',
         path: '/delete'
       }),
       ignored: new command.SocketCommand()
     };
     var overridingPlugin = {
-      postCommand: new command.HTTPCommand({
+      postCommand: new command.RequestResponseHTTPCommand({
         method: 'POST',
         path: '/post/overridden'
       }),
-      deleteCommand: new command.HTTPCommand({
+      deleteCommand: new command.RequestResponseHTTPCommand({
         method: 'DELETE',
         path: '/delete/overridden'
       })
@@ -82,7 +82,7 @@ suite('HTTP Adapter', function() {
 
   suite('registeration', function() {
     var testPlugin = {
-      adapter: new command.HTTPCommand({
+      adapter: new command.RequestResponseHTTPCommand({
         path: '/path/to/adapter',
         onRequest: function(request, connection) {
           connection.emit('adapter', 'adapter requested');

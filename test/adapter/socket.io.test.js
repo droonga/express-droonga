@@ -92,7 +92,7 @@ suite('Socket.IO Adapter', function() {
       putCommand: new command.SocketRequestResponse(),
       postCommand: new command.SocketRequestResponse(),
       deleteCommand: new command.SocketRequestResponse(),
-      ignored: new command.HTTPCommand()
+      ignored: new command.RequestResponseHTTPCommand()
     };
     var overridingPlugin = {
       postCommand: new command.SocketRequestResponse(),
