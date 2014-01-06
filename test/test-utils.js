@@ -288,8 +288,13 @@ function createBackend() {
     });
   };
 
-  backend.sendMessage = function(type, body) {
+  backend.sendMessage = function(type, body, options) {
     var response = createEnvelope(type, body);
+    if (options && typeof options == 'object') {
+      Object.keys(options).forEach(function(key) {
+        response[key] = options[key];
+      });
+    }
     return sendPacketTo(createPacket(response), testReceivePort)
   };
   backend.sendResponse = function(request, type, body) {
