@@ -151,7 +151,7 @@ Deferred.register('createClientSocket', createClientSocket);
 function createClientSockets(count) {
   var clients = [];
   return Deferred.next(function loop() {
-    if (sockets.length < count) {
+    if (clients.length < count) {
       return createClientSocket()
                .next(function(client) {
                  clients.push(client);
