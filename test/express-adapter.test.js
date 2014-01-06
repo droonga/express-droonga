@@ -154,8 +154,8 @@ suite('Adaption for express application', function() {
 
       var mockedReceiver;
       utils.createClientSocket()
-        .next(function(newClientSocket) {
-          clientSocket = newClientSocket;
+        .next(function(newClient) {
+          clientSocket = newClient.socket;
           clientSocket.emit('api', 'request');
         })
         .wait(0.01)
