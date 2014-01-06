@@ -135,8 +135,11 @@ function createClientSocket() {
   var host = 'http://localhost:' + testServerPort;
   var options = { 'force new connection': true };
   var socket = client.connect(host, options);
-  socket.on('connect', function() {
-    deferred.call(socket);
+//  socket.on('connect', function() {
+//    deferred.call(socket);
+//  });
+  socket.on('connected', function(client) {
+    deferred.call(client);
   });
   return deferred;
 }
@@ -144,16 +147,16 @@ exports.createClientSocket = createClientSocket;
 Deferred.register('createClientSocket', createClientSocket);
 
 function createClientSockets(count) {
-  var sockets = [];
+  var clients = [];
   return Deferred.next(function loop() {
     if (sockets.length < count) {
       return createClientSocket()
-               .next(function(newSocket) {
-                 sockets.push(newSocket);
+               .next(function(client) {
+                 clients.push(client);
                })
                .next(loop);
     } else {
-      return sockets;
+      return clients;
     }
   });
 }
