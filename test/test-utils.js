@@ -130,7 +130,7 @@ exports.post = post;
 Deferred.register('post', function() { return post.apply(this, arguments); });
 
 
-function createClientSocket() {
+function createClient() {
   var deferred = new Deferred();
   var host = 'http://localhost:' + testServerPort;
   var options = { 'force new connection': true };
@@ -145,14 +145,14 @@ function createClientSocket() {
   });
   return deferred;
 }
-exports.createClientSocket = createClientSocket;
-Deferred.register('createClientSocket', createClientSocket);
+exports.createClient = createClient;
+Deferred.register('createClient', createClient);
 
-function createClientSockets(count) {
+function createClients(count) {
   var clients = [];
   return Deferred.next(function loop() {
     if (clients.length < count) {
-      return createClientSocket()
+      return createClient()
                .next(function(client) {
                  clients.push(client);
                })
@@ -162,8 +162,8 @@ function createClientSockets(count) {
     }
   });
 }
-exports.createClientSockets = createClientSockets;
-Deferred.register('createClientSockets', createClientSockets);
+exports.createClients = createClients;
+Deferred.register('createClients', createClients);
 
 function createStubbedBackendConnection() {
   return {

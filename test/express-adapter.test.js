@@ -153,7 +153,7 @@ suite('Adaption for express application', function() {
       });
 
       var mockedReceiver;
-      utils.createClientSocket()
+      utils.createClient()
         .next(function(newClient) {
           clientSocket = newClient.socket;
           clientSocket.emit('api', 'request');

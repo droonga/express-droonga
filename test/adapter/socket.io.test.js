@@ -173,7 +173,7 @@ suite('Socket.IO Adapter', function() {
             ]
           });
 
-          return utils.createClientSocket();
+          return utils.createClient();
         })
         .next(function(newClient) {
           clientSockets.push(newClient.socket);
@@ -209,7 +209,7 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClientSocket()
+        .createClient()
         .next(function(newClient) {
           clientSockets.push(newClient.socket);
           clientSockets[0].emit(params.clientCommand, params.clientBody);
@@ -305,7 +305,7 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClientSockets(3)
+        .createClients(3)
         .next(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', messages[0]);
@@ -385,7 +385,7 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClientSockets(1)
+        .createClients(1)
         .next(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', 'message1',
@@ -485,7 +485,7 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClientSocket()
+        .createClient()
         .next(function(newClient) {
           clientSockets.push(newClient.socket);
           subscriberId = newClient.subscriberId;
