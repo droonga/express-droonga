@@ -175,8 +175,8 @@ suite('Socket.IO Adapter', function() {
 
           return utils.createClientSocket();
         })
-        .next(function(newClientSocket) {
-          clientSockets.push(newClientSocket);
+        .next(function(newClient) {
+          clientSockets.push(newClient.socket);
         })
         .wait(0.01)
         .next(function() {
@@ -210,8 +210,8 @@ suite('Socket.IO Adapter', function() {
           });
         })
         .createClientSocket()
-        .next(function(newClientSocket) {
-          clientSockets.push(newClientSocket);
+        .next(function(newClient) {
+          clientSockets.push(newClient.socket);
           clientSockets[0].emit(params.clientCommand, params.clientBody);
         })
         .wait(0.01)
@@ -306,8 +306,8 @@ suite('Socket.IO Adapter', function() {
           });
         })
         .createClientSockets(3)
-        .next(function(newClientSockets) {
-          clientSockets = clientSockets.concat(newClientSockets);
+        .next(function(newClients) {
+          clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', messages[0]);
         }).wait(0.01).next(function() {
           clientSockets[1].emit('reqrep', messages[1]);
@@ -386,8 +386,8 @@ suite('Socket.IO Adapter', function() {
           });
         })
         .createClientSockets(1)
-        .next(function(newClientSockets) {
-          clientSockets = clientSockets.concat(newClientSockets);
+        .next(function(newClients) {
+          clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', 'message1',
                                 { responseEvent: 'reqrep.extra.name' });
           clientSockets[0].emit('reqrep-mod-event', 'message2',
@@ -466,6 +466,7 @@ suite('Socket.IO Adapter', function() {
 
     test('notification', function(done) {
       var mockedReceiver;
+      var subscriberId;
       // step 0: setup
       utils.setupApplication()
         .next(function(result) {
@@ -485,8 +486,9 @@ suite('Socket.IO Adapter', function() {
           });
         })
         .createClientSocket()
-        .next(function(newClientSocket) {
-          clientSockets.push(newClientSocket);
+        .next(function(newClient) {
+          clientSockets.push(newClient.socket);
+          subscriberId = newClient.subscriberId;
           clientSockets[0].on('pubsub.subscribe.response', function(data) {
             mockedReceiver.receive(data);
           });
@@ -501,7 +503,8 @@ suite('Socket.IO Adapter', function() {
           mockedReceiver = nodemock
             .mock('receive').takes('nothing');
           return backend.sendMessage('pubsub.notification',
-                                     'never notified');
+                                     'never notified',
+                                     { to: subscriberId });
         })
         .wait(0.01)
         .next(function() {
@@ -533,15 +536,18 @@ suite('Socket.IO Adapter', function() {
             .mock('receive').takes('notified 2')
             .mock('receive').takes('notified 3');
           return backend.sendMessage('pubsub.notification',
-                                     'notified 1');
+                                     'notified 1',
+                                     { to: subscriberId });
         })
         .next(function() {
           return backend.sendMessage('pubsub.notification',
-                                     'notified 2');
+                                     'notified 2',
+                                     { to: subscriberId });
         })
         .next(function() {
           return backend.sendMessage('pubsub.notification',
-                                     'notified 3');
+                                     'notified 3',
+                                     { to: subscriberId });
         })
         .wait(0.01)
         .next(function() {
