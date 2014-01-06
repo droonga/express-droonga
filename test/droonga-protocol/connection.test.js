@@ -207,9 +207,9 @@ suite('Connection', function() {
         var numericMessage = utils.createEnvelope('numeric', 1234);
         var objectMessage = utils.createEnvelope('object', { value: true });
         callback
-          .takes(stringMessage.body)
-          .takes(numericMessage.body)
-          .takes(objectMessage.body);
+          .takes(stringMessage)
+          .takes(numericMessage)
+          .takes(objectMessage);
 
         utils
           .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
