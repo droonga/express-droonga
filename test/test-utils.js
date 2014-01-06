@@ -135,10 +135,12 @@ function createClientSocket() {
   var host = 'http://localhost:' + testServerPort;
   var options = { 'force new connection': true };
   var socket = client.connect(host, options);
+  var newClientSocket;
 //  socket.on('connect', function() {
 //    deferred.call(socket);
 //  });
   socket.on('connected', function(client) {
+    client.socket = socket;
     deferred.call(client);
   });
   return deferred;
