@@ -34,7 +34,9 @@ suite('Socket.IO Adapter', function() {
         socket.emit('reqrep-mod-body.response', 'modified response');
       }
     }),
-    'pubsub': new command.SocketPublishSubscribe(),
+    'pubsub': new command.SocketPublishSubscribe({
+      notification: 'pubsub.notification'
+    }),
     'pubsub-mod-event': new command.SocketPublishSubscribe({
       onSubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.subscribe', data);
@@ -48,6 +50,7 @@ suite('Socket.IO Adapter', function() {
       onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.unsubscribe.response', data);
       },
+      notification: 'pubsub-mod-event.notification',
       onNotify: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.notification', data);
       }
@@ -65,6 +68,7 @@ suite('Socket.IO Adapter', function() {
       onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-body.unsubscribe.response', 'modified response');
       },
+      notification: 'pubsub-mod-body.notification',
       onNotify: function(data, socket) {
         socket.emit('pubsub-mod-body.notification', 'modified response');
       }
