@@ -35,7 +35,7 @@ suite('Socket.IO Adapter', function() {
       }
     }),
     'pubsub': new command.SocketPublishSubscribe({
-      notification: 'pubsub.notification'
+      messageType: 'pubsub.publish'
     }),
     'pubsub-mod-event': new command.SocketPublishSubscribe({
       onSubscribe: function(data, connection) {
@@ -50,9 +50,9 @@ suite('Socket.IO Adapter', function() {
       onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.unsubscribe.response', data);
       },
-      notification: 'pubsub-mod-event.notification',
-      onNotify: function(data, socket) {
-        socket.emit('pubsub-mod-event.mod.notification', data);
+      messageType: 'pubsub-mod-event.publish',
+      onPublish: function(data, socket) {
+        socket.emit('pubsub-mod-event.mod.publish', data);
       }
     }),
     'pubsub-mod-body': new command.SocketPublishSubscribe({
@@ -68,9 +68,9 @@ suite('Socket.IO Adapter', function() {
       onUnsubscribed: function(data, socket) {
         socket.emit('pubsub-mod-body.unsubscribe.response', 'modified response');
       },
-      notification: 'pubsub-mod-body.notification',
-      onNotify: function(data, socket) {
-        socket.emit('pubsub-mod-body.notification', 'modified response');
+      messageType: 'pubsub-mod-body.publish',
+      onPublish: function(data, socket) {
+        socket.emit('pubsub-mod-body.publish', 'modified response');
       }
     })
   };
@@ -464,7 +464,7 @@ suite('Socket.IO Adapter', function() {
       expectedBackendBody:    'modified response'        
     });
 
-    test('notification', function(done) {
+    test('publish', function(done) {
       var mockedReceiver;
       var subscriberId;
       // step 0: setup
@@ -495,15 +495,15 @@ suite('Socket.IO Adapter', function() {
           clientSockets[0].on('pubsub.unsubscribe.response', function(data) {
             mockedReceiver.receive(data);
           });
-          clientSockets[0].on('pubsub.notification', function(data) {
+          clientSockets[0].on('pubsub.publish', function(data) {
             mockedReceiver.receive(data);
           });
 
-      // step 1: notifications before subscribing
+      // step 1: published messages before subscribing
           mockedReceiver = nodemock
             .mock('receive').takes('nothing');
-          return backend.sendMessage('pubsub.notification',
-                                     'never notified',
+          return backend.sendMessage('pubsub.publish',
+                                     'never published',
                                      { to: subscriberId });
         })
         .wait(0.01)
@@ -530,23 +530,23 @@ suite('Socket.IO Adapter', function() {
         .next(function() {
           mockedReceiver.assertThrows();
 
-      // step 3: notifications while subscribing
+      // step 3: published messages while subscribing
           mockedReceiver = nodemock
-            .mock('receive').takes('notified 1')
-            .mock('receive').takes('notified 2')
-            .mock('receive').takes('notified 3');
-          return backend.sendMessage('pubsub.notification',
-                                     'notified 1',
+            .mock('receive').takes('published 1')
+            .mock('receive').takes('published 2')
+            .mock('receive').takes('published 3');
+          return backend.sendMessage('pubsub.publish',
+                                     'published 1',
                                      { to: subscriberId });
         })
         .next(function() {
-          return backend.sendMessage('pubsub.notification',
-                                     'notified 2',
+          return backend.sendMessage('pubsub.publish',
+                                     'published 2',
                                      { to: subscriberId });
         })
         .next(function() {
-          return backend.sendMessage('pubsub.notification',
-                                     'notified 3',
+          return backend.sendMessage('pubsub.publish',
+                                     'published 3',
                                      { to: subscriberId });
         })
         .wait(0.01)
@@ -573,11 +573,11 @@ suite('Socket.IO Adapter', function() {
         .next(function() {
           mockedReceiver.assertThrows();
 
-      // step 5: notifications after unsubscribing
+      // step 5: published message after unsubscribing
           mockedReceiver = nodemock
             .mock('receive').takes('nothing');
-          return backend.sendMessage('pubsub.notification',
-                                     'never notified');
+          return backend.sendMessage('pubsub.publish',
+                                     'never published');
         })
         .wait(0.01)
         .next(function() {
