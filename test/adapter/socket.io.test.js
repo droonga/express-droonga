@@ -488,7 +488,7 @@ suite('Socket.IO Adapter', function() {
         .createClient()
         .next(function(newClient) {
           clientSockets.push(newClient.socket);
-          subscriberId = newClient.subscriberId;
+          subscriberId = newClient.subscriber;
           clientSockets[0].on('pubsub.subscribe.response', function(data) {
             mockedReceiver.receive(data);
           });
