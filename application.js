@@ -19,7 +19,7 @@ application.configure(function() {
 
 application.droonga({
   prefix: '',
-  defaultDataset: 'example',
+  defaultDataset: 'Droonga',
   server: server,
   sessionStore: sessionStore, // this is required to share session information by socket.io and HTTP APIs
   plugins: [
