@@ -18,11 +18,18 @@ suite('adapter/http.register', function() {
     StubApplication.prototype.configure = function() {
     };
 
-    ["get", "post", "put", "delete"].forEach(function(method) {
-      StubApplication.prototype[method] = function(path, handler) {
-        this[method + "Paths"].push(path);
-      };
-    });
+    StubApplication.prototype.get = function(path, handler) {
+      this.getPaths.push(path);
+    };
+    StubApplication.prototype.post = function(path, handler) {
+      this.postPaths.push(path);
+    };
+    StubApplication.prototype.put = function(path, handler) {
+      this.putPaths.push(path);
+    };
+    StubApplication.prototype.delete = function(path, handler) {
+      this.deletePaths.push(path);
+    };
 
     StubApplication.prototype.paths = function() {
       return {
