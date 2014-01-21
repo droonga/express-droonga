@@ -7,7 +7,7 @@ var httpAdapter = require('../../../lib/adapter/http');
 var command = require('../../../lib/adapter/command');
 
 suite('adapter/http.register', function() {
-  suite('method', function() {
+  suite('commandSet', function() {
     function StubApplication() {
       this.getPaths    = [];
       this.postPaths   = [];
@@ -60,6 +60,7 @@ suite('adapter/http.register', function() {
       return application.paths();
     }
 
+    suite('method', function() {
     test('default', function() {
       var noMethodCommand = new command.HTTPRequestResponse({
         path: '/no-method'
@@ -102,6 +103,7 @@ suite('adapter/http.register', function() {
       });
       assert.deepEqual(register({ 'delete-method': deleteMethodCommand }),
                        { 'delete': ['/delete'] });
+    });
     });
   });
 });
