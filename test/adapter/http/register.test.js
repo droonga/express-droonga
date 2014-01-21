@@ -61,49 +61,49 @@ suite('adapter/http.register', function() {
     }
 
     suite('method', function() {
-    test('default', function() {
-      var noMethodCommand = new command.HTTPRequestResponse({
-        path: '/no-method'
+      test('default', function() {
+        var noMethodCommand = new command.HTTPRequestResponse({
+          path: '/no-method'
+        });
+        assert.deepEqual(register({ 'no-method': noMethodCommand }),
+                         { 'get': ['/no-method'] });
       });
-      assert.deepEqual(register({ 'no-method': noMethodCommand }),
-                       { 'get': ['/no-method'] });
-    });
 
-    test('get', function() {
-      var getMethodCommand = new command.HTTPRequestResponse({
-        path:   '/get',
-        method: 'GET'
+      test('get', function() {
+        var getMethodCommand = new command.HTTPRequestResponse({
+          path:   '/get',
+          method: 'GET'
+        });
+        assert.deepEqual(register({ 'get-method': getMethodCommand }),
+                         { 'get': ['/get'] });
       });
-      assert.deepEqual(register({ 'get-method': getMethodCommand }),
-                       { 'get': ['/get'] });
-    });
 
-    test('post', function() {
-      var postMethodCommand = new command.HTTPRequestResponse({
-        path:   '/post',
-        method: 'POST'
+      test('post', function() {
+        var postMethodCommand = new command.HTTPRequestResponse({
+          path:   '/post',
+          method: 'POST'
+        });
+        assert.deepEqual(register({ 'post-method': postMethodCommand }),
+                         { 'post': ['/post'] });
       });
-      assert.deepEqual(register({ 'post-method': postMethodCommand }),
-                       { 'post': ['/post'] });
-    });
 
-    test('put', function() {
-      var putMethodCommand = new command.HTTPRequestResponse({
-        path:   '/put',
-        method: 'PUT'
+      test('put', function() {
+        var putMethodCommand = new command.HTTPRequestResponse({
+          path:   '/put',
+          method: 'PUT'
+        });
+        assert.deepEqual(register({ 'put-method': putMethodCommand }),
+                         { 'put': ['/put'] });
       });
-      assert.deepEqual(register({ 'put-method': putMethodCommand }),
-                       { 'put': ['/put'] });
-    });
 
-    test('delete', function() {
-      var deleteMethodCommand = new command.HTTPRequestResponse({
-        path:   '/delete',
-        method: 'DELETE'
+      test('delete', function() {
+        var deleteMethodCommand = new command.HTTPRequestResponse({
+          path:   '/delete',
+          method: 'DELETE'
+        });
+        assert.deepEqual(register({ 'delete-method': deleteMethodCommand }),
+                         { 'delete': ['/delete'] });
       });
-      assert.deepEqual(register({ 'delete-method': deleteMethodCommand }),
-                       { 'delete': ['/delete'] });
-    });
     });
   });
 });
