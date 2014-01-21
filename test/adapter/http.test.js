@@ -13,7 +13,7 @@ var droongaAPI = require('../../lib/adapter/api/droonga');
 var groongaAPI = require('../../lib/adapter/api/groonga');
 
 suite('HTTP Adapter', function() {
-  test('registeration of plugin commands', function() {
+  test('registration of plugin commands', function() {
     var basePlugin = {
       getCommand: new command.HTTPRequestResponse({
         path: '/get'
