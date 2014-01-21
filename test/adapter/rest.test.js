@@ -70,6 +70,8 @@ suite('HTTP Adapter', function() {
                         definition: groongaAPI.groonga },
                       { name:       'droonga',
                         definition: droongaAPI.droonga },
+                      { name:       'droonga-streaming:watch',
+                        definition: droongaAPI["droonga-streaming:watch"] },
                       { name:       'getCommand',
                         definition: basePlugin.getCommand },
                       { name:       'putCommand',
