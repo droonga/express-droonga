@@ -1,3 +1,3 @@
-((js2-mode . ((indent-tabs-mode . nil)
-              (js2-basic-offset . 2)
-              (show-trailing-whitespace . t))))
+((js-mode . ((indent-tabs-mode . nil)
+             (js-indent-level . 2)
+             (show-trailing-whitespace . t))))
