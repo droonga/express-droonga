@@ -15,13 +15,6 @@ var groongaAPI = require('../../lib/adapter/api/groonga');
 suite('HTTP Adapter', function() {
   test('registration of plugin commands', function() {
     var basePlugin = {
-      getCommand: new command.HTTPRequestResponse({
-        path: '/get'
-      }),
-      putCommand: new command.HTTPRequestResponse({
-        method: 'PUT',
-        path: '/put'
-      }),
       postCommand: new command.HTTPRequestResponse({
         method: 'POST',
         path: '/post'
@@ -72,10 +65,6 @@ suite('HTTP Adapter', function() {
                         definition: droongaAPI.droonga },
                       { name:       'droonga-streaming:watch',
                         definition: droongaAPI["droonga-streaming:watch"] },
-                      { name:       'getCommand',
-                        definition: basePlugin.getCommand },
-                      { name:       'putCommand',
-                        definition: basePlugin.putCommand },
                       { name:       'postCommand',
                         definition: overridingPlugin.postCommand },
                       { name:       'deleteCommand',
