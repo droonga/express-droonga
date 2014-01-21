@@ -48,14 +48,12 @@ suite('adapter/http.register', function() {
       return paths;
     };
 
-    function register(commandSet) {
+    function register(plugins) {
       var application = new StubApplication();
       httpAdapter.register(application, {
         prefix:     '',
         connection: utils.createStubbedBackendConnection(),
-        plugins: [
-          commandSet
-        ]
+        plugins: plugins
       });
       return application.paths();
     }
@@ -65,7 +63,7 @@ suite('adapter/http.register', function() {
         var noMethodCommand = new command.HTTPRequestResponse({
           path: '/no-method'
         });
-        assert.deepEqual(register({ 'no-method': noMethodCommand }),
+        assert.deepEqual(register([{ 'no-method': noMethodCommand }]),
                          { 'get': ['/no-method'] });
       });
 
@@ -74,7 +72,7 @@ suite('adapter/http.register', function() {
           path:   '/get',
           method: 'GET'
         });
-        assert.deepEqual(register({ 'get-method': getMethodCommand }),
+        assert.deepEqual(register([{ 'get-method': getMethodCommand }]),
                          { 'get': ['/get'] });
       });
 
@@ -83,7 +81,7 @@ suite('adapter/http.register', function() {
           path:   '/post',
           method: 'POST'
         });
-        assert.deepEqual(register({ 'post-method': postMethodCommand }),
+        assert.deepEqual(register([{ 'post-method': postMethodCommand }]),
                          { 'post': ['/post'] });
       });
 
@@ -92,7 +90,7 @@ suite('adapter/http.register', function() {
           path:   '/put',
           method: 'PUT'
         });
-        assert.deepEqual(register({ 'put-method': putMethodCommand }),
+        assert.deepEqual(register([{ 'put-method': putMethodCommand }]),
                          { 'put': ['/put'] });
       });
 
@@ -101,8 +99,38 @@ suite('adapter/http.register', function() {
           path:   '/delete',
           method: 'DELETE'
         });
-        assert.deepEqual(register({ 'delete-method': deleteMethodCommand }),
+        assert.deepEqual(register([{ 'delete-method': deleteMethodCommand }]),
                          { 'delete': ['/delete'] });
+      });
+    });
+
+    suite('override', function() {
+      test('same method', function() {
+        var command1 = new command.HTTPRequestResponse({
+          path:   '/command1',
+          method: 'POST'
+        });
+        var command2 = new command.HTTPRequestResponse({
+          path:   '/command2',
+          method: 'POST'
+        });
+        assert.deepEqual(register([{ 'command': command1 },
+                                   { 'command': command2 }]),
+                         { 'post': ['/command2'] });
+      });
+
+      test('different method', function() {
+        var command1 = new command.HTTPRequestResponse({
+          path:   '/command1',
+          method: 'GET'
+        });
+        var command2 = new command.HTTPRequestResponse({
+          path:   '/command2',
+          method: 'POST'
+        });
+        assert.deepEqual(register([{ 'command': command1 },
+                                   { 'command': command2 }]),
+                         { 'post': ['/command2'] });
       });
     });
   });

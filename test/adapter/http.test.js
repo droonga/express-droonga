@@ -14,28 +14,6 @@ var groongaAPI = require('../../lib/adapter/api/groonga');
 
 suite('HTTP Adapter', function() {
   test('registration of plugin commands', function() {
-    var basePlugin = {
-      postCommand: new command.HTTPRequestResponse({
-        method: 'POST',
-        path: '/post'
-      }),
-      deleteCommand: new command.HTTPRequestResponse({
-        method: 'DELETE',
-        path: '/delete'
-      }),
-      ignored: new command.SocketCommand()
-    };
-    var overridingPlugin = {
-      postCommand: new command.HTTPRequestResponse({
-        method: 'POST',
-        path: '/post/overridden'
-      }),
-      deleteCommand: new command.HTTPRequestResponse({
-        method: 'DELETE',
-        path: '/delete/overridden'
-      })
-    };
-
     var application = express();
     var registeredCommands = httpAdapter.register(application, {
       prefix:     '',
@@ -44,9 +22,7 @@ suite('HTTP Adapter', function() {
         api.API_REST,
         api.API_SOCKET_IO,
         api.API_GROONGA,
-        api.API_DROONGA,
-        basePlugin,
-        overridingPlugin
+        api.API_DROONGA
       ]
     });
 
@@ -64,11 +40,7 @@ suite('HTTP Adapter', function() {
                       { name:       'droonga',
                         definition: droongaAPI.droonga },
                       { name:       'droonga-streaming:watch',
-                        definition: droongaAPI["droonga-streaming:watch"] },
-                      { name:       'postCommand',
-                        definition: overridingPlugin.postCommand },
-                      { name:       'deleteCommand',
-                        definition: overridingPlugin.deleteCommand }]);
+                        definition: droongaAPI["droonga-streaming:watch"] }]);
   });
 
   suite('registeration', function() {
