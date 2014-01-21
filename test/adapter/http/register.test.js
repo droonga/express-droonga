@@ -32,12 +32,20 @@ suite('adapter/http.register', function() {
     };
 
     StubApplication.prototype.paths = function() {
-      return {
-        get:    this.getPaths,
-        post:   this.postPaths,
-        put:    this.putPaths,
-        delete: this.deletePaths
-      };
+      var paths = {}
+      if (this.getPaths.length > 0) {
+        paths.get = this.getPaths;
+      }
+      if (this.postPaths.length > 0) {
+        paths.post = this.postPaths;
+      }
+      if (this.putPaths.length > 0) {
+        paths.put = this.putPaths;
+      }
+      if (this.deletePaths.length > 0) {
+        paths.delete = this.deletePaths;
+      }
+      return paths;
     };
 
     function register(commandSet) {
@@ -57,12 +65,7 @@ suite('adapter/http.register', function() {
         path: '/no-method'
       });
       assert.deepEqual(register({ 'no-method': noMethodCommand }),
-                       {
-                         "get":    ['/no-method'],
-                         "post":   [],
-                         "put":    [],
-                         "delete": []
-                       });
+                       { 'get': ['/no-method'] });
     });
 
     test('get', function() {
@@ -71,12 +74,7 @@ suite('adapter/http.register', function() {
         method: 'GET'
       });
       assert.deepEqual(register({ 'get-method': getMethodCommand }),
-                       {
-                         "get":    ['/get'],
-                         "post":   [],
-                         "put":    [],
-                         "delete": []
-                       });
+                       { 'get': ['/get'] });
     });
 
     test('post', function() {
@@ -85,12 +83,7 @@ suite('adapter/http.register', function() {
         method: 'POST'
       });
       assert.deepEqual(register({ 'post-method': postMethodCommand }),
-                       {
-                         "get":    [],
-                         "post":   ['/post'],
-                         "put":    [],
-                         "delete": []
-                       });
+                       { 'post': ['/post'] });
     });
 
     test('put', function() {
@@ -99,12 +92,7 @@ suite('adapter/http.register', function() {
         method: 'PUT'
       });
       assert.deepEqual(register({ 'put-method': putMethodCommand }),
-                       {
-                         "get":    [],
-                         "post":   [],
-                         "put":    ['/put'],
-                         "delete": []
-                       });
+                       { 'put': ['/put'] });
     });
 
     test('delete', function() {
@@ -113,12 +101,7 @@ suite('adapter/http.register', function() {
         method: 'DELETE'
       });
       assert.deepEqual(register({ 'delete-method': deleteMethodCommand }),
-                       {
-                         "get":    [],
-                         "post":   [],
-                         "put":    [],
-                         "delete": ['/delete']
-                       });
+                       { 'delete': ['/delete'] });
     });
   });
 });
