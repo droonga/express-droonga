@@ -43,7 +43,7 @@ suite('HTTP Adapter', function() {
                         definition: droongaAPI["droonga-streaming:watch"] }]);
   });
 
-  suite('registeration', function() {
+  suite('registration', function() {
     var testPlugin = {
       adapter: new command.HTTPRequestResponse({
         path: '/path/to/adapter',
