@@ -1,15 +1,17 @@
-"Droonga" (distributed-groonga) is built with the part of frontend named
-"express-droonga" and the part of backend named "fluent-plugin-droonga".
+# README
 
+"Droonga" (distributed-groonga) is built with the protocol adapter
+part named "express-droonga" and the Droonga engine part named
+"fluent-plugin-droonga". This is "express-droonga".
 
-# express-droonga
+## About express-droonga
 
-  express-droonga provides a framework for building scalable
-  realtime web API services for Express.
+express-droonga provides a framework for building scalable realtime
+Web API services for Express.
 
-# usage
+## Usage
 
-## server
+### Server
 
 If both express-droonga and fluentd are running on the same machine,
 you can initialize the express-droonga instance easily.
@@ -52,7 +54,7 @@ to the fluentd and to receive messages from the fluentd.
     });
 
 
-## client (REST)
+### Client (REST)
 
 Frontend applications can call REST APIs to access resources stored in
 the droonga. For example:
@@ -61,7 +63,7 @@ the droonga. For example:
 
 It works as a search request, and a JSON string will be returned as the result.
 
-## client (Socket.IO)
+### Client (Socket.IO)
 
 Frontend applications can call raw APIs via Socket.IO. For example:
 
