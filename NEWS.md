@@ -6,7 +6,7 @@
 
   * Supported HTTP streaming.
 
-## 0.8.0: 2013-12-29
+## 0.8.1: 2014-01-06
 
 A bug fix release of 0.8.1.
 
