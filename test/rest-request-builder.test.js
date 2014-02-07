@@ -17,7 +17,7 @@ suite('building message from REST adapter request', function() {
       };
       var expectedBody = {
         queries: {
-          'test-tables': {
+          'testTables': {
             source: 'test_table',
             condition: {
               query:  'foobar'
