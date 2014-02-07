@@ -17,6 +17,7 @@
   "dependencies": {
     "connect": "*",
     "fluent-logger": "*",
+    "inflection": "*",
     "jade": "*",
     "less-middleware": "*",
     "msgpack": "*",
