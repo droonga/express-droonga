@@ -17,7 +17,7 @@ suite('building message from REST adapter request', function() {
       };
       var expectedBody = {
         queries: {
-          result: {
+          'test-tables': {
             source: 'test_table',
             condition: {
               query:  'foobar'
@@ -51,7 +51,7 @@ suite('building message from REST adapter request', function() {
       var expectedBody = {
         timeout: 1000,
         queries: {
-          result: {
+          people: {
             source:  'people',
             condition: {
               query:   'foobar',
