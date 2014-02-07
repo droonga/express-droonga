@@ -176,7 +176,7 @@ suite('HTTP Adapter', function() {
       utils.setupServer(application)
         .next(function(newServer) {
           server = newServer;
-          utils.get('/tables/foo?query=bar');
+          utils.get('/tables/Store?query=NY');
         })
         .wait(0.1)
         .next(function() {
@@ -186,10 +186,10 @@ suite('HTTP Adapter', function() {
 
           var expected = {
             queries: {
-              result: {
-                source: 'foo',
+              stores: {
+                source: 'Store',
                 condition: {
-                  query: 'bar'
+                  query: 'NY'
                 },
                 output: {
                   elements: utils.allElements,
