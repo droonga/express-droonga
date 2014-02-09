@@ -1,5 +1,12 @@
 # News
 
+## 0.9.9: 2014-02-09
+
+### Improvements
+
+  * search: Improved query name in `queries` parameter. It was always
+    `result`. Now, it is guessed from table name parameter.
+
 ## 0.9.0: 2014-01-29
 
 ### Improvements
