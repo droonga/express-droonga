@@ -1,5 +1,9 @@
 # News
 
+## 1.0.0: 2014-02-28
+
+The first major release! No changes since 0.9.9.
+
 ## 0.9.9: 2014-02-09
 
 ### Improvements
