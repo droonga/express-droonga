@@ -10,6 +10,8 @@ var version = require('./package.json').version;
 options
   .version(version)
   .option('--port <port>', 'Port number', Number, 13000)
+  .option('--droonga-engine-port <port>', 'Port number of Droonga engine',
+          Number, 24224)
   .parse(process.argv);
 
 var application = express();
@@ -30,6 +32,7 @@ application.droonga({
   defaultDataset: 'Droonga',
   server: server,
   sessionStore: sessionStore, // this is required to share session information by socket.io and HTTP APIs
+  port: options.droongaEnginePort,
   plugins: [
     droonga.API_REST,
     droonga.API_SOCKET_IO,
