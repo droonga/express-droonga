@@ -25,7 +25,8 @@
     "jade": "*",
     "less-middleware": ">=0.2",
     "msgpack": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "commander": "*"
   },
   "devDependencies": {
     "chai": "*",

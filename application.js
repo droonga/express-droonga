@@ -2,7 +2,15 @@
 
 var express = require('express'),
     droonga = require('./index'),
-    http = require('http');
+    http = require('http'),
+    options = require('commander');
+
+var version = require('./package.json').version;
+
+options
+  .version(version)
+  .option('--port <port>', 'Port number', Number, 13000)
+  .parse(process.argv);
 
 var application = express();
 var server = http.createServer(application);
@@ -30,4 +38,4 @@ application.droonga({
   ]
 });
 
-server.listen(13000);
+server.listen(options.port);
