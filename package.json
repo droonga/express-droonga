@@ -13,6 +13,10 @@
       "email": "piro.outsider.reflex@gmail.com"
     }
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/droonga/express-droonga.git"
+  },
   "license": "MIT",
   "dependencies": {
     "connect": "*",
