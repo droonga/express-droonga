@@ -12,6 +12,7 @@ options
   .option('--port <port>', 'Port number', Number, 13000)
   .option('--droonga-engine-port <port>', 'Port number of Droonga engine',
           Number, 24224)
+  .option('--enable-logging', 'Enable logging to the standard output')
   .parse(process.argv);
 
 var application = express();
@@ -20,6 +21,9 @@ var server = http.createServer(application);
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
 application.configure(function() {
+  if (options.enableLogging) {
+    application.use(express.logger());
+  }
   application.use(express.cookieParser('secret key'));
   application.use(express.session({
     secret: 'secret key',
