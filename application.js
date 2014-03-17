@@ -9,9 +9,9 @@ var version = require('./package.json').version;
 
 options
   .version(version)
-  .option('--port <port>', 'Port number', Number, 13000)
+  .option('--port <port>', 'Port number', parseInt, 13000)
   .option('--droonga-engine-port <port>', 'Port number of Droonga engine',
-          Number, 24224)
+          parseInt, 24224)
   .option('--enable-logging', 'Enable logging to the standard output')
   .parse(process.argv);
 
