@@ -503,6 +503,7 @@ suite('Connection', function() {
     });
 
     test('disconnected suddenly', function(done) {
+      var lastError = null;
       Deferred
         .next(function() {
           var deferred = new Deferred();
@@ -525,12 +526,17 @@ suite('Connection', function() {
           var deferred = new Deferred();
 
           connection.on('error', function(error) {
+            lastError = error
             deferred.call();
           });
 
           connection.emitMessage('type2', { message: true });
 
           return deferred;
+        })
+        .next(function() {
+          assert.isNotNull(lastError);
+          assert.equal(lastError.code, 'ECONNREFUSED');
         })
         .createBackend()
         .next(function(newBackend) {
