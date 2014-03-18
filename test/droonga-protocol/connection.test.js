@@ -503,7 +503,6 @@ suite('Connection', function() {
     });
 
     test('disconnected suddenly', function(done) {
-      var errorHandler;
       Deferred
         .next(function() {
           var deferred = new Deferred();
@@ -525,20 +524,13 @@ suite('Connection', function() {
         .next(function() {
           var deferred = new Deferred();
 
-          errorHandler = nodemock
-            .mock('handle')
-              .takes({});
           connection.on('error', function(error) {
-            errorHandler.handle(error);
             deferred.call();
           });
 
           connection.emitMessage('type2', { message: true });
 
           return deferred;
-        })
-        .next(function() {
-          errorHandler.assertThrows();
         })
         .createBackend()
         .next(function(newBackend) {
