@@ -222,6 +222,119 @@ suite('Response Cache Middleware', function() {
             });
         });
     });
+
+    test('size over', function(done) {
+      application = express();
+      application.use(middleware({
+        size: 1,
+        rules: [
+          { regex: /cached/ }
+        ]
+      }));
+      application.get('/cached/first', function(request, response){
+        response.json(200, 'OK');
+      });
+      application.get('/cached/second', function(request, response){
+        response.json(200, 'OK');
+      });
+      client(application)
+        .get('/cached/first')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
+
+          client(application)
+            .get('/cached/second')
+            .expect(200)
+            .end(function(error, response){
+              if (error)
+                return done(error);
+
+              client(application)
+                .get('/cached/second')
+                .expect(200)
+                .expect('X-Droonga-Cached', 'yes')
+                .end(function(error, response){
+                  if (error)
+                    return done(error);
+
+                  client(application)
+                    .get('/cached/first')
+                    .expect(200)
+                    .end(function(error, response){
+                      if (error)
+                        done(error);
+                      else
+                        assertNotCached(response, done);
+                    });
+                });
+            });
+        });
+    });
+
+    test('expired by global TTL', function(done) {
+      application = express();
+      application.use(middleware({
+        ttlInMilliSeconds: 300,
+        rules: [
+          { regex: /cached/ }
+        ]
+      }));
+      application.get('/cached/expired', function(request, response){
+        response.json(200, 'OK');
+      });
+      client(application)
+        .get('/cached/expired')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
+
+          setTimeout(function() {
+            client(application)
+              .get('/cached/expired')
+              .expect(200)
+              .end(function(error, response){
+                if (error)
+                  return done(error);
+                else
+                  assertNotCached(response, done);
+              });
+          }, 600);
+        });
+    });
+
+    test('expired by TTL for a rule', function(done) {
+      application = express();
+      application.use(middleware({
+        rules: [
+          { regex: /cached/, ttlInMilliSeconds: 300 }
+        ]
+      }));
+      application.get('/cached/expired', function(request, response){
+        response.json(200, 'OK');
+      });
+      client(application)
+        .get('/cached/expired')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
+
+          setTimeout(function() {
+            client(application)
+              .get('/cached/expired')
+              .expect(200)
+              .end(function(error, response){
+                if (error)
+                  return done(error);
+                else
+                  assertNotCached(response, done);
+              });
+          }, 600);
+        });
+    });
   });
 });
 
