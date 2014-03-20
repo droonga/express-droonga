@@ -23,7 +23,34 @@ suite('Response Cache Middleware', function() {
     application.get('/fresh', function(request, response){
       response.send(200, 'OK');
     });
-    application.listen(3000, '0.0.0.0');
+    application.post('/cached/post', function(request, response){
+      response.send(200, 'OK');
+    });
+  });
+
+  function assertNotCached(response, done) {
+    try {
+      assert.equal(-1, Object.keys(response.headers).indexOf('X-Droonga-Cached'.toLowerCase()));
+      if (done)
+        done();
+    } catch(error) {
+      if (done)
+        done(error);
+      else
+        throw error;
+    }
+  }
+
+  test('not yet cached', function(done) {
+    client(application)
+      .get('/cached/success')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+        else
+          assertNotCached(response, done);
+      });
   });
 
   test('cached', function(done) {
@@ -43,6 +70,68 @@ suite('Response Cache Middleware', function() {
               done(error);
             else
               done();
+          });
+      });
+  });
+
+  test('never cached: error response', function(done) {
+    client(application)
+      .get('/cached/fail')
+      .expect(400)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        client(application)
+          .get('/cached/fail')
+          .expect(400)
+          .end(function(error, response){
+            if (error)
+              done(error);
+            else
+              assertNotCached(response, done);
+          });
+      });
+  });
+
+  test('never cached: not matched', function(done) {
+    client(application)
+      .get('/fresh')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        client(application)
+          .get('/fresh')
+          .expect(200)
+          .end(function(error, response){
+            if (error)
+              done(error);
+            else
+              assertNotCached(response, done);
+          });
+      });
+  });
+
+  test('never cached: not GET method', function(done) {
+    client(application)
+      .post('/cached/post')
+      .send('OK')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        client(application)
+          .post('/cached/post')
+          .send('OK')
+          .expect(200)
+          .end(function(error, response){
+            if (error)
+              done(error);
+            else
+              assertNotCached(response, done);
           });
       });
   });
