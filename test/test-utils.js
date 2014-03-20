@@ -26,7 +26,7 @@ function connectTo(port) {
     clientSocket.destroy();
     deferred.fail(error);
   });
-  clientSocket.connect(port, 'localhost', function(){
+  clientSocket.connect(port, '127.0.0.1', function(){
     deferred.call(clientSocket);
   });
   return deferred;
@@ -79,7 +79,7 @@ function sendRequest(method, path, postData, headers) {
   var deferred = new Deferred();
 
   var options = {
-        host: 'localhost',
+        host: '127.0.0.1',
         port: testServerPort,
         path: path,
         method: method,
@@ -132,7 +132,7 @@ Deferred.register('post', function() { return post.apply(this, arguments); });
 
 function createClient() {
   var deferred = new Deferred();
-  var host = 'http://localhost:' + testServerPort;
+  var host = 'http://127.0.0.1:' + testServerPort;
   var options = { 'force new connection': true };
   var socket = client.connect(host, options);
   var newClientSocket;
@@ -177,7 +177,7 @@ function createStubbedBackendConnection() {
     },
     emitMessageCalledArguments: [],
     getRouteToSelf: function() {
-      return 'localhost:' + testReceivePort + '/' + testTag;
+      return '127.0.0.1:' + testReceivePort + '/' + testTag;
     },
 
     emit: function() {},
@@ -203,7 +203,7 @@ function setupApplication() {
       var connection = new Connection({
         tag:      testTag,
         defaultDataset: 'test-dataset',
-        hostName: 'localhost',
+        hostName: '127.0.0.1',
         port:     testSendPort,
         receivePort: testReceivePort,
         maxRetyrCount: 3,
@@ -320,7 +320,7 @@ function createEnvelope(type, body, options) {
   var envelope = {
     id:         now.getTime(),
     date:       now.toISOString(),
-    from:       'localhost:' + testReceivePort + '/' + testTag,
+    from:       '127.0.0.1:' + testReceivePort + '/' + testTag,
     statusCode: 200,
     dataset:    options.dataset || 'test-dataset',
     type:       type,

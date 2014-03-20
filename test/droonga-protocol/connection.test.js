@@ -65,7 +65,7 @@ suite('Connection', function() {
           connection = new Connection({
             tag:      'test',
             defaultDataset: 'test-dataset',
-            hostName: 'localhost',
+            hostName: '127.0.0.1',
             port:     utils.testSendPort,
             receivePort: utils.testReceivePort,
             maxRetyrCount: 3,
@@ -461,7 +461,7 @@ suite('Connection', function() {
           backend = newBackend;
           connection = new Connection({
             tag:      utils.testTag,
-            hostName: 'localhost',
+            hostName: '127.0.0.1',
             port:     utils.testSendPort,
             maxRetyrCount: 3,
             retryDelay: 1
