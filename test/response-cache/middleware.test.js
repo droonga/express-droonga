@@ -276,7 +276,7 @@ suite('Response Cache Middleware', function() {
     test('expired by global TTL', function(done) {
       application = express();
       application.use(middleware({
-        ttlInMilliSeconds: 300,
+        ttlInMilliSeconds: 10,
         rules: [
           { regex: /cached/ }
         ]
@@ -301,7 +301,7 @@ suite('Response Cache Middleware', function() {
                 else
                   assertNotCached(response, done);
               });
-          }, 600);
+          }, 50);
         });
     });
 
@@ -309,7 +309,7 @@ suite('Response Cache Middleware', function() {
       application = express();
       application.use(middleware({
         rules: [
-          { regex: /cached/, ttlInMilliSeconds: 300 }
+          { regex: /cached/, ttlInMilliSeconds: 10 }
         ]
       }));
       application.get('/cached/expired', function(request, response){
@@ -332,7 +332,7 @@ suite('Response Cache Middleware', function() {
                 else
                   assertNotCached(response, done);
               });
-          }, 600);
+          }, 50);
         });
     });
   });
