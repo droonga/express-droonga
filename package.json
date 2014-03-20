@@ -24,6 +24,7 @@
     "inflection": "*",
     "jade": "*",
     "less-middleware": ">=0.2",
+    "uber-cache": "*",
     "msgpack": "*",
     "socket.io": "*",
     "commander": "*"
