@@ -63,79 +63,79 @@ suite('Response Cache Middleware', function() {
   });
 
   suite('not cached', function() {
-  test('initial access', function(done) {
-    client(application)
-      .get('/cached/success')
-      .expect(200)
-      .end(function(error, response){
-        if (error)
-          return done(error);
-        else
-          assertNotCached(response, done);
-      });
-  });
+    test('initial access', function(done) {
+      client(application)
+        .get('/cached/success')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
+          else
+            assertNotCached(response, done);
+        });
+    });
 
-  test('error response', function(done) {
-    client(application)
-      .get('/cached/fail')
-      .expect(400)
-      .end(function(error, response){
-        if (error)
-          return done(error);
+    test('error response', function(done) {
+      client(application)
+        .get('/cached/fail')
+        .expect(400)
+        .end(function(error, response){
+          if (error)
+            return done(error);
 
-        client(application)
-          .get('/cached/fail')
-          .expect(400)
-          .end(function(error, response){
-            if (error)
-              done(error);
-            else
-              assertNotCached(response, done);
-          });
-      });
-  });
+          client(application)
+            .get('/cached/fail')
+            .expect(400)
+            .end(function(error, response){
+              if (error)
+                done(error);
+              else
+                assertNotCached(response, done);
+            });
+        });
+    });
 
-  test('not matched', function(done) {
-    client(application)
-      .get('/fresh')
-      .expect(200)
-      .end(function(error, response){
-        if (error)
-          return done(error);
+    test('not matched', function(done) {
+      client(application)
+        .get('/fresh')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
 
-        client(application)
-          .get('/fresh')
-          .expect(200)
-          .end(function(error, response){
-            if (error)
-              done(error);
-            else
-              assertNotCached(response, done);
-          });
-      });
-  });
+          client(application)
+            .get('/fresh')
+            .expect(200)
+            .end(function(error, response){
+              if (error)
+                done(error);
+              else
+                assertNotCached(response, done);
+            });
+        });
+    });
 
-  test('not GET method', function(done) {
-    client(application)
-      .post('/cached/post')
-      .send('OK')
-      .expect(200)
-      .end(function(error, response){
-        if (error)
-          return done(error);
+    test('not GET method', function(done) {
+      client(application)
+        .post('/cached/post')
+        .send('OK')
+        .expect(200)
+        .end(function(error, response){
+          if (error)
+            return done(error);
 
-        client(application)
-          .post('/cached/post')
-          .send('OK')
-          .expect(200)
-          .end(function(error, response){
-            if (error)
-              done(error);
-            else
-              assertNotCached(response, done);
-          });
-      });
-  });
+          client(application)
+            .post('/cached/post')
+            .send('OK')
+            .expect(200)
+            .end(function(error, response){
+              if (error)
+                done(error);
+              else
+                assertNotCached(response, done);
+            });
+        });
+    });
   });
 });
 
