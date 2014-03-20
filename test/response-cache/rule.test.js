@@ -21,5 +21,23 @@ suite('Response Cache Rule', function() {
       assert.equal(rule.ttlInMilliSeconds, 20);
     });
   });
+
+  test('createEntry', function() {
+    var rule = new Rule({ regex: null, ttlInMilliSeconds: 10 });
+    var entry = rule.createEntry();
+    assert.equal(entry.ttlInMilliSeconds, 10);
+  });
+
+  suite('match', function() {
+    test('matched', function() {
+      var rule = new Rule({ regex: /foo/, ttlInMilliSeconds: 10 });
+      assert.isTrue(rule.match({ url: 'foo' }));
+    });
+
+    test('not matched', function() {
+      var rule = new Rule({ regex: /foo/, ttlInMilliSeconds: 10 });
+      assert.isFalse(rule.match({ url: 'bar' }));
+    });
+  });
 });
 
