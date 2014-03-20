@@ -51,6 +51,39 @@ suite('Response Cache', function() {
       var rule = cache.getRule(stubRequest);
       assert.isNull(rule);
     });
+
+    test('mached to a rule', function() {
+      var cache = new Cache({
+        rules: [
+          { regex: /foo/ }
+        ]
+      });
+      var stubRequest = {
+        method: 'GET',
+        url:    'fooooo'
+      };
+      var rule = cache.getRule(stubRequest);
+      assert.isNotNull(rule);
+      assert.deepEqual(rule.regex, /foo/);
+    });
+
+    test('mached to multiple rules', function() {
+      var primaryRegex = /foo/;
+      var secondaryRegex = /foobar/;
+      var cache = new Cache({
+        rules: [
+          { regex: primaryRegex },
+          { regex: secondaryRegex },
+        ]
+      });
+      var stubRequest = {
+        method: 'GET',
+        url:    'foobar'
+      };
+      var rule = cache.getRule(stubRequest);
+      assert.isNotNull(rule);
+      assert.deepEqual(rule.regex, primaryRegex);
+    });
   });
 });
 
