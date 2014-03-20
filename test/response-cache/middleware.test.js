@@ -28,19 +28,6 @@ suite('Response Cache Middleware', function() {
     });
   });
 
-  function assertNotCached(response, done) {
-    try {
-      assert.equal(-1, Object.keys(response.headers).indexOf('X-Droonga-Cached'.toLowerCase()));
-      if (done)
-        done();
-    } catch(error) {
-      if (done)
-        done(error);
-      else
-        throw error;
-    }
-  }
-
   test('cached', function(done) {
     client(application)
       .get('/cached/success')
@@ -63,6 +50,19 @@ suite('Response Cache Middleware', function() {
   });
 
   suite('not cached', function() {
+    function assertNotCached(response, done) {
+      try {
+        assert.equal(-1, Object.keys(response.headers).indexOf('X-Droonga-Cached'.toLowerCase()));
+        if (done)
+          done();
+      } catch(error) {
+        if (done)
+          done(error);
+        else
+          throw error;
+      }
+    }
+
     test('initial access', function(done) {
       client(application)
         .get('/cached/success')
