@@ -35,7 +35,8 @@
     "jsdeferred": "*",
     "mocha": "*",
     "nodemock": "*",
-    "socket.io-client": "*"
+    "socket.io-client": "*",
+    "supertest": "*"
   },
   "scripts": {
     "start": "./application.js",
