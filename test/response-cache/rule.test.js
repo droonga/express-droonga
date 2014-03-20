@@ -5,25 +5,25 @@ var Rule = require('../../lib/response-cache/rule');
 suite('Response Cache Rule', function() {
   suite('ttlInMilliSeconds', function() {
     test('default', function() {
-      var rule = new Rule({ regex: null, ttlInMilliSeconds: null });
+      var rule = new Rule({ regex: /./, ttlInMilliSeconds: null });
       assert.equal(rule.ttlInMilliSeconds, 0);
     });
 
     test('global', function() {
-      var rule = new Rule({ regex: null, ttlInMilliSeconds: null },
+      var rule = new Rule({ regex: /./, ttlInMilliSeconds: null },
                           { ttlInMilliSeconds: 10 });
       assert.equal(rule.ttlInMilliSeconds, 10);
     });
 
     test('local', function() {
-      var rule = new Rule({ regex: null, ttlInMilliSeconds: 20 },
+      var rule = new Rule({ regex: /./, ttlInMilliSeconds: 20 },
                           { ttlInMilliSeconds: 10 });
       assert.equal(rule.ttlInMilliSeconds, 20);
     });
   });
 
   test('createEntry', function() {
-    var rule = new Rule({ regex: null, ttlInMilliSeconds: 10 });
+    var rule = new Rule({ regex: /./, ttlInMilliSeconds: 10 });
     var entry = rule.createEntry();
     assert.equal(entry.ttlInMilliSeconds, 10);
   });
