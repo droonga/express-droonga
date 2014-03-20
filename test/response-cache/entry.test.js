@@ -1,5 +1,4 @@
 var assert = require('chai').assert;
-var nodemock = require('nodemock');
 
 var Entry = require('../../lib/response-cache/entry');
 
@@ -23,15 +22,39 @@ suite('Response Cache Entry', function() {
     });
   });
 
-  test('store', function() {
-    var ttl = 10;
-    var value = true;
-    var mockedStorage = nodemock.mock('set').takes('key', { status: 200, headers: {}, body: [] }, ttl);
+  function createStubStorage() {
+    return {
+      'set': function() {
+        this.args.push(Array.prototype.slice.call(arguments, 0));
+      },
+      args: []
+    };
+  };
 
-    var entry = new Entry('key', ttl, mockedStorage);
+  test('store', function() {
+    var storage = createStubStorage();
+    var entry = new Entry('key', 10, storage);
     entry.data.status = 200;
     entry.store();
-    mockedStorage.assertThrows();
+    assert.deepEqual(storage.args, [['key', entry.data, 10]]);
+  });
+
+  suite('end', function() {
+    test('success', function() {
+      var storage = createStubStorage();
+      var entry = new Entry('key', 10, storage);
+      entry.data.status = 200;
+      entry.store();
+      assert.deepEqual(storage.args, [['key', entry.data, 10]]);
+    });
+
+    test('error', function() {
+      var storage = createStubStorage();
+      var entry = new Entry('key', 10, storage);
+      entry.data.status = 400;
+      entry.store();
+      assert.deepEqual(storage.args, []);
+    });
   });
 });
 
