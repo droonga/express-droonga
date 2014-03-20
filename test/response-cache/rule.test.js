@@ -22,12 +22,6 @@ suite('Response Cache Rule', function() {
     });
   });
 
-  test('createEntry', function() {
-    var rule = new Rule({ regex: /./, ttlInMilliSeconds: 10 });
-    var entry = rule.createEntry();
-    assert.equal(entry.ttlInMilliSeconds, 10);
-  });
-
   suite('match', function() {
     test('matched', function() {
       var rule = new Rule({ regex: /foo/, ttlInMilliSeconds: 10 });
