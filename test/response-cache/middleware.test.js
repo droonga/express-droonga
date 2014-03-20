@@ -41,18 +41,6 @@ suite('Response Cache Middleware', function() {
     }
   }
 
-  test('not yet cached', function(done) {
-    client(application)
-      .get('/cached/success')
-      .expect(200)
-      .end(function(error, response){
-        if (error)
-          return done(error);
-        else
-          assertNotCached(response, done);
-      });
-  });
-
   test('cached', function(done) {
     client(application)
       .get('/cached/success')
@@ -74,7 +62,20 @@ suite('Response Cache Middleware', function() {
       });
   });
 
-  test('never cached: error response', function(done) {
+  suite('not cached', function() {
+  test('initial access', function(done) {
+    client(application)
+      .get('/cached/success')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+        else
+          assertNotCached(response, done);
+      });
+  });
+
+  test('error response', function(done) {
     client(application)
       .get('/cached/fail')
       .expect(400)
@@ -94,7 +95,7 @@ suite('Response Cache Middleware', function() {
       });
   });
 
-  test('never cached: not matched', function(done) {
+  test('not matched', function(done) {
     client(application)
       .get('/fresh')
       .expect(200)
@@ -114,7 +115,7 @@ suite('Response Cache Middleware', function() {
       });
   });
 
-  test('never cached: not GET method', function(done) {
+  test('not GET method', function(done) {
     client(application)
       .post('/cached/post')
       .send('OK')
@@ -134,6 +135,7 @@ suite('Response Cache Middleware', function() {
               assertNotCached(response, done);
           });
       });
+  });
   });
 });
 
