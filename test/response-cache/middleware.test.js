@@ -7,7 +7,10 @@ var middleware = require('../../lib/response-cache');
 
 suite('Response Cache Middleware', function() {
   var application;
+  var handled = false;
   setup(function() {
+    handled = false;
+
     application = express();
     application.use(middleware({
       rules: [
@@ -15,15 +18,19 @@ suite('Response Cache Middleware', function() {
       ]
     }));
     application.get('/cached/success', function(request, response){
+      handled = true;
       response.send(200, 'OK');
     });
     application.get('/cached/fail', function(request, response){
+      handled = true;
       response.send(400, 'NG');
     });
     application.get('/fresh', function(request, response){
+      handled = true;
       response.send(200, 'OK');
     });
     application.post('/cached/post', function(request, response){
+      handled = true;
       response.send(200, 'OK');
     });
   });
@@ -45,6 +52,38 @@ suite('Response Cache Middleware', function() {
               done(error);
             else
               done();
+          });
+      });
+  });
+
+  test('handler skipped', function(done) {
+    client(application)
+      .get('/cached/success')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        try {
+          assert.isTrue(handled);
+        } catch(error) {
+          return done(error);
+        }
+        handled = false;
+
+        client(application)
+          .get('/cached/success')
+          .expect(200)
+          .end(function(error, response){
+            if (error)
+              return done(error);
+
+            try {
+              assert.isFalse(handled);
+            } catch(error) {
+              return done(error);
+            }
+            done();
           });
       });
   });
