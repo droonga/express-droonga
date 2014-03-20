@@ -2,6 +2,7 @@
 
 var express = require('express'),
     droonga = require('./index'),
+    cache = require('./lib/response-cache'),
     http = require('http'),
     options = require('commander');
 
@@ -28,6 +29,11 @@ application.configure(function() {
   application.use(express.session({
     secret: 'secret key',
     store:  sessionStore
+  }));
+  application.use(cache({
+    rules: [
+      { regex: /./ }
+    ]
   }));
 });
 
