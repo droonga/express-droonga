@@ -77,6 +77,52 @@ suite('Response Cache Middleware', function() {
       });
   });
 
+  test('cached headers', function(done) {
+    application.get('/cached/headers', function(request, response){
+      response.setHeader('X-Custom-Header', 'yes');
+      response.send(200, 'OK');
+    });
+    client(application)
+      .get('/cached/headers')
+      .expect(200)
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        client(application)
+          .get('/cached/headers')
+          .expect(200)
+          .expect('X-Droonga-Cached', 'yes')
+          .end(function(error, response){
+            if (error)
+              return done(error);
+            done();
+          });
+      });
+  });
+
+  test('cached body', function(done) {
+    application.get('/cached/body', function(request, response){
+      response.json(200, { value: true });
+    });
+    client(application)
+      .get('/cached/body')
+      .expect(200, { value: true })
+      .end(function(error, response){
+        if (error)
+          return done(error);
+
+        client(application)
+          .get('/cached/body')
+          .expect(200, { value: true })
+          .end(function(error, response){
+            if (error)
+              return done(error);
+            done();
+          });
+      });
+  });
+
   suite('not cached', function() {
     function assertNotCached(response, done) {
       try {
