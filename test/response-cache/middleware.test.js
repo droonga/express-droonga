@@ -7,35 +7,19 @@ var middleware = require('../../lib/response-cache');
 
 suite('Response Cache Middleware', function() {
   var application;
-  var handled = false;
   setup(function() {
-    handled = false;
-
     application = express();
     application.use(middleware({
       rules: [
         { regex: /cached/ }
       ]
     }));
-    application.get('/cached/success', function(request, response){
-      handled = true;
-      response.send(200, 'OK');
-    });
-    application.get('/cached/fail', function(request, response){
-      handled = true;
-      response.send(400, 'NG');
-    });
-    application.get('/fresh', function(request, response){
-      handled = true;
-      response.send(200, 'OK');
-    });
-    application.post('/cached/post', function(request, response){
-      handled = true;
-      response.send(200, 'OK');
-    });
   });
 
   test('cached', function(done) {
+    application.get('/cached/success', function(request, response) {
+      response.send(200, 'OK');
+    });
     client(application)
       .get('/cached/success')
       .expect(200)
@@ -57,8 +41,13 @@ suite('Response Cache Middleware', function() {
   });
 
   test('handler skipped', function(done) {
+    var handled = false;
+    application.get('/cached/handled', function(request, response){
+      handled = true;
+      response.send(200, 'OK');
+    });
     client(application)
-      .get('/cached/success')
+      .get('/cached/handled')
       .expect(200)
       .end(function(error, response){
         if (error)
@@ -72,7 +61,7 @@ suite('Response Cache Middleware', function() {
         handled = false;
 
         client(application)
-          .get('/cached/success')
+          .get('/cached/handled')
           .expect(200)
           .end(function(error, response){
             if (error)
@@ -103,8 +92,11 @@ suite('Response Cache Middleware', function() {
     }
 
     test('initial access', function(done) {
+      application.get('/cached/initial', function(request, response) {
+        response.send(200, 'OK');
+      });
       client(application)
-        .get('/cached/success')
+        .get('/cached/initial')
         .expect(200)
         .end(function(error, response){
           if (error)
@@ -115,6 +107,9 @@ suite('Response Cache Middleware', function() {
     });
 
     test('error response', function(done) {
+      application.get('/cached/fail', function(request, response) {
+        response.send(400, 'NG');
+      });
       client(application)
         .get('/cached/fail')
         .expect(400)
@@ -135,6 +130,9 @@ suite('Response Cache Middleware', function() {
     });
 
     test('not matched', function(done) {
+      application.get('/fresh', function(request, response) {
+        response.send(200, 'OK');
+      });
       client(application)
         .get('/fresh')
         .expect(200)
@@ -155,6 +153,9 @@ suite('Response Cache Middleware', function() {
     });
 
     test('not GET method', function(done) {
+      application.post('/cached/post', function(request, response) {
+        response.send(200, 'OK');
+      });
       client(application)
         .post('/cached/post')
         .send('OK')
