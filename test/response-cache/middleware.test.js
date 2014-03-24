@@ -336,5 +336,29 @@ suite('Response Cache Middleware', function() {
         });
     });
   });
+
+  suite('statistics', function() {
+    test('json', function(done) {
+      client(application)
+      .get('/cache/statistics')
+      .expect(200)
+      .end(function(error, response) {
+        if (error)
+          return done(error);
+
+        var statistics = {
+          nGets: 0,
+          nHits: 0,
+          hitRatio: 0.0
+        };
+        try {
+          assert.deepEqual(response.body, statistics);
+        } catch (error) {
+          return done(error);
+        }
+        done();
+      });
+    });
+  });
 });
 
