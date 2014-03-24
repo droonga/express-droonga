@@ -23,7 +23,7 @@ suite('Response Cache Middleware', function() {
     client(application)
       .get('/cached/success')
       .expect(200)
-      .end(function(error, response){
+      .end(function(error, response) {
         if (error)
           return done(error);
 
@@ -31,7 +31,7 @@ suite('Response Cache Middleware', function() {
           .get('/cached/success')
           .expect(200)
           .expect('X-Droonga-Cached', 'yes')
-          .end(function(error, response){
+          .end(function(error, response) {
             if (error)
               done(error);
             else
@@ -42,14 +42,14 @@ suite('Response Cache Middleware', function() {
 
   test('handler skipped', function(done) {
     var handled = false;
-    application.get('/cached/handled', function(request, response){
+    application.get('/cached/handled', function(request, response) {
       handled = true;
       response.send(200, 'OK');
     });
     client(application)
       .get('/cached/handled')
       .expect(200)
-      .end(function(error, response){
+      .end(function(error, response) {
         if (error)
           return done(error);
 
@@ -63,7 +63,7 @@ suite('Response Cache Middleware', function() {
         client(application)
           .get('/cached/handled')
           .expect(200)
-          .end(function(error, response){
+          .end(function(error, response) {
             if (error)
               return done(error);
 
@@ -78,14 +78,14 @@ suite('Response Cache Middleware', function() {
   });
 
   test('cached headers', function(done) {
-    application.get('/cached/headers', function(request, response){
+    application.get('/cached/headers', function(request, response) {
       response.setHeader('X-Custom-Header', 'yes');
       response.send(200, 'OK');
     });
     client(application)
       .get('/cached/headers')
       .expect(200)
-      .end(function(error, response){
+      .end(function(error, response) {
         if (error)
           return done(error);
 
@@ -93,7 +93,7 @@ suite('Response Cache Middleware', function() {
           .get('/cached/headers')
           .expect(200)
           .expect('X-Droonga-Cached', 'yes')
-          .end(function(error, response){
+          .end(function(error, response) {
             if (error)
               return done(error);
             done();
@@ -102,20 +102,20 @@ suite('Response Cache Middleware', function() {
   });
 
   test('cached body', function(done) {
-    application.get('/cached/body', function(request, response){
+    application.get('/cached/body', function(request, response) {
       response.json(200, { value: true });
     });
     client(application)
       .get('/cached/body')
       .expect(200, { value: true })
-      .end(function(error, response){
+      .end(function(error, response) {
         if (error)
           return done(error);
 
         client(application)
           .get('/cached/body')
           .expect(200, { value: true })
-          .end(function(error, response){
+          .end(function(error, response) {
             if (error)
               return done(error);
             done();
@@ -144,7 +144,7 @@ suite('Response Cache Middleware', function() {
       client(application)
         .get('/cached/initial')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
           else
@@ -159,14 +159,14 @@ suite('Response Cache Middleware', function() {
       client(application)
         .get('/cached/fail')
         .expect(400)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
           client(application)
             .get('/cached/fail')
             .expect(400)
-            .end(function(error, response){
+            .end(function(error, response) {
               if (error)
                 done(error);
               else
@@ -182,14 +182,14 @@ suite('Response Cache Middleware', function() {
       client(application)
         .get('/fresh')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
           client(application)
             .get('/fresh')
             .expect(200)
-            .end(function(error, response){
+            .end(function(error, response) {
               if (error)
                 done(error);
               else
@@ -206,7 +206,7 @@ suite('Response Cache Middleware', function() {
         .post('/cached/post')
         .send('OK')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
@@ -214,7 +214,7 @@ suite('Response Cache Middleware', function() {
             .post('/cached/post')
             .send('OK')
             .expect(200)
-            .end(function(error, response){
+            .end(function(error, response) {
               if (error)
                 done(error);
               else
@@ -231,23 +231,23 @@ suite('Response Cache Middleware', function() {
           { regex: /cached/ }
         ]
       }));
-      application.get('/cached/first', function(request, response){
+      application.get('/cached/first', function(request, response) {
         response.json(200, 'OK');
       });
-      application.get('/cached/second', function(request, response){
+      application.get('/cached/second', function(request, response) {
         response.json(200, 'OK');
       });
       client(application)
         .get('/cached/first')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
           client(application)
             .get('/cached/second')
             .expect(200)
-            .end(function(error, response){
+            .end(function(error, response) {
               if (error)
                 return done(error);
 
@@ -255,14 +255,14 @@ suite('Response Cache Middleware', function() {
                 .get('/cached/second')
                 .expect(200)
                 .expect('X-Droonga-Cached', 'yes')
-                .end(function(error, response){
+                .end(function(error, response) {
                   if (error)
                     return done(error);
 
                   client(application)
                     .get('/cached/first')
                     .expect(200)
-                    .end(function(error, response){
+                    .end(function(error, response) {
                       if (error)
                         done(error);
                       else
@@ -281,13 +281,13 @@ suite('Response Cache Middleware', function() {
           { regex: /cached/ }
         ]
       }));
-      application.get('/cached/expired', function(request, response){
+      application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
       client(application)
         .get('/cached/expired')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
@@ -295,7 +295,7 @@ suite('Response Cache Middleware', function() {
             client(application)
               .get('/cached/expired')
               .expect(200)
-              .end(function(error, response){
+              .end(function(error, response) {
                 if (error)
                   return done(error);
                 else
@@ -312,13 +312,13 @@ suite('Response Cache Middleware', function() {
           { regex: /cached/, ttlInMilliSeconds: 10 }
         ]
       }));
-      application.get('/cached/expired', function(request, response){
+      application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
       client(application)
         .get('/cached/expired')
         .expect(200)
-        .end(function(error, response){
+        .end(function(error, response) {
           if (error)
             return done(error);
 
@@ -326,7 +326,7 @@ suite('Response Cache Middleware', function() {
             client(application)
               .get('/cached/expired')
               .expect(200)
-              .end(function(error, response){
+              .end(function(error, response) {
                 if (error)
                   return done(error);
                 else
