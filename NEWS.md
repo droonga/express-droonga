@@ -1,5 +1,12 @@
 # News
 
+## 1.0.1: 2014-03-29 (planned)
+
+ * Parallel connections from the Droonga Engine are established correctly.
+ * The built-in (bundled) express application becomes useful actually.
+   * It supports `--port`, `--droonga-engine-port`, `--enable-logging` command line options.
+   * A middleware for response caches is available now.
+
 ## 1.0.0: 2014-02-28
 
 The first major release! No changes since 0.9.9.
