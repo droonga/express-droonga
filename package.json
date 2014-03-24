@@ -27,7 +27,8 @@
     "uber-cache": "*",
     "msgpack": "*",
     "socket.io": "*",
-    "commander": "*"
+    "commander": "*",
+    "response-time": "*"
   },
   "devDependencies": {
     "chai": "*",

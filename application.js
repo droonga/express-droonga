@@ -3,6 +3,7 @@
 var express = require('express'),
     droonga = require('./index'),
     cache = require('./lib/response-cache'),
+    responseTime = require('response-time'),
     http = require('http'),
     options = require('commander');
 
@@ -34,6 +35,7 @@ application.configure(function() {
     secret: 'secret key',
     store:  sessionStore
   }));
+  application.use(responseTime());
   application.use(cache({
     rules: [
       { regex: /./ }
