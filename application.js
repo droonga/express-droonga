@@ -15,6 +15,8 @@ options
           '127.0.0.1')
   .option('--droonga-engine-port <port>', 'Port number of Droonga engine',
           parseInt, 24224)
+  .option('--default-dataset <dataset>', 'The default dataset',
+          'Droonga')
   .option('--enable-logging', 'Enable logging to the standard output')
   .parse(process.argv);
 
@@ -41,7 +43,7 @@ application.configure(function() {
 
 application.droonga({
   prefix: '',
-  defaultDataset: 'Droonga',
+  defaultDataset: options.defaultDataset,
   server: server,
   sessionStore: sessionStore, // this is required to share session information by socket.io and HTTP APIs
   hostName: options.droongaEngineHostName,
