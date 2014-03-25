@@ -19,6 +19,8 @@ options
   .option('--default-dataset <dataset>', 'The default dataset',
           'Droonga')
   .option('--enable-logging', 'Enable logging to the standard output')
+  .option('--cache-size <size>', 'The max number of cached requests',
+          parseInt, 100)
   .parse(process.argv);
 
 var application = express();
@@ -37,6 +39,7 @@ application.configure(function() {
   }));
   application.use(responseTime());
   application.use(cache({
+    size: options.cacheSize,
     rules: [
       { regex: /./ }
     ]
