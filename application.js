@@ -12,6 +12,10 @@ var version = require('./package.json').version;
 options
   .version(version)
   .option('--port <port>', 'Port number', parseInt, 13000)
+  .option('--receive-host-name <name>',
+          'Host name of the protocol adapter. ' +
+            'It must be resolvable by Droonga engine.',
+          '127.0.0.1')
   .option('--droonga-engine-host-name <name>', 'Host name of Droonga engine',
           '127.0.0.1')
   .option('--droonga-engine-port <port>', 'Port number of Droonga engine',
@@ -53,6 +57,7 @@ application.droonga({
   defaultDataset: options.defaultDataset,
   server: server,
   sessionStore: sessionStore, // this is required to share session information by socket.io and HTTP APIs
+  receiveHostName: options.receiveHostName,
   hostName: options.droongaEngineHostName,
   port: options.droongaEnginePort,
   plugins: [
