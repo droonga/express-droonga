@@ -147,6 +147,116 @@ suite('building message from REST adapter request', function() {
       testFailFor({ query: { timeout: '-0.1' } }, 'invalid integer', baseRequest);
       testFailFor({ query: { timeout: 'foobar' } }, 'invalid integer', baseRequest);
     });
+
+    // TODO: split test file
+    suite('group_by', function() {
+      var request;
+
+      setup(function () {
+        request = {
+          params: {
+            tableName: 'Memos'
+          },
+          query: {
+            group_by: {
+            }
+          }
+        };
+      });
+
+      function buildGroupByQuery(query) {
+        var name = 'group';
+        request.query.group_by[name] = query;
+        return builders.search(request).queries[name];
+      };
+
+      test('source', function() {
+        var query = {
+          key: '_key'
+        };
+        assert.equalJSON(buildGroupByQuery(query).source,
+                         'memos');
+      });
+
+      test('key', function() {
+        var query = {
+          key: '_key'
+        };
+        var expected = {
+          key: '_key'
+        };
+        assert.equalJSON(buildGroupByQuery(query).groupBy,
+                         expected);
+      });
+
+      test('max_n_sub_records', function() {
+        var query = {
+          key: '_key',
+          max_n_sub_records: 10
+        };
+        var expected = {
+          key: '_key',
+          maxNSubRecords: 10
+        };
+        assert.equalJSON(buildGroupByQuery(query).groupBy,
+                         expected);
+      });
+
+      test('limit', function() {
+        var query = {
+          key: '_key',
+          limit: 10
+        };
+        assert.equalJSON(buildGroupByQuery(query).output.limit,
+                         10);
+      });
+
+      suite('attributes', function() {
+        test('source', function() {
+          var query = {
+            key: '_key',
+            attributes: {
+              titleLabel: {
+                source: 'title'
+              }
+            }
+          };
+          var expected = [
+            {
+              label: 'titleLabel',
+              source: 'title'
+            }
+          ];
+          assert.equalJSON(buildGroupByQuery(query).output.attributes,
+                           expected);
+        });
+
+        test('attributes', function() {
+          var query = {
+            key: '_key',
+            attributes: {
+              sub_records: {
+                source: '_subrecs',
+                attributes: [
+                  'title'
+                ]
+              }
+            }
+          };
+          var expected = [
+            {
+              label: 'sub_records',
+              source: '_subrecs',
+              attributes: [
+                'title'
+              ]
+            }
+          ];
+          assert.equalJSON(buildGroupByQuery(query).output.attributes,
+                           expected);
+        });
+      });
+    });
   });
 });
 
