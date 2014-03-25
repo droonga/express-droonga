@@ -38,12 +38,14 @@ application.configure(function() {
     store:  sessionStore
   }));
   application.use(responseTime());
-  application.use(cache({
-    size: options.cacheSize,
-    rules: [
-      { regex: /./ }
-    ]
-  }));
+  if (options.cacheSize > 0) {
+    application.use(cache({
+      size: options.cacheSize,
+      rules: [
+        { regex: /./ }
+      ]
+    }));
+  }
 });
 
 application.droonga({
