@@ -149,6 +149,37 @@ suite('building message from REST adapter request', function() {
     });
 
     // TODO: split test file
+    suite('sort_by', function() {
+      var request;
+
+      setup(function () {
+        request = {
+          params: {
+            tableName: 'Memos'
+          },
+          query: {
+          }
+        };
+      });
+
+      function buildSortByQuery(sort_by) {
+        var name = 'memos';
+        request.query.sort_by = sort_by;
+        return builders.search(request).queries[name];
+      };
+
+      test('string', function() {
+        assert.equalJSON(buildSortByQuery('-_score,title').sortBy,
+                         ['-_score', 'title']);
+      });
+
+      test('array', function() {
+        assert.equalJSON(buildSortByQuery(['-_score', 'title']).sortBy,
+                         ['-_score', 'title']);
+      });
+    });
+
+    // TODO: split test file
     suite('group_by', function() {
       var request;
 
