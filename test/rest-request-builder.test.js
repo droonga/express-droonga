@@ -180,6 +180,75 @@ suite('building message from REST adapter request', function() {
     });
 
     // TODO: split test file
+    suite('adjusters', function() {
+      var request;
+
+      setup(function () {
+        request = {
+          params: {
+            tableName: 'Memos'
+          },
+          query: {
+          }
+        };
+      });
+
+      function buildQuery(adjusters) {
+        var name = 'memos';
+        request.query.adjusters = adjusters;
+        return builders.search(request).queries[name];
+      };
+
+      test('no column', function() {
+        var adjusters = {
+          tags: {
+            value: 'Droonga'
+          }
+        };
+        assert.equalJSON(buildQuery(adjusters).adjusters,
+                         [
+                           {
+                             column: 'tags',
+                             value: 'Droonga'
+                           }
+                         ]);
+      });
+
+      test('column', function() {
+        var adjusters = {
+          tags: {
+            column: 'categories',
+            value: 'Droonga'
+          }
+        };
+        assert.equalJSON(buildQuery(adjusters).adjusters,
+                         [
+                           {
+                             column: 'categories',
+                             value: 'Droonga'
+                           }
+                         ]);
+      });
+
+      test('factor', function() {
+        var adjusters = {
+          tags: {
+            value: 'Droonga',
+            factor: 9
+          }
+        };
+        assert.equalJSON(buildQuery(adjusters).adjusters,
+                         [
+                           {
+                             column: 'tags',
+                             value: 'Droonga',
+                             factor: 9
+                           }
+                         ]);
+      });
+    });
+
+    // TODO: split test file
     suite('group_by', function() {
       var request;
 
