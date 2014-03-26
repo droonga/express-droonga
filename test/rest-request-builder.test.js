@@ -162,19 +162,19 @@ suite('building message from REST adapter request', function() {
         };
       });
 
-      function buildSortByQuery(sort_by) {
+      function buildQuery(sort_by) {
         var name = 'memos';
         request.query.sort_by = sort_by;
         return builders.search(request).queries[name];
       };
 
       test('string', function() {
-        assert.equalJSON(buildSortByQuery('-_score,title').sortBy,
+        assert.equalJSON(buildQuery('-_score,title').sortBy,
                          ['-_score', 'title']);
       });
 
       test('array', function() {
-        assert.equalJSON(buildSortByQuery(['-_score', 'title']).sortBy,
+        assert.equalJSON(buildQuery(['-_score', 'title']).sortBy,
                          ['-_score', 'title']);
       });
     });
