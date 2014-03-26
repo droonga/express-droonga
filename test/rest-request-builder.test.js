@@ -162,9 +162,9 @@ suite('building message from REST adapter request', function() {
         };
       });
 
-      function buildQuery(sort_by) {
+      function buildQuery(sortBy) {
         var name = 'memos';
-        request.query.sort_by = sort_by;
+        request.query.sort_by = sortBy;
         return builders.search(request).queries[name];
       };
 
