@@ -234,7 +234,7 @@ suite('building message from REST adapter request', function() {
         var adjusters = {
           tags: {
             value: 'Droonga',
-            factor: 9
+            factor: '9'
           }
         };
         assert.equalJSON(buildQuery(adjusters).adjusters,
