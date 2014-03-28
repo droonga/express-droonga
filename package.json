@@ -20,7 +20,6 @@
   "license": "MIT",
   "dependencies": {
     "connect": "*",
-    "express": ">=3.0",
     "fluent-logger": "*",
     "inflection": "*",
     "jade": "*",
@@ -32,6 +31,7 @@
     "response-time": "*"
   },
   "devDependencies": {
+    "express": ">=3.0",
     "chai": "*",
     "jsdeferred": "*",
     "mocha": "*",
