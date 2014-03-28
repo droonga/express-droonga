@@ -2,11 +2,11 @@
 
 ## 1.0.1: 2014-03-29 (planned)
 
+ * The bundled HTTP server application is removed.
+   Instead, use another project [droonga-http-server](https://github.com/droonga/droonga-http-server).
  * Parallel connections from the Droonga Engine are established correctly.
- * The bundled HTTP server application becomes more useful.
-   * It supports `--port`, `--droonga-engine-host-name`, `--droonga-engine-port`, `--receive-host-name`, `--default-dataset`, `--enable-logging`, and `--cache-size` command line options.
-   * A middleware for response caches is available now.
-     You can see the statistics via `/cache/statistics`.
+ * A middleware for response caches is available now.
+   You can see the statistics via `/cache/statistics`.
  * Query parameters `attributes`, `group_by`, and `adjusters` are available for a REST `search` command (via `/tables/:tableName`).
 
 ## 1.0.0: 2014-02-28
