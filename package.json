@@ -26,9 +26,7 @@
     "less-middleware": ">=0.2",
     "uber-cache": "*",
     "msgpack": "*",
-    "socket.io": "*",
-    "commander": "*",
-    "response-time": "*"
+    "socket.io": "*"
   },
   "devDependencies": {
     "express": ">=3.0",
