@@ -1,6 +1,6 @@
 # News
 
-## 1.0.1: 2014-03-29 (planned)
+## 1.0.1: 2014-03-29
 
  * The bundled HTTP server application is removed.
    Instead, use another project [droonga-http-server](https://github.com/droonga/droonga-http-server).
