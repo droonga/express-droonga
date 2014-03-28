@@ -4,7 +4,7 @@ var httpAdapter = require('./lib/adapter/http');
 var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
 
-express.application.droonga = function(params) {
+function droonga(application, params) {
   params = params || {};
 
   params.connection = params.connection || new Connection(params);
@@ -13,10 +13,10 @@ express.application.droonga = function(params) {
   params.prefix = params.prefix || '';
   params.prefix = params.prefix.replace(/\/$/, '');
 
-  httpAdapter.register(this, params);
+  httpAdapter.register(application, params);
 
   if (params.server) {
-    socketIoAdapter.register(this, params.server, params);
+    socketIoAdapter.register(application, params.server, params);
     params.server.on('close', function() {
       // The connection can be mocked/stubbed. We don't need to close
       // such a fake connection.
@@ -25,11 +25,14 @@ express.application.droonga = function(params) {
     });
   }
 
-  dashboardUI.register(this, params);
+  dashboardUI.register(application, params);
 
-  this.connection = connection;
-  this.emitMessage = connection.emitMessage.bind(connection); // shorthand
+  application.connection = connection;
+  application.emitMessage = connection.emitMessage.bind(connection); // shorthand
 }
+
+exports.initialize = droonga;
+express.application.droonga = droonga;
 
 require('./lib/adapter/api').exportTo(exports);
 
