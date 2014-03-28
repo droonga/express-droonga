@@ -52,17 +52,16 @@ application.configure(function() {
   }
 });
 
-application.droonga({
+droonga.initialize(application, {
   prefix: '',
   defaultDataset: options.defaultDataset,
   server: server,
-  sessionStore: sessionStore, // this is required to share session information by socket.io and HTTP APIs
+  sessionStore: sessionStore, // this is required to share session information HTTP APIs
   receiveHostName: options.receiveHostName,
   hostName: options.droongaEngineHostName,
   port: options.droongaEnginePort,
   plugins: [
     droonga.API_REST,
-//    droonga.API_SOCKET_IO,
     droonga.API_GROONGA,
     droonga.API_DROONGA
   ]
