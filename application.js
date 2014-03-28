@@ -62,7 +62,7 @@ application.droonga({
   port: options.droongaEnginePort,
   plugins: [
     droonga.API_REST,
-    droonga.API_SOCKET_IO,
+//    droonga.API_SOCKET_IO,
     droonga.API_GROONGA,
     droonga.API_DROONGA
   ]
