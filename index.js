@@ -32,7 +32,9 @@ function droonga(application, params) {
 }
 
 exports.initialize = droonga;
-express.application.droonga = droonga;
+express.application.droonga = function(params) {
+  droonga(this, parmas);
+};
 
 require('./lib/adapter/api').exportTo(exports);
 
