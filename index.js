@@ -37,3 +37,4 @@ express.application.droonga = droonga;
 require('./lib/adapter/api').exportTo(exports);
 
 exports.command = require('./lib/adapter/command');
+exports.cache = require('./lib/response-cache');
