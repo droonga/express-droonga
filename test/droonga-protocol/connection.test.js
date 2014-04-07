@@ -525,12 +525,12 @@ suite('Connection', function() {
         .next(function() {
           var deferred = new Deferred();
 
-          connection.on('error', function(error) {
-            lastError = error
+          var callback = function(errorCode, response) {
+            lastError = response.body.detail;
             deferred.call();
-          });
+          };
 
-          connection.emitMessage('type2', { message: true });
+          connection.emitMessage('type2', { message: true }, callback);
 
           return deferred;
         })
