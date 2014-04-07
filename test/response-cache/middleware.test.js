@@ -3,17 +3,19 @@ var express = require('express');
 
 var assert = require('chai').assert;
 
-var middleware = require('../../lib/response-cache');
+var responseCache = require('../../lib/response-cache');
 
 suite('Response Cache Middleware', function() {
   var application;
+  var cache;
   setup(function() {
-    application = express();
-    application.use(middleware({
+    cache = new responseCache.Cache({
       rules: [
         { regex: /cached/ }
       ]
-    }));
+    });
+    application = express();
+    application.use(responseCache.middleware(cache));
   });
 
   test('cached', function(done) {
@@ -225,12 +227,13 @@ suite('Response Cache Middleware', function() {
 
     test('size over', function(done) {
       application = express();
-      application.use(middleware({
+      cache = new responseCache.Cache({
         size: 1,
         rules: [
           { regex: /cached/ }
         ]
-      }));
+      });
+      application.use(responseCache.middleware(cache));
       application.get('/cached/first', function(request, response) {
         response.json(200, 'OK');
       });
@@ -275,12 +278,13 @@ suite('Response Cache Middleware', function() {
 
     test('expired by global TTL', function(done) {
       application = express();
-      application.use(middleware({
+      cache = new responseCache.Cache({
         ttlInMilliSeconds: 10,
         rules: [
           { regex: /cached/ }
         ]
-      }));
+      });
+      application.use(responseCache.middleware(cache));
       application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
@@ -307,11 +311,12 @@ suite('Response Cache Middleware', function() {
 
     test('expired by TTL for a rule', function(done) {
       application = express();
-      application.use(middleware({
+      cache = new responseCache.Cache({
         rules: [
           { regex: /cached/, ttlInMilliSeconds: 10 }
         ]
-      }));
+      });
+      application.use(responseCache.middleware(cache));
       application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
@@ -338,6 +343,13 @@ suite('Response Cache Middleware', function() {
   });
 
   suite('statistics', function() {
+    setup(function() {
+      application = express();
+      application.use("/cache/statistics",
+                      responseCache.statisticsMiddleware(cache));
+      application.use(responseCache.middleware(cache));
+    });
+
     test('json', function(done) {
       client(application)
       .get('/cache/statistics')
