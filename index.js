@@ -39,4 +39,8 @@ express.application.droonga = function(params) {
 require('./lib/adapter/api').exportTo(exports);
 
 exports.command = require('./lib/adapter/command');
-exports.cache = require('./lib/response-cache');
+exports.cache = require('./lib/cache');
+exports.middleware = {
+  cacheStatistics: require('./lib/middleware/cache-statistics'),
+  cache: require('./lib/middleware/cache')
+};

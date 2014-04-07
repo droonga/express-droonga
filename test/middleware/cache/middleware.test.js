@@ -3,19 +3,158 @@ var express = require('express');
 
 var assert = require('chai').assert;
 
-var responseCache = require('../../lib/response-cache');
+var Cache = require('../../../lib/cache');
+var middleware = require('../../../lib/middleware/cache');
 
-suite('Response Cache Middleware', function() {
+suite('middleware - cache -', function() {
   var application;
   var cache;
   setup(function() {
-    cache = new responseCache.Cache({
+    cache = new Cache();
+    application = express();
+    application.use(middleware(cache, {
       rules: [
         { regex: /cached/ }
       ]
+    }));
+  });
+
+  suite('required parameters', function() {
+    test('missing rules', function() {
+      assert.throw(function() {
+        middleware(cache, {
+        });
+      }, Error);
     });
-    application = express();
-    application.use(responseCache.middleware(cache));
+
+    test('not-array rules', function() {
+      assert.throw(function() {
+        middleware(cache, {
+          rules: {
+            'foo' : {
+              ttl: 10
+            }
+          }
+        });
+      }, Error);
+    });
+  });
+
+  suite('findRule -', function() {
+    suite('a rule -', function() {
+      setup(function() {
+        application = express();
+        application.use(middleware(cache, {
+          rules: [
+            { regex: /^\/cache-target\// }
+          ]
+        }));
+      });
+
+      test('non-GET requests', function(done) {
+        application.post('/cache-target/path', function(request, response) {
+          response.send(200, 'POST - success');
+        });
+        client(application)
+          .post('/cache-target/path')
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+
+            var nGets = cache.getStatistics().nGets;
+            try {
+              assert.deepEqual(nGets, 0);
+            } catch (error) {
+              return done(error);
+            }
+            done();
+          });
+      });
+
+      test('not matched', function(done) {
+        application.get('/not-cache-target/path', function(request, response) {
+          response.send(200, 'GET - success');
+        });
+        client(application)
+          .get('/not-cache-target/path')
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+
+            var nGets = cache.getStatistics().nGets;
+            try {
+              assert.deepEqual(nGets, 0);
+            } catch (error) {
+              return done(error);
+            }
+            done();
+          });
+      });
+
+      test('matched to a rule', function(done) {
+        application.get('/cache-target/path', function(request, response) {
+          response.send(200, 'GET - success');
+        });
+        client(application)
+          .get('/cache-target/path')
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+
+            var nGets = cache.getStatistics().nGets;
+            try {
+              assert.deepEqual(nGets, 1);
+            } catch (error) {
+              return done(error);
+            }
+            done();
+          });
+      });
+    });
+
+    suite('multiple rules', function() {
+      setup(function() {
+        application = express();
+      });
+
+      test('matched to multiple rules', function(done) {
+        var notUsedTtlInMilliSeconds = 1;
+        application.use(middleware(cache, {
+          rules: [
+            {
+              regex: /^\/cache-target/,
+              ttlInMilliSeconds: 1000
+            },
+            {
+              regex: /^\/cache-target-not-used/,
+              ttlInMilliSeconds: notUsedTtlInMilliSeconds
+            }
+          ]
+        }));
+        application.get('/cache-target-not-used', function(request, response) {
+          response.send(200, 'GET - success');
+        });
+
+        client(application)
+          .get('/cache-target-not-used')
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+
+            setTimeout(function() {
+              client(application)
+                .get('/cache-target-not-used')
+                .expect(200)
+                .expect('X-Droonga-Cached', 'yes')
+                .end(function(error, response) {
+                  if (error)
+                    return done(error);
+                  done();
+                });
+            }, notUsedTtlInMilliSeconds + 1);
+          });
+      });
+    });
   });
 
   test('cached', function(done) {
@@ -227,13 +366,14 @@ suite('Response Cache Middleware', function() {
 
     test('size over', function(done) {
       application = express();
-      cache = new responseCache.Cache({
+      cache = new Cache({
         size: 1,
+      });
+      application.use(middleware(cache, {
         rules: [
           { regex: /cached/ }
         ]
-      });
-      application.use(responseCache.middleware(cache));
+      }));
       application.get('/cached/first', function(request, response) {
         response.json(200, 'OK');
       });
@@ -278,13 +418,12 @@ suite('Response Cache Middleware', function() {
 
     test('expired by global TTL', function(done) {
       application = express();
-      cache = new responseCache.Cache({
+      application.use(middleware(cache, {
         ttlInMilliSeconds: 10,
         rules: [
           { regex: /cached/ }
         ]
-      });
-      application.use(responseCache.middleware(cache));
+      }));
       application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
@@ -311,12 +450,11 @@ suite('Response Cache Middleware', function() {
 
     test('expired by TTL for a rule', function(done) {
       application = express();
-      cache = new responseCache.Cache({
+      application.use(middleware(cache, {
         rules: [
           { regex: /cached/, ttlInMilliSeconds: 10 }
         ]
-      });
-      application.use(responseCache.middleware(cache));
+      }));
       application.get('/cached/expired', function(request, response) {
         response.json(200, 'OK');
       });
@@ -339,37 +477,6 @@ suite('Response Cache Middleware', function() {
               });
           }, 50);
         });
-    });
-  });
-
-  suite('statistics', function() {
-    setup(function() {
-      application = express();
-      application.use("/cache/statistics",
-                      responseCache.statisticsMiddleware(cache));
-      application.use(responseCache.middleware(cache));
-    });
-
-    test('json', function(done) {
-      client(application)
-      .get('/cache/statistics')
-      .expect(200)
-      .end(function(error, response) {
-        if (error)
-          return done(error);
-
-        var statistics = {
-          nGets: 0,
-          nHits: 0,
-          hitRatio: 0.0
-        };
-        try {
-          assert.deepEqual(response.body, statistics);
-        } catch (error) {
-          return done(error);
-        }
-        done();
-      });
     });
   });
 });

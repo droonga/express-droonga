@@ -1,8 +1,8 @@
 var assert = require('chai').assert;
 
-var Entry = require('../../lib/response-cache/entry');
+var Entry = require('../../../lib/middleware/cache/entry');
 
-suite('Response Cache Entry', function() {
+suite('middleware - cache - Entry', function() {
   suite('isCachable', function() {
     test('not processed', function() {
       var entry = new Entry();
