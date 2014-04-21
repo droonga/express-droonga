@@ -19,14 +19,19 @@
   },
   "license": "MIT",
   "dependencies": {
+    "body-parser": "*",
     "connect": "*",
+    "errorhandler": "*",
     "fluent-logger": "*",
     "inflection": "*",
     "jade": "*",
     "less-middleware": ">=0.2",
     "uber-cache": "*",
+    "method-override": "*",
     "msgpack": "*",
-    "socket.io": "*"
+    "serve-static": "*",
+    "socket.io": "*",
+    "static-favicon": "*"
   },
   "devDependencies": {
     "express": ">=4.0",
