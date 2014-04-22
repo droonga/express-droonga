@@ -17,6 +17,9 @@ function droonga(application, params) {
 
   if (params.server) {
     socketIoAdapter.register(application, params.server, params);
+    params.server.on('error', function(error) {
+      connection.close();
+    });
     params.server.on('close', function() {
       // The connection can be mocked/stubbed. We don't need to close
       // such a fake connection.
