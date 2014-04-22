@@ -321,7 +321,6 @@ function createEnvelope(type, body, options) {
     id:         now.getTime(),
     date:       now.toISOString(),
     from:       '127.0.0.1:' + testReceivePort + '/' + testTag,
-    statusCode: 200,
     dataset:    options.dataset || 'test-dataset',
     type:       type,
     body:       body
