@@ -185,6 +185,112 @@ suite('adapter/api/groonga: load', function() {
           });
       });
     });
+
+    suite('array style', function() {
+      test('no _key', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, successMessage);
+        });
+        var body = [
+          [
+            'title',
+            'content'
+          ],
+          [
+            'Droonga',
+            'Droonga is fun!'
+          ]
+        ]
+        utils.post('/d/load?table=Memos', JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(requestBody,
+                               {
+                                 table: 'Memos',
+                                 values: {
+                                   title: 'Droonga',
+                                   content: 'Droonga is fun!'
+                                 }
+                               });
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+
+      test('with columns', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, successMessage);
+        });
+        var body = [
+          [
+            '_key',
+            'name',
+            'age'
+          ],
+          [
+            'alice',
+            'Alice',
+            20
+          ]
+        ]
+        utils.post('/d/load?table=Users', JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(requestBody,
+                               {
+                                 table: 'Users',
+                                 key: 'alice',
+                                 values: {
+                                   name: 'Alice',
+                                   age: 20
+                                 }
+                               });
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+
+      test('with columns query parameter', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, successMessage);
+        });
+        var path = '/d/load?table=Users&columns=_key,name,age';
+        var body = [
+          [
+            'alice',
+            'Alice',
+            20
+          ]
+        ]
+        utils.post(path, JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(requestBody,
+                               {
+                                 table: 'Users',
+                                 key: 'alice',
+                                 values: {
+                                   name: 'Alice',
+                                   age: 20
+                                 }
+                               });
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+    });
   });
 
   suite('failure', function() {
