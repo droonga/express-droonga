@@ -311,7 +311,7 @@ suite('adapter/api/groonga: load', function() {
   });
 
   suite('failure', function() {
-    test('no table', function() {
+    test('no table', function(done) {
       var body = [
         {
           _key: 'alice'
