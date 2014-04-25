@@ -331,7 +331,7 @@ suite('adapter/api/groonga: load', function() {
                                httpStatusCode: 400,
                                groongaStatusCode: -22,
                                errorMessage: 'required parameter is missing: <table>',
-                               body: 0
+                               body: [0]
                              });
             done();
           } catch (error) {
