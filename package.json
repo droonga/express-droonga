@@ -25,6 +25,7 @@
     "fluent-logger": "*",
     "inflection": "*",
     "jade": "*",
+    "jsonparse": "*",
     "less-middleware": ">=0.2",
     "uber-cache": "*",
     "method-override": "*",
