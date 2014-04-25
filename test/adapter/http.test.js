@@ -37,6 +37,8 @@ suite('HTTP Adapter', function() {
                         definition: restAPI.search },
                       { name:       'groonga',
                         definition: groongaAPI.groonga },
+                      { name:       'groonga-load',
+                        definition: groongaAPI['groonga-load'] },
                       { name:       'droonga',
                         definition: droongaAPI.droonga },
                       { name:       'droonga-streaming:watch',
