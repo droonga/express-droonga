@@ -49,7 +49,7 @@ suite('adapter/api/groonga: load', function() {
   }
 
   suite('success', function() {
-    suite('key only', function() {
+    suite('n records', function() {
       test('zero', function(done) {
         pushSuccessResponse();
         var body = [
