@@ -49,6 +49,18 @@ suite('adapter/api/groonga: load', function() {
     });
   }
 
+  function groongaResponse(responseMessage) {
+    return JSON.parse(responseMessage.body);
+  }
+
+  function groongaResponseHeader(responseMessage) {
+    return groongaResponse(responseMessage)[0];
+  };
+
+  function groongaResponseBody(responseMessage) {
+    return groongaResponse(responseMessage)[1];
+  };
+
   suite('success', function() {
     suite('n records', function() {
       test('zero', function(done) {
@@ -58,7 +70,8 @@ suite('adapter/api/groonga: load', function() {
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
             try {
-              assert.deepEqual([0], JSON.parse(response.body)[1]);
+              var responseBody = groongaResponseBody(response);
+              assert.deepEqual(responseBody, [0]);
               done();
             } catch (error) {
               done(error);
@@ -76,7 +89,8 @@ suite('adapter/api/groonga: load', function() {
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
             try {
-              assert.deepEqual([1], JSON.parse(response.body)[1]);
+              var responseBody = groongaResponseBody(response);
+              assert.deepEqual(responseBody, [1]);
               done();
             } catch (error) {
               done(error);
@@ -98,7 +112,8 @@ suite('adapter/api/groonga: load', function() {
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
             try {
-              assert.deepEqual([2], JSON.parse(response.body)[1]);
+              var responseBody = groongaResponseBody(response);
+              assert.deepEqual(responseBody, [2]);
               done();
             } catch (error) {
               done(error);
