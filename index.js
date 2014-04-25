@@ -7,6 +7,8 @@ var dashboardUI = require('./lib/ui/dashboard');
 function droonga(application, params) {
   params = params || {};
 
+  params.logger = params.logger || console;
+
   params.connection = params.connection || new Connection(params);
   var connection = params.connection;
 
