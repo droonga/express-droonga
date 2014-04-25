@@ -294,6 +294,33 @@ suite('adapter/api/groonga: load', function() {
   });
 
   suite('failure', function() {
+    test('no table', function() {
+      var body = [
+        {
+          _key: 'alice'
+        }
+      ];
+      utils.post('/d/load', JSON.stringify(body))
+        .next(function(responseMessage) {
+          try {
+            var actual = {
+              httpStatusCode: responseMessage.statusCode,
+              groongaStatusCode: groongaResponseHeader(response)[0],
+              errorMessage: groongaResponseHeader(response)[3],
+              body: groongaResponseBody(response)
+            }
+            assert.deepEqual(actual,
+                             {
+                               httpStatusCode: 400,
+                               groongaStatusCode: -22,
+                               errorMessage: 'required parameter is missing: <table>',
+                               body: 0
+                             });
+            done();
+          } catch (error) {
+            done(error);
+          }
+        });
+    });
   });
 });
-
