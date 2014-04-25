@@ -51,6 +51,21 @@ suite('adapter/api: Groonga', function() {
 
     suite('success', function() {
       suite('key only', function() {
+        test('zero', function(done) {
+          pushSuccessResponse();
+          var body = [
+          ]
+          utils.post('/d/load?table=Users', JSON.stringify(body))
+            .next(function(response) {
+              try {
+                assert.deepEqual([0], JSON.parse(response.body)[1]);
+                done();
+              } catch (error) {
+                done(error);
+              }
+            });
+        });
+
         test('one', function(done) {
           pushSuccessResponse();
           var body = [
