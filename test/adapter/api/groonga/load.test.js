@@ -2,13 +2,13 @@ var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
-var utils = require('../../test-utils');
+var utils = require('../../../test-utils');
 
 var express = require('express');
-var httpAdapter = require('../../../lib/adapter/http');
-var groongaAPI = require('../../../lib/adapter/api/groonga');
+var httpAdapter = require('../../../../lib/adapter/http');
+var groongaAPI = require('../../../../lib/adapter/api/groonga');
 
-suite('adapter/api: Groonga', function() {
+suite('adapter/api/groonga: load', function() {
   suite('load', function() {
     var connection;
     var application;
