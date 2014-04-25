@@ -360,7 +360,7 @@ function createReplyPacket(requestPacket, envelope) {
   var timestamp = Date.now();
   var requestEnvelope = requestPacket[2];
   var replyEnvelope = Object.create(envelope);
-  envelope.inReplyTo = requestEnvelope.id;
+  replyEnvelope.inReplyTo = requestEnvelope.id;
   return [tag, timestamp, replyEnvelope];
 }
 exports.createReplyPacket = createReplyPacket;
