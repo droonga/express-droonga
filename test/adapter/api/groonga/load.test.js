@@ -121,6 +121,40 @@ suite('adapter/api/groonga: load', function() {
           });
       });
     });
+
+    suite('object style', function() {
+      test('one', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, successMessage);
+        });
+        var body = [
+          {
+            _key: 'alice',
+            name: 'Alice',
+            age: 20
+          }
+        ]
+        utils.post('/d/load?table=Users', JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(requestBody,
+                               {
+                                table: 'Users',
+                                key: 'alice',
+                                values: {
+                                  name: 'Alice',
+                                  age: 20
+                                }
+                              });
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+    });
   });
 
   suite('failure', function() {
