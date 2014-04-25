@@ -322,9 +322,9 @@ suite('adapter/api/groonga: load', function() {
           try {
             var actual = {
               httpStatusCode: responseMessage.statusCode,
-              groongaStatusCode: groongaResponseHeader(response)[0],
-              errorMessage: groongaResponseHeader(response)[3],
-              body: groongaResponseBody(response)
+              groongaStatusCode: groongaResponseHeader(responseMessage)[0],
+              errorMessage: groongaResponseHeader(responseMessage)[3],
+              body: groongaResponseBody(responseMessage)
             }
             assert.deepEqual(actual,
                              {
