@@ -38,13 +38,14 @@ suite('adapter/api/groonga: load', function() {
     });
   });
 
+  var successMessage = {
+    statusCode: 200,
+    body:       true
+  };
+
   function pushSuccessResponse() {
-    backend.reserveResponse(function(request) {
-      return utils.createReplyPacket(request,
-                                     {
-                                       statusCode: 200,
-                                       body:       true
-                                     });
+    backend.reserveResponse(function(requestPacket) {
+      return utils.createReplyPacket(requestPacket, successMessage);
     });
   }
 
