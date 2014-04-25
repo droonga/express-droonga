@@ -123,7 +123,7 @@ suite('adapter/api/groonga: load', function() {
     });
 
     suite('object style', function() {
-      test('one', function(done) {
+      test('with columns', function(done) {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
