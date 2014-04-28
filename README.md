@@ -13,7 +13,7 @@ Web API services for Express.
 
 ### Server
 
-If both express-droonga and fluentd are running on the same machine,
+If both express-droonga and droonga engine are running on the same machine,
 you can initialize the express-droonga instance easily.
 
     var express = require('express'),
@@ -28,13 +28,13 @@ you can initialize the express-droonga instance easily.
       tag:    'droonga',
       server: server, // this is required to initialize Socket.IO API!
       extraCommands: [ // optional
-        // extra command will be sent to fluentd via the Socket.IO API, as is.
+        // extra command will be sent to droonga engine via the Socket.IO API, as is.
         'droonga.reindex'
       ]
     });
 
 Otherwise, you have to specify pairs of host and port to send messages
-to the fluentd and to receive messages from the fluentd.
+to the engine and to receive messages from the engine.
 
     application.droonga({
       prefix: '/droonga',
@@ -44,11 +44,11 @@ to the fluentd and to receive messages from the fluentd.
         'droonga.reindex'
       ],
     
-      // host and port to send messages to fluentd
+      // host and port to send messages to the engine
       hostName: 'backend.droonga.example.org',
       port:     24224,
 
-      // host and port to receive messages from fluentd
+      // host and port to receive messages from the engine
       receiveHostName: 'express.droonga.example.org',
       receivePort:     10030
     });
@@ -80,4 +80,4 @@ In Socket.IO APIs, you'll send requests and receive results separately.
 
 The MIT License. See LICENSE for details.
 
-Copyright (c) 2013 Droonga project
+Copyright (c) 2013-2014 Droonga project

@@ -1,5 +1,12 @@
 # News
 
+## 1.0.2: 2014-04-29 (planned)
+
+ * Works with the [Express 4.0](http://expressjs.com/).
+ * Keeps the process alive even if it is disconnected from the Droonga Engine.
+ * Groonga compatible `load` command with `POST` method is available.
+   (Note: `load` command with `GET` method is not supported yet.)
+
 ## 1.0.1: 2014-03-29
 
  * The bundled HTTP server application is removed.
