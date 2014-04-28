@@ -3,6 +3,7 @@ var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../../../test-utils');
+var groongaUtils = require('./utils');
 
 var express = require('express');
 var httpAdapter = require('../../../../lib/adapter/http');
@@ -38,33 +39,10 @@ suite('adapter/api/groonga: load', function() {
     });
   });
 
-  var successMessage = {
-    statusCode: 200,
-    body:       true
-  };
-
-  function pushSuccessResponse() {
-    backend.reserveResponse(function(requestPacket) {
-      return utils.createReplyPacket(requestPacket, successMessage);
-    });
-  }
-
-  function groongaResponse(responseMessage) {
-    return JSON.parse(responseMessage.body);
-  }
-
-  function groongaResponseHeader(responseMessage) {
-    return groongaResponse(responseMessage)[0];
-  };
-
-  function groongaResponseBody(responseMessage) {
-    return groongaResponse(responseMessage)[1];
-  };
-
   suite('success', function() {
     suite('URL suffix', function() {
       test('nothing', function(done) {
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
@@ -78,7 +56,7 @@ suite('adapter/api/groonga: load', function() {
       });
 
       test('.json', function(done) {
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
         utils.post('/d/load.json?table=Users', JSON.stringify(body))
@@ -94,7 +72,7 @@ suite('adapter/api/groonga: load', function() {
 
     suite('HTTP header', function() {
       test('status code', function(done) {
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
@@ -110,12 +88,12 @@ suite('adapter/api/groonga: load', function() {
 
     suite('n records', function() {
       test('zero', function(done) {
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
-            var responseBody = groongaResponseBody(response);
+            var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [0]);
             done();
           })
@@ -125,7 +103,7 @@ suite('adapter/api/groonga: load', function() {
       });
 
       test('one', function(done) {
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
           {
             _key: 'alice'
@@ -133,7 +111,7 @@ suite('adapter/api/groonga: load', function() {
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
-            var responseBody = groongaResponseBody(response);
+            var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [1]);
             done();
           })
@@ -143,8 +121,8 @@ suite('adapter/api/groonga: load', function() {
       });
 
       test('multiple', function(done) {
-        pushSuccessResponse();
-        pushSuccessResponse();
+        groongaUtils.pushSuccessResponse(backend);
+        groongaUtils.pushSuccessResponse(backend);
         var body = [
           {
             _key: 'alice'
@@ -155,7 +133,7 @@ suite('adapter/api/groonga: load', function() {
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
           .next(function(response) {
-            var responseBody = groongaResponseBody(response);
+            var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [2]);
             done();
           })
@@ -170,7 +148,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
         });
         var body = [
           {
@@ -199,7 +177,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
         });
         var body = [
           {
@@ -232,7 +210,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
         });
         var body = [
           [
@@ -265,7 +243,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
         });
         var body = [
           [
@@ -301,7 +279,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
         });
         var path = '/d/load?table=Users&columns=_key,name,age';
         var body = [
@@ -342,9 +320,9 @@ suite('adapter/api/groonga: load', function() {
         .next(function(responseMessage) {
           var actual = {
             httpStatusCode: responseMessage.statusCode,
-            groongaStatusCode: groongaResponseHeader(responseMessage)[0],
-            errorMessage: groongaResponseHeader(responseMessage)[3],
-            body: groongaResponseBody(responseMessage)
+            groongaStatusCode: groongaUtils.groongaResponseHeader(responseMessage)[0],
+            errorMessage: groongaUtils.groongaResponseHeader(responseMessage)[3],
+            body: groongaUtils.groongaResponseBody(responseMessage)
           }
           assert.deepEqual(actual,
                            {

@@ -3,6 +3,7 @@ var nodemock = require('nodemock');
 var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../../../test-utils');
+var groongaUtils = require('./utils');
 
 var express = require('express');
 var httpAdapter = require('../../../../lib/adapter/http');
@@ -38,32 +39,9 @@ suite('adapter/api/groonga: basic commands', function() {
     });
   });
 
-  var successMessage = {
-    statusCode: 200,
-    body:       true
-  };
-
-  function pushSuccessResponse() {
-    backend.reserveResponse(function(requestPacket) {
-      return utils.createReplyPacket(requestPacket, successMessage);
-    });
-  }
-
-  function groongaResponse(responseMessage) {
-    return JSON.parse(responseMessage.body);
-  }
-
-  function groongaResponseHeader(responseMessage) {
-    return groongaResponse(responseMessage)[0];
-  };
-
-  function groongaResponseBody(responseMessage) {
-    return groongaResponse(responseMessage)[1];
-  };
-
   suite('URL suffix', function() {
     test('nothing', function(done) {
-      pushSuccessResponse();
+      groongaUtils.pushSuccessResponse(backend);
       var body = [
       ]
       utils.post('/d/table_create?name=Users', JSON.stringify(body))
@@ -77,7 +55,7 @@ suite('adapter/api/groonga: basic commands', function() {
     });
 
     test('.json', function(done) {
-      pushSuccessResponse();
+      groongaUtils.pushSuccessResponse(backend);
       var body = [
       ]
       utils.post('/d/table_create.json?name=Users', JSON.stringify(body))
