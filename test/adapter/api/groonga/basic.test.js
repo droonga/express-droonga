@@ -44,7 +44,7 @@ suite('adapter/api/groonga: basic commands', function() {
       groongaUtils.pushSuccessResponse(backend);
       var body = [
       ]
-      utils.post('/d/table_create?name=Users', JSON.stringify(body))
+      utils.get('/d/table_create?name=Users', JSON.stringify(body))
         .next(function(response) {
           assert.deepEqual(response.statusCode, 200);
           done();
@@ -58,7 +58,7 @@ suite('adapter/api/groonga: basic commands', function() {
       groongaUtils.pushSuccessResponse(backend);
       var body = [
       ]
-      utils.post('/d/table_create.json?name=Users', JSON.stringify(body))
+      utils.get('/d/table_create.json?name=Users', JSON.stringify(body))
         .next(function(response) {
           assert.deepEqual(response.statusCode, 200);
           done();
