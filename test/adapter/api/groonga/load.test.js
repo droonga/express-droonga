@@ -62,6 +62,38 @@ suite('adapter/api/groonga: load', function() {
   };
 
   suite('success', function() {
+    suite('URL suffix', function() {
+      test('nothing', function(done) {
+        pushSuccessResponse();
+        var body = [
+        ]
+        utils.post('/d/load?table=Users', JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(response.statusCode, 200);
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+
+      test('.json', function(done) {
+        pushSuccessResponse();
+        var body = [
+        ]
+        utils.post('/d/load.json?table=Users', JSON.stringify(body))
+          .next(function(response) {
+            try {
+              assert.deepEqual(response.statusCode, 200);
+              done();
+            } catch (error) {
+              done(error);
+            }
+          });
+      });
+    });
+
     suite('HTTP header', function() {
       test('status code', function(done) {
         pushSuccessResponse();
