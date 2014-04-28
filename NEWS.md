@@ -1,6 +1,6 @@
 # News
 
-## 1.0.2: 2014-04-29 (planned)
+## 1.0.2: 2014-04-29
 
  * Works with the [Express 4.0](http://expressjs.com/).
  * Keeps the process alive even if it is disconnected from the Droonga Engine.
