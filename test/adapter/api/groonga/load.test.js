@@ -146,21 +146,40 @@ suite('adapter/api/groonga: load', function() {
     });
 
     suite('POST', function() {
+      function post(body, additionalQuery) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, successMessage);
+        });
+        var path = {
+          pathname: '/d/load',
+          query: {
+            table: 'Memos'
+          }
+        };
+        if (additionalQuery) {
+          Object.keys(additionalQuery).forEach(function(key) {
+            path.query[key] = additionalQuery[key];
+          });
+        }
+
+        return utils.post(path, JSON.stringify(body))
+          .next(function(request) {
+            return requestBody;
+          });
+      }
+
       suite('object style', function() {
         test('no _key', function(done) {
-          var requestBody;
-          backend.reserveResponse(function(requestPacket) {
-            requestBody = requestPacket[2].body;
-            return utils.createReplyPacket(requestPacket, successMessage);
-          });
           var body = [
             {
               title: 'Droonga',
               content: 'Droonga is fun!'
             }
           ]
-          utils.post('/d/load?table=Memos', JSON.stringify(body))
-            .next(function(response) {
+          post(body)
+            .next(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -177,27 +196,22 @@ suite('adapter/api/groonga: load', function() {
         });
 
         test('with columns', function(done) {
-          var requestBody;
-          backend.reserveResponse(function(requestPacket) {
-            requestBody = requestPacket[2].body;
-            return utils.createReplyPacket(requestPacket, successMessage);
-          });
           var body = [
             {
               _key: 'alice',
-              name: 'Alice',
-              age: 20
+              title: 'Alice',
+              content: 'Alice is ...'
             }
           ]
-          utils.post('/d/load?table=Users', JSON.stringify(body))
-            .next(function(response) {
+          post(body)
+            .next(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
-                                 table: 'Users',
+                                 table: 'Memos',
                                  key: 'alice',
                                  values: {
-                                   name: 'Alice',
-                                   age: 20
+                                   title: 'Alice',
+                                   content: 'Alice is ...'
                                  }
                                });
               done();
@@ -210,11 +224,6 @@ suite('adapter/api/groonga: load', function() {
 
       suite('array style', function() {
         test('no _key', function(done) {
-          var requestBody;
-          backend.reserveResponse(function(requestPacket) {
-            requestBody = requestPacket[2].body;
-            return utils.createReplyPacket(requestPacket, successMessage);
-          });
           var body = [
             [
               'title',
@@ -225,8 +234,8 @@ suite('adapter/api/groonga: load', function() {
               'Droonga is fun!'
             ]
           ]
-          utils.post('/d/load?table=Memos', JSON.stringify(body))
-            .next(function(response) {
+          post(body)
+            .next(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -243,32 +252,27 @@ suite('adapter/api/groonga: load', function() {
         });
 
         test('with columns', function(done) {
-          var requestBody;
-          backend.reserveResponse(function(requestPacket) {
-            requestBody = requestPacket[2].body;
-            return utils.createReplyPacket(requestPacket, successMessage);
-          });
           var body = [
             [
               '_key',
-              'name',
-              'age'
+              'title',
+              'content'
             ],
             [
               'alice',
               'Alice',
-              20
+              'Alice is ...'
             ]
           ]
-          utils.post('/d/load?table=Users', JSON.stringify(body))
-            .next(function(response) {
+          post(body)
+            .next(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
-                                 table: 'Users',
+                                 table: 'Memos',
                                  key: 'alice',
                                  values: {
-                                   name: 'Alice',
-                                   age: 20
+                                   title: 'Alice',
+                                   content: 'Alice is ...'
                                  }
                                });
               done();
@@ -279,28 +283,25 @@ suite('adapter/api/groonga: load', function() {
         });
 
         test('with columns query parameter', function(done) {
-          var requestBody;
-          backend.reserveResponse(function(requestPacket) {
-            requestBody = requestPacket[2].body;
-            return utils.createReplyPacket(requestPacket, successMessage);
-          });
-          var path = '/d/load?table=Users&columns=_key,name,age';
+          var query = {
+            columns: '_key,title,content'
+          }
           var body = [
             [
               'alice',
               'Alice',
-              20
+              'Alice is ...'
             ]
           ]
-          utils.post(path, JSON.stringify(body))
-            .next(function(response) {
+          post(body, query)
+            .next(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
-                                 table: 'Users',
+                                 table: 'Memos',
                                  key: 'alice',
                                  values: {
-                                   name: 'Alice',
-                                   age: 20
+                                   title: 'Alice',
+                                   content: 'Alice is ...'
                                  }
                                });
               done();
