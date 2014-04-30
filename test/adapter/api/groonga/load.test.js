@@ -307,6 +307,89 @@ suite('adapter/api/groonga: load', function() {
           });
       });
     });
+
+    suite('GET', function() {
+      test('object style', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+        });
+        var values = [
+          {
+            _key: 'alice',
+            name: 'Alice',
+            age: 20
+          }
+        ];
+        var path = {
+          pathname: '/d/load',
+          query: {
+            table: 'Users',
+            values: JSON.stringify(values)
+          }
+        };
+        utils.get(path)
+          .next(function(response) {
+            assert.deepEqual(requestBody,
+                             {
+                               table: 'Users',
+                               key: 'alice',
+                               values: {
+                                 name: 'Alice',
+                                 age: 20
+                               }
+                             });
+            done();
+          })
+          .error(function(error) {
+            done(error);
+          });
+      });
+
+      test('array style', function(done) {
+        var requestBody;
+        backend.reserveResponse(function(requestPacket) {
+          requestBody = requestPacket[2].body;
+          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+        });
+        var values = [
+          [
+            '_key',
+            'name',
+            'age'
+          ],
+          [
+            'alice',
+            'Alice',
+            20
+          ]
+        ];
+        var path = {
+          pathname: '/d/load',
+          query: {
+            table: 'Users',
+            values: JSON.stringify(values)
+          }
+        };
+        utils.get(path)
+          .next(function(response) {
+            assert.deepEqual(requestBody,
+                             {
+                               table: 'Users',
+                               key: 'alice',
+                               values: {
+                                 name: 'Alice',
+                                 age: 20
+                               }
+                             });
+            done();
+          })
+          .error(function(error) {
+            done(error);
+          });
+      });
+    });
   });
 
   suite('failure', function() {

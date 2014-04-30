@@ -7,6 +7,7 @@ var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
 var client = require('socket.io-client');
 var express = require('express');
+var url = require('url');
 
 var FluentReceiver = require('../lib/droonga-protocol/receiver').FluentReceiver;
 exports.FluentReceiver = FluentReceiver;
@@ -75,9 +76,17 @@ function setupServer(handlerOrServer) {
 exports.setupServer = setupServer;
 Deferred.register('setupServer', setupServer);
 
+function normalizePath(path) {
+  if (typeof path != 'string') {
+    path = url.format(path);
+  }
+  return path;
+}
+
 function sendRequest(method, path, postData, headers) {
   var deferred = new Deferred();
 
+  path = normalizePath(path);
   var options = {
         host: '127.0.0.1',
         port: testServerPort,
