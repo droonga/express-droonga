@@ -311,19 +311,13 @@ suite('adapter/api/groonga: load', function() {
     });
 
     suite('GET', function() {
-      test('object style', function(done) {
+      function get(values) {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
           return utils.createReplyPacket(requestPacket, successMessage);
         });
-        var values = [
-          {
-            _key: 'alice',
-            name: 'Alice',
-            age: 20
-          }
-        ];
+
         var path = {
           pathname: '/d/load',
           query: {
@@ -331,8 +325,23 @@ suite('adapter/api/groonga: load', function() {
             values: JSON.stringify(values)
           }
         };
-        utils.get(path)
+
+        return utils.get(path)
           .next(function(response) {
+            return requestBody;
+          });
+      };
+
+      test('object style', function(done) {
+        var values = [
+          {
+            _key: 'alice',
+            name: 'Alice',
+            age: 20
+          }
+        ];
+        get(values)
+          .next(function(requestBody) {
             assert.deepEqual(requestBody,
                              {
                                table: 'Users',
@@ -350,11 +359,6 @@ suite('adapter/api/groonga: load', function() {
       });
 
       test('array style', function(done) {
-        var requestBody;
-        backend.reserveResponse(function(requestPacket) {
-          requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
-        });
         var values = [
           [
             '_key',
@@ -367,15 +371,8 @@ suite('adapter/api/groonga: load', function() {
             20
           ]
         ];
-        var path = {
-          pathname: '/d/load',
-          query: {
-            table: 'Users',
-            values: JSON.stringify(values)
-          }
-        };
-        utils.get(path)
-          .next(function(response) {
+        get(values)
+          .next(function(requestBody) {
             assert.deepEqual(requestBody,
                              {
                                table: 'Users',
