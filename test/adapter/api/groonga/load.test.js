@@ -145,6 +145,7 @@ suite('adapter/api/groonga: load', function() {
       });
     });
 
+    suite('POST', function() {
     suite('object style', function() {
       test('no _key', function(done) {
         var requestBody;
@@ -308,6 +309,7 @@ suite('adapter/api/groonga: load', function() {
             done(error);
           });
       });
+    });
     });
 
     suite('GET', function() {
