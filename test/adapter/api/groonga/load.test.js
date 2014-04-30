@@ -15,6 +15,8 @@ suite('adapter/api/groonga: load', function() {
   var server;
   var backend;
 
+  var successMessage = groongaUtils.successMessage;
+
   setup(function(done) {
     utils.setupApplication()
       .next(function(result) {
@@ -148,7 +150,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var body = [
           {
@@ -177,7 +179,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var body = [
           {
@@ -210,7 +212,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var body = [
           [
@@ -243,7 +245,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var body = [
           [
@@ -279,7 +281,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var path = '/d/load?table=Users&columns=_key,name,age';
         var body = [
@@ -313,7 +315,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var values = [
           {
@@ -351,7 +353,7 @@ suite('adapter/api/groonga: load', function() {
         var requestBody;
         backend.reserveResponse(function(requestPacket) {
           requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, groongaUtils.successMessage);
+          return utils.createReplyPacket(requestPacket, successMessage);
         });
         var values = [
           [
