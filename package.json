@@ -31,8 +31,7 @@
     "method-override": "*",
     "msgpack": "*",
     "serve-static": "*",
-    "socket.io": "*",
-    "static-favicon": "*"
+    "socket.io": "*"
   },
   "devDependencies": {
     "express": ">=4.0",
