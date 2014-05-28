@@ -355,6 +355,19 @@ suite('building message from REST adapter request', function() {
           assert.equalJSON(buildGroupByQuery(query).output.attributes,
                            expected);
         });
+
+        test('simple string', function() {
+          var query = {
+            key: '_key',
+            attributes: '_key,_nsubrecs'
+          };
+          var expected = [
+            '_key',
+            '_nsubrecs'
+          ];
+          assert.equalJSON(buildGroupByQuery(query).output.attributes,
+                           expected);
+        });
       });
     });
   });
