@@ -331,6 +331,30 @@ suite('building message from REST adapter request', function() {
                            expected);
         });
 
+        test('attributes with comma separated attributes', function() {
+          var query = {
+            key: '_key',
+            attributes: {
+              sub_records: {
+                source: '_subrecs',
+                attributes: 'title,name'
+              }
+            }
+          };
+          var expected = [
+            {
+              label: 'sub_records',
+              source: '_subrecs',
+              attributes: [
+                'title',
+                'name'
+              ]
+            }
+          ];
+          assert.equalJSON(buildGroupByQuery(query).output.attributes,
+                           expected);
+        });
+
         test('attributes', function() {
           var query = {
             key: '_key',
