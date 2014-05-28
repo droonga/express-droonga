@@ -331,7 +331,7 @@ suite('building message from REST adapter request', function() {
                            expected);
         });
 
-        test('attributes with comma separated attributes', function() {
+        test('with comma separated attributes', function() {
           var query = {
             key: '_key',
             attributes: {
@@ -355,7 +355,7 @@ suite('building message from REST adapter request', function() {
                            expected);
         });
 
-        test('attributes', function() {
+        test('in complex format', function() {
           var query = {
             key: '_key',
             attributes: {
@@ -380,7 +380,7 @@ suite('building message from REST adapter request', function() {
                            expected);
         });
 
-        test('simple string', function() {
+        test('given as a simple string', function() {
           var query = {
             key: '_key',
             attributes: '_key,_nsubrecs'
