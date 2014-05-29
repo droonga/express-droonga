@@ -1,6 +1,6 @@
 # News
 
-## 1.0.3: 2014-05-29 (planned)
+## 1.0.3: 2014-05-29
 
  * Groonga compatible `load` command with `GET` method is available.
  * Query parameter `group_by[(column name)][attributes]` for the REST `search` command now accepts simple comma-separeted string value.
