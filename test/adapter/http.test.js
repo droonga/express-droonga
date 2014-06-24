@@ -39,8 +39,10 @@ suite('HTTP Adapter', function() {
                         definition: groongaAPI.groonga },
                       { name:       'groonga-post',
                         definition: groongaAPI['groonga-post'] },
-                      { name:       'droonga',
-                        definition: droongaAPI.droonga },
+                      { name:       'droonga-get',
+                        definition: droongaAPI['droonga-get'] },
+                      { name:       'droonga-post',
+                        definition: droongaAPI['droonga-post'] },
                       { name:       'droonga-streaming:watch',
                         definition: droongaAPI["droonga-streaming:watch"] }]);
   });
