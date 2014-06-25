@@ -21,6 +21,7 @@
   "dependencies": {
     "body-parser": "*",
     "connect": "*",
+    "cookie": "*",
     "errorhandler": "*",
     "fluent-logger": "*",
     "inflection": "*",
