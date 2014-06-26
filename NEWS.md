@@ -1,5 +1,11 @@
 # News
 
+## 1.0.4: 2014-06-29 (planned)
+
+ * Supports paths like `/droonga/(command name)` with `GET` method.
+ * Supports paths like `/droonga/(command namespace)/(command name)` with `GET` and `POST` method.
+ * Works with the [Express 4.4.4](http://expressjs.com/).
+
 ## 1.0.3: 2014-05-29
 
  * Groonga compatible `load` command with `GET` method is available.
