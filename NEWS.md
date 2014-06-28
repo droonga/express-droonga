@@ -1,6 +1,6 @@
 # News
 
-## 1.0.4: 2014-06-29 (planned)
+## 1.0.4: 2014-06-29
 
  * Supports paths like `/droonga/(command name)` with `GET` method.
  * Supports paths like `/droonga/(command namespace)/(command name)` with `GET` and `POST` method.
