@@ -1,5 +1,9 @@
 # News
 
+## 1.0.5: 2014-09-29 (planned)
+
+ * Return cached responses correctly.
+
 ## 1.0.4: 2014-06-29
 
  * Supports paths like `/droonga/(command name)` with `GET` method.
