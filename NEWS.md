@@ -1,6 +1,6 @@
 # News
 
-## 1.0.5: 2014-09-29 (planned)
+## 1.0.5: 2014-09-29
 
  * Return cached responses correctly.
 
