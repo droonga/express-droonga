@@ -1,7 +1,7 @@
 {
   "name": "express-droonga",
   "description": "A framework for building scalable realtime web API services for Express",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "author": "Droonga project <droonga@groonga.org>",
   "contributors": [
     {
