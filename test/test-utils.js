@@ -259,7 +259,7 @@ function createBackend() {
 
   backend.clearMessages();
   backend.on('receive', function(data) {
-    console.trace('test-utils.createBackend.receive %d', backend._id);
+    console.debug('test-utils.createBackend.receive %d', backend._id);
     backend.received.push(data);
     if (backend.reservedResponses.length > 0) {
       var response = backend.reservedResponses.shift();
