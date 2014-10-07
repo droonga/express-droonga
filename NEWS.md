@@ -1,5 +1,9 @@
 # News
 
+## 1.0.6: 2014-10-07 (planned)
+
+ * Debug logs are now reported via given logger.
+
 ## 1.0.5: 2014-09-29
 
  * Return cached responses correctly.
