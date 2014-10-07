@@ -1,6 +1,6 @@
 # News
 
-## 1.0.6: 2014-10-07 (planned)
+## 1.0.6: 2014-10-07
 
  * Debug logs are now reported via given logger.
 
