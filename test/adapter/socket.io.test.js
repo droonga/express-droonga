@@ -192,10 +192,7 @@ suite('Socket.IO Adapter', function() {
         .then(utils.waitCb(0.01))
         .then(function() {
           assert.deepEqual(
-            connection.emitMessageCalledArguments.map(function(args) {
-              return { type:    args.type,
-                       message: args.message };
-            }),
+            connection.emittedMessages,
             [
               { type:    params.expectedRequest,
                 message: params.body }
@@ -285,10 +282,7 @@ suite('Socket.IO Adapter', function() {
           clientSockets[2].emit('reqrep', messages[5]);
         }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(
-            connection.emitMessageCalledArguments.map(function(args) {
-              return { type:    args.type,
-                       message: args.message };
-            }),
+            connection.emittedMessages,
             messages.map(function(message) {
               return { type:    'reqrep',
                        message: message };
@@ -339,13 +333,7 @@ suite('Socket.IO Adapter', function() {
                                 { responseEvent: 'reqrep-mod-event.extra.name' });
         }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(
-            connection.emitMessageCalledArguments.map(function(args) {
-              var options = {};
-              if (args.options)
-                options.responseEvent = args.options.responseEvent;
-              return { type:    args.type,
-                       message: args.message };
-            }),
+            connection.emittedMessages,
             [
               { type:    'reqrep',
                 message: 'message1' },

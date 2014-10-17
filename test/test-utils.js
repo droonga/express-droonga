@@ -234,7 +234,16 @@ function createStubbedBackendConnection(hostName) {
     on: function() {},
     removeListener: function() {},
     removeAllListeners: function() {},
-    close: function() {}
+    close: function() {},
+
+    get emittedMessages() {
+      return this.emitMessageCalledArguments.map(function(args) {
+        return {
+          type:    args.type,
+          message: args.message
+        };
+      });
+    }
   };
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
@@ -257,7 +266,12 @@ function createStubbedBackendConnectionPool(count) {
     },
     closeAll: function() {},
 
-    connections: connections
+    connections: connections,
+    get emittedMessages() {
+      return this.connections.map(function(connection) {
+        return connection.emittedMessages;
+      });
+    }
   };
 }
 exports.createStubbedBackendConnectionPool = createStubbedBackendConnectionPool;

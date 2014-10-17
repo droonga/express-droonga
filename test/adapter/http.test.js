@@ -289,14 +289,7 @@ suite('HTTP Adapter', function() {
           .then(function(response) { responses.push(response); })
         .then(function() {
           assert.deepEqual(
-            connectionPool.connections.map(function(connection) {
-              return connection.emitMessageCalledArguments.map(function(args) {
-                return {
-                  type:    args.type,
-                  message: args.message
-                };
-              });
-            }),
+            connectionPool.emittedMessages,
             [
               [{ type: 'adapter', message: 'requested 1' },
                { type: 'adapter', message: 'requested 4' }],
