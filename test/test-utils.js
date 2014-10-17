@@ -218,8 +218,12 @@ function createStubbedBackendConnection(hostName) {
 
       this.emitMessageCalledArguments.push(args);
 
-      if (typeof callback == 'function')
-        callback(null, { type: type + '.result', message: {} });
+      if (typeof callback == 'function') {
+        callback(null, {
+          type: type + '.result',
+          message: message
+        });
+      }
     },
     emitMessageCalledArguments: [],
     getRouteToSelf: function() {
