@@ -251,7 +251,9 @@ function createStubbedBackendConnections(count) {
         index = 0;
       return connection;
     },
-    closeAll: function() {}
+    closeAll: function() {},
+
+    connections: connections
   };
 }
 exports.createStubbedBackendConnections = createStubbedBackendConnections;
