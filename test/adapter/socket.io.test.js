@@ -236,20 +236,16 @@ suite('Socket.IO Adapter', function() {
         '2-b'
       ];
       var clientReceiver;
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      connection = connectionPool.get();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
-          connectionPool = result.connectionPool;
-          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connectionPool: connectionPool,
             plugins: [
-              api.API_REST,
-              api.API_SOCKET_IO,
-              api.API_GROONGA,
-              api.API_DROONGA,
               testPlugin
             ]
           });
@@ -257,6 +253,25 @@ suite('Socket.IO Adapter', function() {
         .then(utils.createClientsCb(3))
         .then(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
+
+          clientReceiver = nodemock
+            .mock('receive').takes('0:' + messages[0])
+            .mock('receive').takes('1:' + messages[1])
+            .mock('receive').takes('2:' + messages[2])
+            .mock('receive').takes('0:' + messages[3])
+            .mock('receive').takes('1:' + messages[4])
+            .mock('receive').takes('2:' + messages[5]);
+
+          clientSockets[0].on('reqrep.result', function(data) {
+            clientReceiver.receive('0:' + data);
+          });
+          clientSockets[1].on('reqrep.result', function(data) {
+            clientReceiver.receive('1:' + data);
+          });
+          clientSockets[2].on('reqrep.result', function(data) {
+            clientReceiver.receive('2:' + data);
+          });
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[0].emit('reqrep', messages[0]);
         }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[1].emit('reqrep', messages[1]);
@@ -269,53 +284,27 @@ suite('Socket.IO Adapter', function() {
         }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[2].emit('reqrep', messages[5]);
         }).then(utils.waitCb(0.01)).then(function() {
-          assert.deepEqual(backend.getBodies(), messages);
-
-          var responses = backend.getMessages().map(function(envelope) {
-            return utils.createReplyEnvelope(envelope, 'reqrep', envelope.body);
-          });
-
-          clientReceiver = nodemock
-            .mock('receive').takes('0:' + messages[0])
-            .mock('receive').takes('1:' + messages[1])
-            .mock('receive').takes('2:' + messages[2])
-            .mock('receive').takes('0:' + messages[3])
-            .mock('receive').takes('1:' + messages[4])
-            .mock('receive').takes('2:' + messages[5]);
-          clientSockets[0].on('reqrep', function(data) {
-            clientReceiver.receive('0:' + data);
-          });
-          clientSockets[1].on('reqrep', function(data) {
-            clientReceiver.receive('1:' + data);
-          });
-          clientSockets[2].on('reqrep', function(data) {
-            clientReceiver.receive('2:' + data);
-          });
-
-          return utils.wait(0)
-            .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
-            .then(utils.sendPacketToCb(utils.createPacket(responses[1]), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
-            .then(utils.sendPacketToCb(utils.createPacket(responses[2]), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
-            .then(utils.sendPacketToCb(utils.createPacket(responses[3]), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
-            .then(utils.sendPacketToCb(utils.createPacket(responses[4]), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
-            .then(utils.sendPacketToCb(utils.createPacket(responses[5]), utils.testReceivePort));
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
+          assert.deepEqual(
+            connection.emitMessageCalledArguments.map(function(args) {
+              return { type:    args.type,
+                       message: args.message };
+            }),
+            messages.map(function(message) {
+              return { type:    'reqrep',
+                       message: message };
+            })
+          );
           clientReceiver.assertThrows();
           done();
         })
         .catch(done);
     });
 
-    test('event with options', function(done) {
+    test('event with custom response event', function(done) {
       var clientReceiver;
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      connection = connectionPool.get();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
           connectionPool = result.connectionPool;
@@ -325,10 +314,6 @@ suite('Socket.IO Adapter', function() {
             tag:      utils.testTag,
             connectionPool: connectionPool,
             plugins: [
-              api.API_REST,
-              api.API_SOCKET_IO,
-              api.API_GROONGA,
-              api.API_DROONGA,
               testPlugin
             ]
           });
@@ -336,20 +321,11 @@ suite('Socket.IO Adapter', function() {
         .then(utils.createClientsCb(1))
         .then(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
-          clientSockets[0].emit('reqrep', 'message1',
-                                { responseEvent: 'reqrep.extra.name' });
-          clientSockets[0].emit('reqrep-mod-event', 'message2',
-                                { responseEvent: 'reqrep-mod-event.extra.name' });
-        }).then(utils.waitCb(0.01)).then(function() {
-          assert.deepEqual(backend.getBodies(), ['message1', 'message2']);
-
-          var responses = backend.getMessages().map(function(envelope) {
-            return utils.createReplyEnvelope(envelope, envelope.type, envelope.body);
-          });
 
           clientReceiver = nodemock
             .mock('receive').takes('message1')
             .mock('receive').takes('message2');
+
           clientSockets[0].on('reqrep.extra.name', function(data) {
             clientReceiver.receive(data);
           });
@@ -357,15 +333,26 @@ suite('Socket.IO Adapter', function() {
             clientReceiver.receive(data);
           });
 
-          return utils.wait(0)
-            .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
-            .then(function() {
-              return utils
-                .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-            });
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
+          clientSockets[0].emit('reqrep', 'message1',
+                                { responseEvent: 'reqrep.extra.name' });
+          clientSockets[0].emit('reqrep-mod-event', 'message2',
+                                { responseEvent: 'reqrep-mod-event.extra.name' });
+        }).then(utils.waitCb(0.01)).then(function() {
+          assert.deepEqual(
+            connection.emitMessageCalledArguments.map(function(args) {
+              var options = {};
+              if (args.options)
+                options.responseEvent = args.options.responseEvent;
+              return { type:    args.type,
+                       message: args.message };
+            }),
+            [
+              { type:    'reqrep',
+                message: 'message1' },
+              { type:    'reqrep-mod-event.mod',
+                message: 'message2' }
+            ]
+          );
           clientReceiver.assertThrows();
           done();
         })
