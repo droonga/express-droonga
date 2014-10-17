@@ -37,11 +37,11 @@ suite('Adaption for express application', function() {
     var server;
 
     setup(function(done) {
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -86,24 +86,22 @@ suite('Adaption for express application', function() {
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
-      var responseBody;
+      var responses = [];
       utils.get('/path/to/droonga/path/to/api')
-        .then(function(response) {
-          responseBody = response.body;
-        });
-
-      utils.wait(0.01)
+        .then(function(response) { responses.push(response); })
         .then(function() {
-          backend.assertReceived([{ type: 'api',
-                                    body: 'api requested' }]);
-
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'api.result',
-                                      'api OK?');
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
-          assert.equal(responseBody, JSON.stringify('api OK'));
+          assert.deepEqual(
+            connectionPool.emittedMessages,
+            [
+              [{ type: 'api', message: 'api requested' }]
+            ]
+          );
+          assert.deepEqual(
+            responses,
+            [
+              { statusCode: 200, body: JSON.stringify('api OK') }
+            ]
+          );
           done();
         })
         .catch(done);
@@ -118,11 +116,11 @@ suite('Adaption for express application', function() {
     var backend;
 
     setup(function(done) {
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -150,23 +148,16 @@ suite('Adaption for express application', function() {
       utils.createClient()
         .then(function(newClient) {
           clientSocket = newClient.socket;
-          clientSocket.emit('api', 'request');
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
-          backend.assertReceived([{ type: 'api',
-                                    body: 'api requested' }]);
 
           mockedReceiver = nodemock
             .mock('receive')
               .takes('api OK');
+
           clientSocket.on('api.response', function(data) {
             mockedReceiver.receive(data);
           });
 
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'api.response',
-                                      'api OK?');
+          clientSocket.emit('api', 'request');
         })
         .then(utils.waitCb(0.01))
         .then(function() {
