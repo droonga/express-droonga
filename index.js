@@ -3,11 +3,12 @@ var Connection = require('./lib/droonga-protocol/connection').Connection;
 var httpAdapter = require('./lib/adapter/http');
 var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
+var ConsoleLogger = require('./lib/console-logger').ConsoleLogger;
 
 function droonga(application, params) {
   params = params || {};
 
-  params.logger = params.logger || console;
+  params.logger = params.logger || new ConsoleLogger();
 
   params.connection = params.connection || new Connection(params);
   var connection = params.connection;
