@@ -74,21 +74,39 @@ suite('ConnectionPool', function() {
           '127.0.0.3'
         ]
       });
-      var connection = connectionPool.get();
-      assert.isNotNull(connection);
-      assert.equal(connection.hostName, '127.0.0.1');
+      var connections = [];
+      var connection;
 
       connection = connectionPool.get();
       assert.isNotNull(connection);
-      assert.equal(connection.hostName, '127.0.0.2');
+      connections.push(connection);
 
       connection = connectionPool.get();
       assert.isNotNull(connection);
-      assert.equal(connection.hostName, '127.0.0.3');
+      connections.push(connection);
 
       connection = connectionPool.get();
       assert.isNotNull(connection);
-      assert.equal(connection.hostName, '127.0.0.1');
+      connections.push(connection);
+
+      connection = connectionPool.get();
+      assert.isNotNull(connection);
+      connections.push(connection);
+
+      connection = connectionPool.get();
+      assert.isNotNull(connection);
+      connections.push(connection);
+
+      connection = connectionPool.get();
+      assert.isNotNull(connection);
+      connections.push(connection);
+
+      assert.equal([connections[0].hostName,
+                    connections[1].hostName,
+                    connections[2].hostName],
+                   [connections[3].hostName,
+                    connections[4].hostName,
+                    connections[5].hostName]);
     });
   });
 });
