@@ -251,11 +251,17 @@ suite('Socket.IO Adapter', function() {
             .expectReceive('reqrep.result', messages[2])
             .expectReceive('reqrep.result', messages[5]);
 
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[0].socket.emit('reqrep', messages[0]);
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[1].socket.emit('reqrep', messages[1]);
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[2].socket.emit('reqrep', messages[2]);
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[0].socket.emit('reqrep', messages[3]);
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[1].socket.emit('reqrep', messages[4]);
+        }).then(utils.waitCb(0.01)).then(function() {
           clients[2].socket.emit('reqrep', messages[5]);
         }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(
