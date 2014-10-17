@@ -263,7 +263,7 @@ suite('HTTP Adapter', function() {
       }
     });
 
-    test('search', function(done) {
+    test('round-robin', function(done) {
       var receiverCallback = {};
       var connections = utils.createStubbedBackendConnections(3);
       var application = express();
