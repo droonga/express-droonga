@@ -14,7 +14,10 @@ function pushSuccessResponse(backend) {
 exports.pushSuccessResponse = pushSuccessResponse;
 
 function groongaResponse(responseMessage) {
-  return JSON.parse(responseMessage.body);
+  if (typeof responseMessage.body == 'string')
+    return JSON.parse(responseMessage.body);
+  else
+    return responseMessage.body;
 }
 exports.groongaResponse = groongaResponse;
 

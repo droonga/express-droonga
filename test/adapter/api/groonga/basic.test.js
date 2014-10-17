@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var client = require('supertest');
 
 var utils = require('../../../test-utils');
 var groongaUtils = require('./utils');
@@ -42,26 +43,38 @@ suite('adapter/api/groonga: basic commands', function() {
   suite('URL suffix', function() {
     test('nothing', function(done) {
       groongaUtils.pushSuccessResponse(backend);
-      var body = [
-      ]
-      utils.get('/d/table_create?name=Users', JSON.stringify(body))
-        .then(function(response) {
-          assert.deepEqual(response.statusCode, 200);
+      client(application)
+        .get('/d/table_create?name=Users')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(response.body, true);
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
 
     test('.json', function(done) {
       groongaUtils.pushSuccessResponse(backend);
-      var body = [
-      ]
-      utils.get('/d/table_create.json?name=Users', JSON.stringify(body))
-        .then(function(response) {
-          assert.deepEqual(response.statusCode, 200);
+      client(application)
+        .get('/d/table_create.json?name=Users')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(response.body, true);
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
   });
 });

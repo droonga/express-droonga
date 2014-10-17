@@ -1,5 +1,6 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var client = require('supertest');
 
 var utils = require('../../../test-utils');
 var groongaUtils = require('./utils');
@@ -47,24 +48,32 @@ suite('adapter/api/groonga: load', function() {
         groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
-        utils.post('/d/load?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            assert.deepEqual(response.statusCode, 200);
+        client(application)
+          .post('/d/load?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
             done();
-          })
-          .catch(done);
+          });
       });
 
       test('.json', function(done) {
         groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
-        utils.post('/d/load.json?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            assert.deepEqual(response.statusCode, 200);
+        client(application)
+          .post('/d/load.json?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
             done();
-          })
-          .catch(done);
+          });
       });
     });
 
@@ -73,12 +82,16 @@ suite('adapter/api/groonga: load', function() {
         groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
-        utils.post('/d/load?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            assert.deepEqual(response.statusCode, 200);
+        client(application)
+          .post('/d/load?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
             done();
-          })
-          .catch(done);
+          });
       });
     });
 
@@ -87,13 +100,22 @@ suite('adapter/api/groonga: load', function() {
         groongaUtils.pushSuccessResponse(backend);
         var body = [
         ]
-        utils.post('/d/load?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            var responseBody = groongaUtils.groongaResponseBody(response);
-            assert.deepEqual(responseBody, [0]);
+        client(application)
+          .post('/d/load?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+            try {
+              var responseBody = groongaUtils.groongaResponseBody(response);
+              assert.deepEqual(responseBody, [0]);
+            } catch(error) {
+              return done(error);
+            }
             done();
-          })
-          .catch(done);
+          });
       });
 
       test('one', function(done) {
@@ -103,13 +125,22 @@ suite('adapter/api/groonga: load', function() {
             _key: 'alice'
           }
         ]
-        utils.post('/d/load?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            var responseBody = groongaUtils.groongaResponseBody(response);
-            assert.deepEqual(responseBody, [1]);
+        client(application)
+          .post('/d/load?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+            try {
+              var responseBody = groongaUtils.groongaResponseBody(response);
+              assert.deepEqual(responseBody, [1]);
+            } catch(error) {
+              return done(error);
+            }
             done();
-          })
-          .catch(done);
+          });
       });
 
       test('multiple', function(done) {
@@ -123,13 +154,22 @@ suite('adapter/api/groonga: load', function() {
             _key: 'bob'
           }
         ]
-        utils.post('/d/load?table=Users', JSON.stringify(body))
-          .then(function(response) {
-            var responseBody = groongaUtils.groongaResponseBody(response);
-            assert.deepEqual(responseBody, [2]);
+        client(application)
+          .post('/d/load?table=Users')
+          .set('Content-Type', 'application/json')
+          .send(body)
+          .expect(200)
+          .end(function(error, response) {
+            if (error)
+              return done(error);
+            try {
+              var responseBody = groongaUtils.groongaResponseBody(response);
+              assert.deepEqual(responseBody, [2]);
+            } catch(error) {
+              return done(error);
+            }
             done();
-          })
-          .catch(done);
+          });
       });
     });
 
@@ -375,24 +415,31 @@ suite('adapter/api/groonga: load', function() {
           _key: 'alice'
         }
       ];
-      utils.post('/d/load', JSON.stringify(body))
-        .then(function(responseMessage) {
-          var actual = {
-            httpStatusCode: responseMessage.statusCode,
-            groongaStatusCode: groongaUtils.groongaResponseHeader(responseMessage)[0],
-            errorMessage: groongaUtils.groongaResponseHeader(responseMessage)[3],
-            body: groongaUtils.groongaResponseBody(responseMessage)
+      client(application)
+        .post('/d/load')
+        .set('Content-Type', 'application/json')
+        .send(body)
+        .expect(400)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+          try {
+            var actual = {
+              groongaStatusCode: groongaUtils.groongaResponseHeader(response)[0],
+              errorMessage: groongaUtils.groongaResponseHeader(response)[3],
+              body: groongaUtils.groongaResponseBody(response)
+            }
+            assert.deepEqual(actual,
+                             {
+                               groongaStatusCode: -22,
+                               errorMessage: 'required parameter is missing: <table>',
+                               body: [0]
+                             });
+          } catch(error) {
+            return done(error);
           }
-          assert.deepEqual(actual,
-                           {
-                             httpStatusCode: 400,
-                             groongaStatusCode: -22,
-                             errorMessage: 'required parameter is missing: <table>',
-                             body: [0]
-                           });
           done();
-        })
-        .catch(done);
+        });
     });
   });
 });
