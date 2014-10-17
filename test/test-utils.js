@@ -262,7 +262,9 @@ function createStubbedBackendConnectionPool(count) {
 }
 exports.createStubbedBackendConnectionPool = createStubbedBackendConnectionPool;
 
-function setupApplication() {
+function setupApplication(params) {
+  params = params || {};
+
   var application = express();
   var server;
   var backend;
@@ -273,7 +275,7 @@ function setupApplication() {
     .then(exports.createBackendCb())
     .then(function(newBackend) {
       backend = newBackend;
-      var connectionPool = new ConnectionPool({
+      var connectionPool = params.connectionPool || new ConnectionPool({
         tag:      testTag,
         defaultDataset: 'test-dataset',
         hostName: ['127.0.0.1'],

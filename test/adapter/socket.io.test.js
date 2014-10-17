@@ -23,15 +23,7 @@ suite('Socket.IO Adapter', function() {
         connection.emit('reqrep-mod-event.mod', data);
       },
       onResponse: function(data, socket) {
-        socket.emit('reqrep-mod-event.response.mod', data);
-      }
-    }),
-    'reqrep-mod-body': new command.SocketRequestResponse({
-      onRequest: function(data, connection) {
-        connection.emit('reqrep-mod-body', 'modified request');
-      },
-      onResponse: function(data, socket) {
-        socket.emit('reqrep-mod-body.response', 'modified response');
+        socket.emit('reqrep-mod-event.result.mod', data);
       }
     }),
     'pubsub': new command.SocketPublishSubscribe({
@@ -42,35 +34,17 @@ suite('Socket.IO Adapter', function() {
         connection.emit('pubsub-mod-event.mod.subscribe', data);
       },
       onSubscribed: function(data, socket) {
-        socket.emit('pubsub-mod-event.mod.subscribe.response', data);
+        socket.emit('pubsub-mod-event.mod.subscribe.result', data);
       },
       onUnsubscribe: function(data, connection) {
         connection.emit('pubsub-mod-event.mod.unsubscribe', data);
       },
       onUnsubscribed: function(data, socket) {
-        socket.emit('pubsub-mod-event.mod.unsubscribe.response', data);
+        socket.emit('pubsub-mod-event.mod.unsubscribe.result', data);
       },
       messageType: 'pubsub-mod-event.publish',
       onPublish: function(data, socket) {
         socket.emit('pubsub-mod-event.mod.publish', data);
-      }
-    }),
-    'pubsub-mod-body': new command.SocketPublishSubscribe({
-      onSubscribe: function(data, connection) {
-        connection.emit('pubsub-mod-body.subscribe', 'modified request');
-      },
-      onSubscribed: function(data, socket) {
-        socket.emit('pubsub-mod-body.subscribe.response', 'modified response');
-      },
-      onUnsubscribe: function(data, connection) {
-        connection.emit('pubsub-mod-body.unsubscribe', 'modified request');
-      },
-      onUnsubscribed: function(data, socket) {
-        socket.emit('pubsub-mod-body.unsubscribe.response', 'modified response');
-      },
-      messageType: 'pubsub-mod-body.publish',
-      onPublish: function(data, socket) {
-        socket.emit('pubsub-mod-body.publish', 'modified response');
       }
     })
   };
@@ -190,20 +164,16 @@ suite('Socket.IO Adapter', function() {
   function testReqRep(test, description, params) {
     test(description, function(done) {
       var mockedReceiver;
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      connection = connectionPool.get();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
-          connectionPool = result.connectionPool;
-          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
             connectionPool: connectionPool,
             plugins: [
-              api.API_REST,
-              api.API_SOCKET_IO,
-              api.API_GROONGA,
-              api.API_DROONGA,
               testPlugin
             ]
           });
@@ -211,26 +181,26 @@ suite('Socket.IO Adapter', function() {
         .then(utils.createClientCb())
         .then(function(newClient) {
           clientSockets.push(newClient.socket);
-          clientSockets[0].emit(params.clientCommand, params.clientBody);
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
-          backend.assertReceived([{ type: params.expectedClientCommand,
-                                    body: params.expectedClientBody }]);
-
           mockedReceiver = nodemock
             .mock('receive')
-              .takes(params.expectedBackendBody);
-          clientSockets[0].on(params.expectedBackendCommand, function(data) {
+              .takes(params.body);
+          clientSockets[0].on(params.expectedResponse, function(data) {
             mockedReceiver.receive(data);
           });
-
-          return backend.sendResponse(backend.getMessages()[0],
-                                      params.backendCommand,
-                                      params.backendBody);
+          clientSockets[0].emit(params.request, params.body);
         })
         .then(utils.waitCb(0.01))
         .then(function() {
+          assert.deepEqual(
+            connection.emitMessageCalledArguments.map(function(args) {
+              return { type:    args.type,
+                       message: args.message };
+            }),
+            [
+              { type:    params.expectedRequest,
+                message: params.body }
+            ]
+          );
           mockedReceiver.assertThrows();
           done();
         })
@@ -243,36 +213,17 @@ suite('Socket.IO Adapter', function() {
     teardown(teardownEnvironment);
 
     testReqRep(test, 'basic', {
-      clientCommand:          'reqrep',
-      clientBody:             'raw request',
-      expectedClientCommand:  'reqrep',
-      expectedClientBody:     'raw request',
-      backendCommand:         'reqrep.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'reqrep.response',
-      expectedBackendBody:    'raw response'        
+      request:          'reqrep',
+      expectedRequest:  'reqrep',
+      expectedResponse: 'reqrep.result',
+      body:             'raw request'
     });
 
     testReqRep(test, 'modified event type', {
-      clientCommand:          'reqrep-mod-event',
-      clientBody:             'raw request',
-      expectedClientCommand:  'reqrep-mod-event.mod',
-      expectedClientBody:     'raw request',
-      backendCommand:         'reqrep-mod-event.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'reqrep-mod-event.response.mod',
-      expectedBackendBody:    'raw response'        
-    });
-
-    testReqRep(test, 'modified body', {
-      clientCommand:          'reqrep-mod-body',
-      clientBody:             'raw request',
-      expectedClientCommand:  'reqrep-mod-body',
-      expectedClientBody:     'modified request',
-      backendCommand:         'reqrep-mod-body.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'reqrep-mod-body.response',
-      expectedBackendBody:    'modified response'        
+      request:          'reqrep-mod-event',
+      expectedRequest:  'reqrep-mod-event.mod',
+      expectedResponse: 'reqrep-mod-event.result.mod',
+      body:             'raw request'     
     });
 
     test('multiple clients', function(done) {
@@ -427,36 +378,17 @@ suite('Socket.IO Adapter', function() {
     teardown(teardownEnvironment);
 
     testReqRep(test, 'basic', {
-      clientCommand:          'pubsub.subscribe',
-      clientBody:             'raw request',
-      expectedClientCommand:  'pubsub.subscribe',
-      expectedClientBody:     'raw request',
-      backendCommand:         'pubsub.subscribe.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub.subscribe.response',
-      expectedBackendBody:    'raw response'        
+      request:          'pubsub.subscribe',
+      expectedRequest:  'pubsub.subscribe',
+      expectedResponse: 'pubsub.subscribe.result',
+      body:             'raw request'
     });
 
     testReqRep(test, 'modified event type', {
-      clientCommand:          'pubsub-mod-event.subscribe',
-      clientBody:             'raw request',
-      expectedClientCommand:  'pubsub-mod-event.mod.subscribe',
-      expectedClientBody:     'raw request',
-      backendCommand:         'pubsub-mod-event.subscribe.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub-mod-event.mod.subscribe.response',
-      expectedBackendBody:    'raw response'        
-    });
-
-    testReqRep(test, 'modified body', {
-      clientCommand:          'pubsub-mod-body.subscribe',
-      clientBody:             'raw request',
-      expectedClientCommand:  'pubsub-mod-body.subscribe',
-      expectedClientBody:     'modified request',
-      backendCommand:         'pubsub-mod-body.subscribe.response',
-      backendBody:            'raw response',
-      expectedBackendCommand: 'pubsub-mod-body.subscribe.response',
-      expectedBackendBody:    'modified response'        
+      request:          'pubsub-mod-event.subscribe',
+      expectedRequest:  'pubsub-mod-event.mod.subscribe',
+      expectedResponse: 'pubsub-mod-event.mod.subscribe.result',
+      body:             'raw request'
     });
 
     test('publish', function(done) {
@@ -485,10 +417,10 @@ suite('Socket.IO Adapter', function() {
         .then(function(newClient) {
           clientSockets.push(newClient.socket);
           subscriberId = newClient.subscriber;
-          clientSockets[0].on('pubsub.subscribe.response', function(data) {
+          clientSockets[0].on('pubsub.subscribe.result', function(data) {
             mockedReceiver.receive(data);
           });
-          clientSockets[0].on('pubsub.unsubscribe.response', function(data) {
+          clientSockets[0].on('pubsub.unsubscribe.result', function(data) {
             mockedReceiver.receive(data);
           });
           clientSockets[0].on('pubsub.publish', function(data) {
@@ -519,7 +451,7 @@ suite('Socket.IO Adapter', function() {
             .mock('receive')
               .takes('subscribed!');
           return backend.sendResponse(backend.getMessages()[0],
-                                      'pubsub.subscribe.response',
+                                      'pubsub.subscribe.result',
                                       'subscribed!');
         })
         .then(utils.waitCb(0.01))
@@ -562,7 +494,7 @@ suite('Socket.IO Adapter', function() {
             .mock('receive')
               .takes('unsubscribed!');
           return backend.sendResponse(backend.getMessages()[0],
-                                      'pubsub.unsubscribe.response',
+                                      'pubsub.unsubscribe.result',
                                       'unsubscribed!');
         })
         .then(utils.waitCb(0.01))
