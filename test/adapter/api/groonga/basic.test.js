@@ -49,12 +49,6 @@ suite('adapter/api/groonga: basic commands', function() {
         .end(function(error, response) {
           if (error)
             return done(error);
-
-          try {
-            assert.deepEqual(response.body, true);
-          } catch(error) {
-            return done(error);
-          }
           done();
         });
     });
@@ -67,12 +61,6 @@ suite('adapter/api/groonga: basic commands', function() {
         .end(function(error, response) {
           if (error)
             return done(error);
-
-          try {
-            assert.deepEqual(response.body, true);
-          } catch(error) {
-            return done(error);
-          }
           done();
         });
     });
