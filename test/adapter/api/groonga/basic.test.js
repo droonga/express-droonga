@@ -9,7 +9,7 @@ var httpAdapter = require('../../../../lib/adapter/http');
 var groongaAPI = require('../../../../lib/adapter/api/groonga');
 
 suite('adapter/api/groonga: basic commands', function() {
-  var connection;
+  var connections;
   var application;
   var server;
   var backend;
@@ -19,11 +19,11 @@ suite('adapter/api/groonga: basic commands', function() {
       .then(function(result) {
         backend = result.backend;
         server = result.server;
-        connection = result.connection;
+        connections = result.connections;
         application = result.application;
         httpAdapter.register(application, {
           prefix: '',
-          connection: connection,
+          connections: connections,
           plugins: [groongaAPI]
         });
         done();
@@ -35,7 +35,7 @@ suite('adapter/api/groonga: basic commands', function() {
     utils.teardownApplication({
       backend:    backend,
       server:     server,
-      connection: connection
+      connections: connections
     });
   });
 

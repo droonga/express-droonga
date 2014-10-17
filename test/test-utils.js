@@ -12,6 +12,7 @@ var FluentReceiver = require('../lib/droonga-protocol/receiver').FluentReceiver;
 exports.FluentReceiver = FluentReceiver;
 
 var Connection = require('../lib/droonga-protocol/connection').Connection;
+var Connections = require('../lib/droonga-protocol/connections').Connections;
 
 var ConsoleLogger = require('../lib/console-logger').ConsoleLogger;
 var logger = new ConsoleLogger();
@@ -228,6 +229,7 @@ function createStubbedBackendConnections(count) {
   for (var i = 0; i < count; i++) {
     connections.push(createStubbedBackendConnection('127.0.0.' + (i + 1)));
   }
+  var index = 0;
   return {
     count: count,
     get: function() {
@@ -253,10 +255,10 @@ function setupApplication() {
     .then(exports.createBackendCb())
     .then(function(newBackend) {
       backend = newBackend;
-      var connection = new Connection({
+      var connections = new Connections({
         tag:      testTag,
         defaultDataset: 'test-dataset',
-        hostName: '127.0.0.1',
+        hostName: ['127.0.0.1'],
         port:     testSendPort,
         receivePort: testReceivePort,
         maxRetyrCount: 3,
@@ -266,7 +268,7 @@ function setupApplication() {
         backend:     backend,
         server:      server,
         application: application,
-        connection:  connection
+        connections: connections
       };
     });
 }
@@ -279,12 +281,12 @@ function teardownApplication(params) {
     params.backend.close();
     params.backend = undefined;
   }
-  if (params.application && params.application.connection) {
-    params.application.connection.close();
+  if (params.application && params.application.connections) {
+    params.application.connections.closeAll();
     params.application = undefined;
-  } else if (params.connection) {
-    params.connection.close();
-    params.connection = undefined;
+  } else if (params.connections) {
+    params.connections.closeAll();
+    params.connections = undefined;
   }
   if (params.server) {
     params.server.close();

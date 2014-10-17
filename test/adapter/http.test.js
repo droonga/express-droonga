@@ -16,7 +16,7 @@ suite('HTTP Adapter', function() {
     var application = express();
     var registeredCommands = httpAdapter.register(application, {
       prefix:     '',
-      connection: utils.createStubbedBackendConnection(),
+      connections: utils.createStubbedBackendConnections(),
       plugins: [
         api.API_REST,
         api.API_SOCKET_IO,
@@ -59,7 +59,7 @@ suite('HTTP Adapter', function() {
       })
     };
 
-    var connection;
+    var connections;
     var application;
     var server;
     var backend;
@@ -69,7 +69,7 @@ suite('HTTP Adapter', function() {
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connection = result.connection;
+          connections = result.connections;
           application = result.application;
           done();
         })
@@ -79,13 +79,13 @@ suite('HTTP Adapter', function() {
     teardown(function() {
       utils.teardownApplication({ backend:    backend,
                                   server:     server,
-                                  connection: connection });
+                                  connections: connections });
     });
 
     test('to the document root', function(done) {
       httpAdapter.register(application, {
         prefix:     '',
-        connection: connection,
+        connections: connections,
         plugins:    [
           api.API_REST,
           api.API_SOCKET_IO,
@@ -118,7 +118,7 @@ suite('HTTP Adapter', function() {
     test('under specified path', function(done) {
       httpAdapter.register(application, {
         prefix:     '/path/to/droonga',
-        connection: connection,
+        connections: connections,
         plugins:    [
           api.API_REST,
           api.API_SOCKET_IO,
@@ -161,11 +161,12 @@ suite('HTTP Adapter', function() {
 
     test('search', function(done) {
       var receiverCallback = {};
-      var connection = utils.createStubbedBackendConnection();
+      var connections = utils.createStubbedBackendConnections();
+      var connection = connections.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connection: connection,
+        connections: connections,
         plugins: [
           api.API_REST,
           api.API_SOCKET_IO,
@@ -207,11 +208,12 @@ suite('HTTP Adapter', function() {
 
     test('droonga', function(done) {
       var receiverCallback = {};
-      var connection = utils.createStubbedBackendConnection();
+      var connections = utils.createStubbedBackendConnections();
+      var connection = connections.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connection: connection,
+        connections: connections,
         plugins: [
           api.API_REST,
           api.API_SOCKET_IO,

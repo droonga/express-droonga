@@ -1,5 +1,5 @@
 var express = require('express');
-var Connection = require('./lib/droonga-protocol/connection').Connection;
+var Connections = require('./lib/droonga-protocol/connections').Connections;
 var httpAdapter = require('./lib/adapter/http');
 var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
@@ -10,8 +10,8 @@ function droonga(application, params) {
 
   params.logger = params.logger || new ConsoleLogger();
 
-  params.connection = params.connection || new Connection(params);
-  var connection = params.connection;
+  params.connections = params.connections || new Connections(params);
+  var connections = params.connections;
 
   params.prefix = params.prefix || '';
   params.prefix = params.prefix.replace(/\/$/, '');
@@ -21,20 +21,19 @@ function droonga(application, params) {
   if (params.server) {
     socketIoAdapter.register(application, params.server, params);
     params.server.on('error', function(error) {
-      connection.close();
+      connections.closeAll();
     });
     params.server.on('close', function() {
       // The connection can be mocked/stubbed. We don't need to close
       // such a fake connection.
-      if (typeof connection.close == 'function')
-        connection.close();
+      if (typeof connections.closeAll == 'function')
+        connections.closeAll();
     });
   }
 
   dashboardUI.register(application, params);
 
-  application.connection = connection;
-  application.emitMessage = connection.emitMessage.bind(connection); // shorthand
+  application.connections = connections;
 }
 
 exports.initialize = droonga;
