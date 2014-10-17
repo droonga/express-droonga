@@ -1,6 +1,7 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
 var express = require('express');
+var client = require('supertest');
 
 var utils = require('./test-utils');
 
@@ -58,14 +59,26 @@ suite('Adaption for express application', function() {
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
-      utils.get('/path/to/api')
-        .then(function(response) {
-          assert.deepEqual(response,
-                           { statusCode: 200,
-                             body:       JSON.stringify('api OK') });
+      client(application)
+        .get('/path/to/api')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(
+              connectionPool.emittedMessages,
+              [
+                [{ type: 'api', message: 'api requested' }]
+              ]
+            );
+            assert.deepEqual(response.body, 'api OK');
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
 
     test('under specified path', function(done) {
@@ -75,25 +88,26 @@ suite('Adaption for express application', function() {
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
-      var responses = [];
-      utils.get('/path/to/droonga/path/to/api')
-        .then(function(response) { responses.push(response); })
-        .then(function() {
-          assert.deepEqual(
-            connectionPool.emittedMessages,
-            [
-              [{ type: 'api', message: 'api requested' }]
-            ]
-          );
-          assert.deepEqual(
-            responses,
-            [
-              { statusCode: 200, body: JSON.stringify('api OK') }
-            ]
-          );
+      client(application)
+        .get('/path/to/droonga/path/to/api')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(
+              connectionPool.emittedMessages,
+              [
+                [{ type: 'api', message: 'api requested' }]
+              ]
+            );
+            assert.deepEqual(response.body, 'api OK');
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
   });
 
