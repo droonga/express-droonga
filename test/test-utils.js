@@ -13,6 +13,9 @@ exports.FluentReceiver = FluentReceiver;
 
 var Connection = require('../lib/droonga-protocol/connection').Connection;
 
+var ConsoleLogger = require('../lib/console-logger').ConsoleLogger;
+var logger = new ConsoleLogger();
+
 var testSendPort = exports.testSendPort = 3333;
 var testReceivePort = exports.testReceivePort = 3334;
 var testServerPort = exports.testServerPort = 3335;
@@ -259,7 +262,7 @@ function createBackend() {
 
   backend.clearMessages();
   backend.on('receive', function(data) {
-    console.debug('test-utils.createBackend.receive %d', backend._id);
+    logger.debug('test-utils.createBackend.receive %d', backend._id);
     backend.received.push(data);
     if (backend.reservedResponses.length > 0) {
       var response = backend.reservedResponses.shift();

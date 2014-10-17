@@ -32,7 +32,8 @@
     "method-override": "*",
     "msgpack": "*",
     "serve-static": "*",
-    "socket.io": "*"
+    "socket.io": "*",
+    "winston": "*"
   },
   "devDependencies": {
     "express": ">=4.0",
