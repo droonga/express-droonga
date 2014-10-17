@@ -31,6 +31,7 @@
     "uber-cache": "*",
     "method-override": "*",
     "msgpack": "*",
+    "q": "*",
     "serve-static": "*",
     "socket.io": ">=1.0",
     "winston": "*"
