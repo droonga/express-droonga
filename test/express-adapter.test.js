@@ -45,6 +45,9 @@ suite('Adaption for express application', function() {
           connection = result.connection;
           application = result.application;
           done();
+        })
+        .error(function(error) {
+          done(error);
         });
     });
 
@@ -132,6 +135,9 @@ suite('Adaption for express application', function() {
           connection = result.connection;
           application = result.application;
           done();
+        })
+        .error(function(error) {
+          done(error);
         });
     });
 
