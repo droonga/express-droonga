@@ -221,7 +221,7 @@ function createStubbedBackendConnection(hostName) {
       if (typeof callback == 'function') {
         callback(null, {
           type: type + '.result',
-          message: message
+          body: message
         });
       }
     },
