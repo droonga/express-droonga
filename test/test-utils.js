@@ -285,8 +285,9 @@ function setupApplication(params) {
   return setupServer(application)
     .then(function(newServer) {
       server = newServer;
+      if (!params.connectionPool)
+        return exports.createBackend();
     })
-    .then(exports.createBackendCb())
     .then(function(newBackend) {
       backend = newBackend;
       var connectionPool = params.connectionPool || new ConnectionPool({

@@ -31,7 +31,6 @@ suite('Adaption for express application', function() {
   };
 
   suite('REST API registeration', function() {
-    var backend;
     var connectionPool;
     var application;
     var server;
@@ -40,7 +39,6 @@ suite('Adaption for express application', function() {
       connectionPool = utils.createStubbedBackendConnectionPool();
       utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
-          backend = result.backend;
           server = result.server;
           application = result.application;
           done();
@@ -49,8 +47,7 @@ suite('Adaption for express application', function() {
     });
 
     teardown(function() {
-      utils.teardownApplication({ backend:    backend,
-                                  server:     server,
+      utils.teardownApplication({ server:     server,
                                   connectionPool: connectionPool });
     });
 
@@ -59,14 +56,6 @@ suite('Adaption for express application', function() {
         prefix:     '',
         connectionPool: connectionPool,
         plugins:    [testRestPlugin, testSocketPlugin]
-      });
-
-      backend.reserveResponse(function(request) {
-        return utils.createReplyPacket(request,
-                                       {
-                                         statusCode: 200,
-                                         body:       'API response',
-                                       });
       });
 
       utils.get('/path/to/api')
@@ -113,13 +102,11 @@ suite('Adaption for express application', function() {
     var connectionPool;
     var server;
     var clientSocket;
-    var backend;
 
     setup(function(done) {
       connectionPool = utils.createStubbedBackendConnectionPool();
       utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
-          backend = result.backend;
           server = result.server;
           application = result.application;
           done();
@@ -132,8 +119,7 @@ suite('Adaption for express application', function() {
         clientSocket.disconnect();
         clientSocket = undefined;
       }
-      utils.teardownApplication({ backend:    backend,
-                                  server:     server,
+      utils.teardownApplication({ server:     server,
                                   connectionPool: connectionPool });
     });
 
