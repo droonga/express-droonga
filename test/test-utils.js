@@ -202,12 +202,24 @@ function createStubbedBackendConnection(hostName) {
     tag: testTag,
 
     emitMessage: function(type, message, callback, options) {
-      this.emitMessageCalledArguments.push({
-        type:     type,
-        message:  message,
-        callback: callback,
-        options:  options
-      });
+      if (typeof callback != 'function') {
+        callback = null;
+        options = callback;
+      }
+
+      var args = {
+        type:    type,
+        message: message
+      };
+      if (callback)
+        args.callback = callback;
+      if (Object.keys(options).length > 0)
+        args.options = options;
+
+      this.emitMessageCalledArguments.push(args);
+
+      if (typeof callback == 'function')
+        callback(null, { type: type + '.result', message: {} });
     },
     emitMessageCalledArguments: [],
     getRouteToSelf: function() {
