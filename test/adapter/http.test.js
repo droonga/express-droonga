@@ -249,7 +249,7 @@ suite('HTTP Adapter', function() {
           connection.emit('adapter', 'requested ' + request.query.id);
         },
         onResponse: function(data, response) {
-          response.status(200).jsonp('OK');
+          response.status(200).send(data);
         }
       })
     };
@@ -274,14 +274,19 @@ suite('HTTP Adapter', function() {
           testPlugin
         ]
       });
+      var responses = [];
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
         })
         .then(utils.getCb('/endpoint?id=1'))
+          .then(function(response) { responses.push(response); })
         .then(utils.getCb('/endpoint?id=2'))
+          .then(function(response) { responses.push(response); })
         .then(utils.getCb('/endpoint?id=3'))
+          .then(function(response) { responses.push(response); })
         .then(utils.getCb('/endpoint?id=4'))
+          .then(function(response) { responses.push(response); })
         .then(function() {
           assert.deepEqual(
             connections.connections.map(function(connection) {
@@ -297,6 +302,15 @@ suite('HTTP Adapter', function() {
                { type: 'adapter', message: 'requested 4' }],
               [{ type: 'adapter', message: 'requested 2' }],
               [{ type: 'adapter', message: 'requested 3' }]
+            ]
+          );
+          assert.deepEqual(
+            responses,
+            [
+              { statusCode: 200, body: 'requested 1' },
+              { statusCode: 200, body: 'requested 2' },
+              { statusCode: 200, body: 'requested 3' },
+              { statusCode: 200, body: 'requested 4' }
             ]
           );
           done();
