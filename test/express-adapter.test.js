@@ -115,7 +115,7 @@ suite('Adaption for express application', function() {
     var application;
     var connectionPool;
     var server;
-    var clientSocket;
+    var clients;
 
     setup(function(done) {
       connectionPool = utils.createStubbedBackendConnectionPool();
@@ -129,9 +129,11 @@ suite('Adaption for express application', function() {
     });
 
     teardown(function() {
-      if (clientSocket) {
-        clientSocket.disconnect();
-        clientSocket = undefined;
+      if (clients) {
+        clients.forEach(function(client) {
+          client.socket.disconnect();
+        });
+        clients = undefined;
       }
       utils.teardownApplication({ server:     server,
                                   connectionPool: connectionPool });
@@ -145,23 +147,15 @@ suite('Adaption for express application', function() {
       });
 
       var mockedReceiver;
-      utils.createClient()
-        .then(function(newClient) {
-          clientSocket = newClient.socket;
-
-          mockedReceiver = nodemock
-            .mock('receive')
-              .takes('api OK');
-
-          clientSocket.on('api.response', function(data) {
-            mockedReceiver.receive(data);
-          });
-
-          clientSocket.emit('api', 'request');
+      utils.createClients(1)
+        .then(function(newClients) {
+          clients = newClients;
+          clients[0].expectReceive('api.response', 'api OK');
+          clients[0].socket.emit('api', 'request');
         })
         .then(utils.waitCb(0.01))
         .then(function() {
-          mockedReceiver.assertThrows();
+          clients[0].assertThrows();
           done();
         })
         .catch(done);
