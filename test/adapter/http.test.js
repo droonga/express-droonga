@@ -1,9 +1,11 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
+var client = require('supertest');
 
 var utils = require('../test-utils');
 
 var express = require('express');
+var client = require('supertest');
 var httpAdapter = require('../../lib/adapter/http');
 var command = require('../../lib/adapter/command');
 var api = require('../../lib/adapter/api');
@@ -88,25 +90,26 @@ suite('HTTP Adapter', function() {
         ]
       });
 
-      var responses = [];
-      utils.get('/path/to/adapter')
-        .then(function(response) { responses.push(response); })
-        .then(function() {
-          assert.deepEqual(
-            connectionPool.emittedMessages,
-            [
-              [{ type: 'adapter', message: 'adapter requested' }]
-            ]
-          );
-          assert.deepEqual(
-            responses,
-            [
-              { statusCode: 200, body: JSON.stringify('adapter OK') }
-            ]
-          );
+      client(application)
+        .get('/path/to/adapter')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(
+              connectionPool.emittedMessages,
+              [
+                [{ type: 'adapter', message: 'adapter requested' }]
+              ]
+            );
+            assert.deepEqual(response.body, 'adapter OK');
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
 
     test('under specified path', function(done) {
@@ -118,25 +121,26 @@ suite('HTTP Adapter', function() {
         ]
       });
 
-      var responses = [];
-      utils.get('/path/to/droonga/path/to/adapter')
-        .then(function(response) { responses.push(response); })
-        .then(function() {
-          assert.deepEqual(
-            connectionPool.emittedMessages,
-            [
-              [{ type: 'adapter', message: 'adapter requested' }]
-            ]
-          );
-          assert.deepEqual(
-            responses,
-            [
-              { statusCode: 200, body: JSON.stringify('adapter OK') }
-            ]
-          );
+      client(application)
+        .get('/path/to/droonga/path/to/adapter')
+        .expect(200)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+
+          try {
+            assert.deepEqual(
+              connectionPool.emittedMessages,
+              [
+                [{ type: 'adapter', message: 'adapter requested' }]
+              ]
+            );
+            assert.deepEqual(response.body, 'adapter OK');
+          } catch(error) {
+            return done(error);
+          }
           done();
-        })
-        .catch(done);
+        });
     });
   });
 
@@ -153,7 +157,6 @@ suite('HTTP Adapter', function() {
     test('search', function(done) {
       var receiverCallback = {};
       var connectionPool = utils.createStubbedBackendConnectionPool();
-      var connection = connectionPool.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
@@ -165,38 +168,45 @@ suite('HTTP Adapter', function() {
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-        })
-        .then(utils.getCb('/tables/Store?query=NY'))
-        .then(function() {
-          assert.equal(1, connection.emitMessageCalledArguments.length);
-          var args = connection.emitMessageCalledArguments[0];
-          assert.equal(args.type, 'search');
 
-          var expected = {
-            queries: {
-              stores: {
-                source: 'Store',
-                condition: {
-                  query: 'NY'
-                },
-                output: {
-                  elements: utils.allElements,
-                  attributes: []
-                }
+          client(application)
+            .get('/tables/Store?query=NY')
+            .expect(200)
+            .end(function(error, response) {
+              if (error)
+                return done(error);
+
+              try {
+                assert.deepEqual(
+                  connectionPool.emittedMessages,
+                  [
+                    [{ type: 'search',
+                        message: {
+                         queries: {
+                           stores: {
+                             source: 'Store',
+                             condition: { query: 'NY' },
+                             output: {
+                               elements: utils.allElements,
+                               attributes: []
+                             }
+                           }
+                         }
+                       }
+                     }]
+                  ]
+                );
+              } catch(error) {
+                return done(error);
               }
-            }
-          };
-          assert.equalJSON(args.message, expected);
-
-          done();
-        })
-        .catch(done);
+              done();
+            });
+      });
     });
 
     test('droonga', function(done) {
       var receiverCallback = {};
       var connectionPool = utils.createStubbedBackendConnectionPool();
-      var connection = connectionPool.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
@@ -212,23 +222,35 @@ suite('HTTP Adapter', function() {
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-        })
-        .then(utils.postCb('/droonga/search', JSON.stringify({ queries: searchQueries })))
-        .then(function() {
-          assert.equal(1, connection.emitMessageCalledArguments.length);
-          var args = connection.emitMessageCalledArguments[0];
-          assert.equal(args.type, 'search');
 
-          var expected = {
-            queries: searchQueries,
-            timeout: 1000,
-            type:    'droonga-search'
-          };
-          assert.equalJSON(args.message, expected);
+          client(application)
+            .post('/droonga/search')
+            .set('Content-Type', 'application/json')
+            .send({ queries: searchQueries })
+            .expect(200)
+            .end(function(error, response) {
+              if (error)
+                return done(error);
 
-          done();
-        })
-        .catch(done);
+              try {
+                assert.deepEqual(
+                  connectionPool.emittedMessages,
+                  [
+                    [{ type: 'search',
+                        message: {
+                          queries: searchQueries,
+                          timeout: 1000,
+                          type:    'droonga-search'
+                        }
+                     }]
+                  ]
+                );
+              } catch(error) {
+                return done(error);
+              }
+              done();
+            });
+        });
     });
   });
 
