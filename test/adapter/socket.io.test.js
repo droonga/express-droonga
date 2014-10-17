@@ -14,6 +14,7 @@ suite('Socket.IO Adapter', function() {
   var connection;
   var server;
   var clientSockets;
+  var clients;
   var backend;
 
   var testPlugin = {
@@ -50,12 +51,12 @@ suite('Socket.IO Adapter', function() {
   };
 
   function setupEnvironment() {
-    clientSockets = [];
+    clients = [];
   }
   function teardownEnvironment() {
-    if (clientSockets.length) {
-      clientSockets.forEach(function(clientSocket) {
-        clientSocket.disconnect();
+    if (clients.length) {
+      clients.forEach(function(client) {
+        client.socket.disconnect();
       });
     }
     utils.teardownApplication({ backend:    backend,
@@ -85,7 +86,6 @@ suite('Socket.IO Adapter', function() {
         .then(function(newServer) {
           server = newServer;
           connectionPool = utils.createStubbedBackendConnectionPool();
-          connection = connectionPool.get();
           var registeredCommands = socketIoAdapter.register(application, server, {
             connectionPool: connectionPool,
             plugins: [
@@ -135,7 +135,6 @@ suite('Socket.IO Adapter', function() {
         .then(function(newServer) {
           server = newServer;
           connectionPool = utils.createStubbedBackendConnectionPool();
-          connection = connectionPool.get();
           socketIoAdapter.register(application, server, {
             connectionPool: connectionPool,
             plugins: [
@@ -150,10 +149,7 @@ suite('Socket.IO Adapter', function() {
           return utils.createClient();
         })
         .then(function(newClient) {
-          clientSockets.push(newClient.socket);
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
+          clients = [newClient];
           mockedListener.assertThrows();
           done();
         })
@@ -163,9 +159,7 @@ suite('Socket.IO Adapter', function() {
 
   function testReqRep(test, description, params) {
     test(description, function(done) {
-      var mockedReceiver;
       connectionPool = utils.createStubbedBackendConnectionPool();
-      connection = connectionPool.get();
       utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
@@ -178,27 +172,24 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .then(utils.createClientCb())
-        .then(function(newClient) {
-          clientSockets.push(newClient.socket);
-          mockedReceiver = nodemock
-            .mock('receive')
-              .takes(params.body);
-          clientSockets[0].on(params.expectedResponse, function(data) {
-            mockedReceiver.receive(data);
-          });
-          clientSockets[0].emit(params.request, params.body);
+        .then(utils.createClientsCb(1))
+        .then(function(newClients) {
+          clients = newClients;
+          clients[0].expectReceive(params.expectedResponse, params.body);
+          clients[0].socket.emit(params.request, params.body);
         })
         .then(utils.waitCb(0.01))
         .then(function() {
           assert.deepEqual(
-            connection.emittedMessages,
+            connectionPool.emittedMessages,
             [
-              { type:    params.expectedRequest,
-                message: params.body }
+               [
+                 { type:    params.expectedRequest,
+                   message: params.body }
+               ]
             ]
           );
-          mockedReceiver.assertThrows();
+          clients[0].assertThrows();
           done();
         })
         .catch(done);
@@ -234,7 +225,6 @@ suite('Socket.IO Adapter', function() {
       ];
       var clientReceiver;
       connectionPool = utils.createStubbedBackendConnectionPool();
-      connection = connectionPool.get();
       utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
@@ -249,60 +239,48 @@ suite('Socket.IO Adapter', function() {
         })
         .then(utils.createClientsCb(3))
         .then(function(newClients) {
-          clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
+          clients = newClients;
 
-          clientReceiver = nodemock
-            .mock('receive').takes('0:' + messages[0])
-            .mock('receive').takes('1:' + messages[1])
-            .mock('receive').takes('2:' + messages[2])
-            .mock('receive').takes('0:' + messages[3])
-            .mock('receive').takes('1:' + messages[4])
-            .mock('receive').takes('2:' + messages[5]);
+          clients[0]
+            .expectReceive('reqrep.result', messages[0])
+            .expectReceive('reqrep.result', messages[3]);
+          clients[1]
+            .expectReceive('reqrep.result', messages[1])
+            .expectReceive('reqrep.result', messages[4]);
+          clients[2]
+            .expectReceive('reqrep.result', messages[2])
+            .expectReceive('reqrep.result', messages[5]);
 
-          clientSockets[0].on('reqrep.result', function(data) {
-            clientReceiver.receive('0:' + data);
-          });
-          clientSockets[1].on('reqrep.result', function(data) {
-            clientReceiver.receive('1:' + data);
-          });
-          clientSockets[2].on('reqrep.result', function(data) {
-            clientReceiver.receive('2:' + data);
-          });
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[0].emit('reqrep', messages[0]);
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[1].emit('reqrep', messages[1]);
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[2].emit('reqrep', messages[2]);
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[0].emit('reqrep', messages[3]);
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[1].emit('reqrep', messages[4]);
-        }).then(utils.waitCb(0.01)).then(function() {
-          clientSockets[2].emit('reqrep', messages[5]);
+          clients[0].socket.emit('reqrep', messages[0]);
+          clients[1].socket.emit('reqrep', messages[1]);
+          clients[2].socket.emit('reqrep', messages[2]);
+          clients[0].socket.emit('reqrep', messages[3]);
+          clients[1].socket.emit('reqrep', messages[4]);
+          clients[2].socket.emit('reqrep', messages[5]);
         }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(
-            connection.emittedMessages,
-            messages.map(function(message) {
-              return { type:    'reqrep',
-                       message: message };
-            })
+            connectionPool.emittedMessages,
+            [
+              messages.map(function(message) {
+                return { type:    'reqrep',
+                         message: message };
+              })
+            ]
           );
-          clientReceiver.assertThrows();
+          clients[0].assertThrows();
+          clients[1].assertThrows();
+          clients[2].assertThrows();
           done();
         })
         .catch(done);
     });
 
     test('event with custom response event', function(done) {
-      var clientReceiver;
       connectionPool = utils.createStubbedBackendConnectionPool();
-      connection = connectionPool.get();
       utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
           server     = result.server;
           connectionPool = result.connectionPool;
-          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
@@ -314,34 +292,29 @@ suite('Socket.IO Adapter', function() {
         })
         .then(utils.createClientsCb(1))
         .then(function(newClients) {
-          clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
+          clients = newClients;
 
-          clientReceiver = nodemock
-            .mock('receive').takes('message1')
-            .mock('receive').takes('message2');
+          clients[0]
+            .expectReceive('reqrep.extra.name', 'message1')
+            .expectReceive('reqrep-mod-event.extra.name', 'message2');
 
-          clientSockets[0].on('reqrep.extra.name', function(data) {
-            clientReceiver.receive(data);
-          });
-          clientSockets[0].on('reqrep-mod-event.extra.name', function(data) {
-            clientReceiver.receive(data);
-          });
-
-          clientSockets[0].emit('reqrep', 'message1',
-                                { responseEvent: 'reqrep.extra.name' });
-          clientSockets[0].emit('reqrep-mod-event', 'message2',
-                                { responseEvent: 'reqrep-mod-event.extra.name' });
+          clients[0].socket.emit('reqrep', 'message1',
+                                  { responseEvent: 'reqrep.extra.name' });
+          clients[0].socket.emit('reqrep-mod-event', 'message2',
+                                  { responseEvent: 'reqrep-mod-event.extra.name' });
         }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(
-            connection.emittedMessages,
+            connectionPool.emittedMessages,
             [
-              { type:    'reqrep',
-                message: 'message1' },
-              { type:    'reqrep-mod-event.mod',
-                message: 'message2' }
+              [
+                { type:    'reqrep',
+                  message: 'message1' },
+                { type:    'reqrep-mod-event.mod',
+                  message: 'message2' }
+              ]
             ]
           );
-          clientReceiver.assertThrows();
+          clients[0].assertThrows();
           done();
         })
         .catch(done);
@@ -367,14 +340,11 @@ suite('Socket.IO Adapter', function() {
     });
 
     test('publish', function(done) {
-      var mockedReceiver;
       var subscriberId;
-      // step 0: setup
       utils.setupApplication()
         .then(function(result) {
           server     = result.server;
           connectionPool = result.connectionPool;
-          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
@@ -388,56 +358,36 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .then(utils.createClientCb())
-        .then(function(newClient) {
-          clientSockets.push(newClient.socket);
-          subscriberId = newClient.subscriber;
-          clientSockets[0].on('pubsub.subscribe.result', function(data) {
-            mockedReceiver.receive(data);
-          });
-          clientSockets[0].on('pubsub.unsubscribe.result', function(data) {
-            mockedReceiver.receive(data);
-          });
-          clientSockets[0].on('pubsub.publish', function(data) {
-            mockedReceiver.receive(data);
-          });
+        .then(utils.createClientsCb(1))
+        .then(function(newClients) {
+          clients = newClients;
+          subscriberId = clients[0].subscriber;
 
-      // step 1: published messages before subscribing
-          mockedReceiver = nodemock
-            .mock('receive').takes('nothing');
+          clients[0]
+            .expectReceive('pubsub.subscribe.result', 'subscribed!')
+            .expectReceive('pubsub.publish', 'published 1')
+            .expectReceive('pubsub.publish', 'published 2')
+            .expectReceive('pubsub.publish', 'published 3')
+            .expectReceive('pubsub.unsubscribe.result', 'unsubscribed!');
+
+          // published messages before subscribing: should be ignored
           return backend.sendMessage('pubsub.publish',
                                      'never published',
                                      { to: subscriberId });
         })
-        .then(utils.waitCb(0.01))
         .then(function() {
-          mockedReceiver.receive('nothing');
-          mockedReceiver.assertThrows();
-
-      // step 2: subscribe
-          clientSockets[0].emit('pubsub.subscribe', 'subscribe!');
+          backend.reserveResponse(function(request) {
+            var requestEnvelope = request[2];
+            return utils.createPacket(
+              utils.createReplyEnvelope(requestEnvelope,
+                                          'pubsub.subscribe.result',
+                                          'subscribed!')
+            );
+          });
+          clients[0].socket.emit('pubsub.subscribe', 'subscribe!');
         })
         .then(utils.waitCb(0.01))
         .then(function() {
-          backend.assertReceived([{ type: 'pubsub.subscribe',
-                                    body: 'subscribe!' }]);
-
-          mockedReceiver = nodemock
-            .mock('receive')
-              .takes('subscribed!');
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'pubsub.subscribe.result',
-                                      'subscribed!');
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
-          mockedReceiver.assertThrows();
-
-      // step 3: published messages while subscribing
-          mockedReceiver = nodemock
-            .mock('receive').takes('published 1')
-            .mock('receive').takes('published 2')
-            .mock('receive').takes('published 3');
           return backend.sendMessage('pubsub.publish',
                                      'published 1',
                                      { to: subscriberId });
@@ -454,39 +404,25 @@ suite('Socket.IO Adapter', function() {
         })
         .then(utils.waitCb(0.01))
         .then(function() {
-          mockedReceiver.assertThrows();
-
-      // step 4: unsubscribe
-          backend.clearMessages();
-          clientSockets[0].emit('pubsub.unsubscribe', 'unsubscribe!');
+          backend.reserveResponse(function(request) {
+            var requestEnvelope = request[2];
+            return utils.createPacket(
+              utils.createReplyEnvelope(requestEnvelope,
+                                          'pubsub.unsubscribe.result',
+                                          'unsubscribed!')
+            );
+          });
+          clients[0].socket.emit('pubsub.unsubscribe', 'unsubscribe!');
         })
         .then(utils.waitCb(0.01))
         .then(function() {
-          backend.assertReceived([{ type: 'pubsub.unsubscribe',
-                                    body: 'unsubscribe!' }]);
-
-          mockedReceiver = nodemock
-            .mock('receive')
-              .takes('unsubscribed!');
-          return backend.sendResponse(backend.getMessages()[0],
-                                      'pubsub.unsubscribe.result',
-                                      'unsubscribed!');
-        })
-        .then(utils.waitCb(0.01))
-        .then(function() {
-          mockedReceiver.assertThrows();
-
-      // step 5: published message after unsubscribing
-          mockedReceiver = nodemock
-            .mock('receive').takes('nothing');
+          // published messages after unsubscribing: should be ignored
           return backend.sendMessage('pubsub.publish',
                                      'never published');
         })
         .then(utils.waitCb(0.01))
         .then(function() {
-          mockedReceiver.receive('nothing');
-          mockedReceiver.assertThrows();
-
+          clients[0].assertThrows();
           done();
         })
         .catch(done);

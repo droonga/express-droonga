@@ -169,6 +169,22 @@ function createClient() {
 //    });
     socket.on('connected', function(client) {
       client.socket = socket;
+      var clientReceiver;
+      var listeningEvents = {};
+      client.expectReceive = function(event, data) {
+        clientReceiver = (clientReceiver || nodemock)
+                            .mock('receive').takes(event + ': ' + data);
+        if (!listeningEvents[event]) {
+          socket.on(event, function(data) {
+            clientReceiver.receive(event + ': ' + data);
+          });
+          listeningEvents[event] = true;
+        }
+        return client;
+      };
+      client.assertThrows = function() {
+        clientReceiver.assertThrows();
+      };
       resolve(client);
     });
     socket.on('error', function(error) {
