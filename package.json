@@ -32,7 +32,7 @@
     "method-override": "*",
     "msgpack": "*",
     "serve-static": "*",
-    "socket.io": "*",
+    "socket.io": ">=1.0",
     "winston": "*"
   },
   "devDependencies": {
@@ -41,7 +41,7 @@
     "jsdeferred": "*",
     "mocha": "*",
     "nodemock": "*",
-    "socket.io-client": "*",
+    "socket.io-client": ">=1.0",
     "supertest": "*"
   },
   "scripts": {

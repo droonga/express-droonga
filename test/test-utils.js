@@ -4,7 +4,7 @@ var net = require('net');
 var msgpack = require('msgpack');
 var http = require('http');
 var Deferred = require('jsdeferred').Deferred;
-var client = require('socket.io-client');
+var socketIoClient = require('socket.io-client');
 var express = require('express');
 var url = require('url');
 
@@ -143,9 +143,12 @@ Deferred.register('post', function() { return post.apply(this, arguments); });
 
 function createClient() {
   var deferred = new Deferred();
-  var host = 'http://127.0.0.1:' + testServerPort;
-  var options = { 'force new connection': true };
-  var socket = client.connect(host, options);
+  var endpoint = 'http://127.0.0.1:' + testServerPort;
+  var options = {
+    'transports': ['websocket', 'polling'],
+    'force new connection': true
+  };
+  var socket = socketIoClient(endpoint, options);
   var newClientSocket;
 //  socket.on('connect', function() {
 //    deferred.call(socket);
