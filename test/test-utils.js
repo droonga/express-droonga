@@ -193,8 +193,13 @@ function createClients(count) {
 exports.createClients = createClients;
 registerCallbackGenerator('createClients');
 
-function createStubbedBackendConnection() {
+function createStubbedBackendConnection(hostName) {
+  hostName = hostName || '127.0.0.1';
   return {
+    hostName: hostName,
+    port: testReceivePort,
+    tag: testTag,
+
     emitMessage: function(type, message, callback, options) {
       this.emitMessageCalledArguments.push({
         type:     type,
@@ -205,7 +210,7 @@ function createStubbedBackendConnection() {
     },
     emitMessageCalledArguments: [],
     getRouteToSelf: function() {
-      return '127.0.0.1:' + testReceivePort + '/' + testTag;
+      return hostName + ':' + testReceivePort + '/' + testTag;
     },
 
     emit: function() {},
@@ -216,6 +221,26 @@ function createStubbedBackendConnection() {
   };
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
+
+function createStubbedBackendConnections(count) {
+  count = count || 1;
+  var connections = [];
+  for (var i = 0; i < count; i++) {
+    connections.push(createStubbedBackendConnection('127.0.0.' + (i + 1)));
+  }
+  return {
+    count: count,
+    get: function() {
+      var connection = connections[index];
+      index++;
+      if (index == count)
+        index = 0;
+      return connection;
+    },
+    closeAll: function() {}
+  };
+}
+exports.createStubbedBackendConnections = createStubbedBackendConnections;
 
 function setupApplication() {
   var application = express();
