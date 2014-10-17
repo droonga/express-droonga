@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 var express = require('express');
 
 var utils = require('../test-utils');
@@ -108,7 +107,7 @@ suite('Socket.IO Adapter', function() {
 
       var application = express();
       utils.setupServer(application)
-        .next(function(newServer) {
+        .then(function(newServer) {
           server = newServer;
           connection = utils.createStubbedBackendConnection();
           var registeredCommands = socketIoAdapter.register(application, server, {
@@ -144,9 +143,7 @@ suite('Socket.IO Adapter', function() {
                               definition: overridingPlugin.deleteCommand }]);
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('initialization', function(done) {
@@ -159,7 +156,7 @@ suite('Socket.IO Adapter', function() {
       });
 
       utils.setupServer(application)
-        .next(function(newServer) {
+        .then(function(newServer) {
           server = newServer;
           connection = utils.createStubbedBackendConnection();
           socketIoAdapter.register(application, server, {
@@ -175,17 +172,15 @@ suite('Socket.IO Adapter', function() {
 
           return utils.createClient();
         })
-        .next(function(newClient) {
+        .then(function(newClient) {
           clientSockets.push(newClient.socket);
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedListener.assertThrows();
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 
@@ -193,7 +188,7 @@ suite('Socket.IO Adapter', function() {
     test(description, function(done) {
       var mockedReceiver;
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
@@ -209,13 +204,13 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClient()
-        .next(function(newClient) {
+        .then(utils.createClientCb())
+        .then(function(newClient) {
           clientSockets.push(newClient.socket);
           clientSockets[0].emit(params.clientCommand, params.clientBody);
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           backend.assertReceived([{ type: params.expectedClientCommand,
                                     body: params.expectedClientBody }]);
 
@@ -230,14 +225,12 @@ suite('Socket.IO Adapter', function() {
                                       params.backendCommand,
                                       params.backendBody);
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.assertThrows();
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   }
 
@@ -289,7 +282,7 @@ suite('Socket.IO Adapter', function() {
       ];
       var clientReceiver;
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
@@ -305,21 +298,21 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClients(3)
-        .next(function(newClients) {
+        .then(utils.createClientsCb(3))
+        .then(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', messages[0]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[1].emit('reqrep', messages[1]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[2].emit('reqrep', messages[2]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[0].emit('reqrep', messages[3]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[1].emit('reqrep', messages[4]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           clientSockets[2].emit('reqrep', messages[5]);
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(backend.getBodies(), messages);
 
           var responses = backend.getMessages().map(function(envelope) {
@@ -343,33 +336,31 @@ suite('Socket.IO Adapter', function() {
             clientReceiver.receive('2:' + data);
           });
 
-          return utils
-            .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(responses[4]), utils.testReceivePort)
-            .wait(0.01)
-            .sendPacketTo(utils.createPacket(responses[5]), utils.testReceivePort);
+          return utils.wait(0)
+            .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(utils.sendPacketToCb(utils.createPacket(responses[1]), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(utils.sendPacketToCb(utils.createPacket(responses[2]), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(utils.sendPacketToCb(utils.createPacket(responses[3]), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(utils.sendPacketToCb(utils.createPacket(responses[4]), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(utils.sendPacketToCb(utils.createPacket(responses[5]), utils.testReceivePort));
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           clientReceiver.assertThrows();
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('event with options', function(done) {
       var clientReceiver;
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
@@ -385,14 +376,14 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClients(1)
-        .next(function(newClients) {
+        .then(utils.createClientsCb(1))
+        .then(function(newClients) {
           clientSockets = clientSockets.concat(newClients.map(function(client) { return client.socket; }));
           clientSockets[0].emit('reqrep', 'message1',
                                 { responseEvent: 'reqrep.extra.name' });
           clientSockets[0].emit('reqrep-mod-event', 'message2',
                                 { responseEvent: 'reqrep-mod-event.extra.name' });
-        }).wait(0.01).next(function() {
+        }).then(utils.waitCb(0.01)).then(function() {
           assert.deepEqual(backend.getBodies(), ['message1', 'message2']);
 
           var responses = backend.getMessages().map(function(envelope) {
@@ -409,21 +400,19 @@ suite('Socket.IO Adapter', function() {
             clientReceiver.receive(data);
           });
 
-          return utils
-            .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-            .next(function() {
+          return utils.wait(0)
+            .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
+            .then(function() {
               return utils
                 .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
             });
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           clientReceiver.assertThrows();
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 
@@ -469,7 +458,7 @@ suite('Socket.IO Adapter', function() {
       var subscriberId;
       // step 0: setup
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           server     = result.server;
           connection = result.connection;
           backend    = result.backend;
@@ -485,8 +474,8 @@ suite('Socket.IO Adapter', function() {
             ]
           });
         })
-        .createClient()
-        .next(function(newClient) {
+        .then(utils.createClientCb())
+        .then(function(newClient) {
           clientSockets.push(newClient.socket);
           subscriberId = newClient.subscriber;
           clientSockets[0].on('pubsub.subscribe.response', function(data) {
@@ -506,16 +495,16 @@ suite('Socket.IO Adapter', function() {
                                      'never published',
                                      { to: subscriberId });
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.receive('nothing');
           mockedReceiver.assertThrows();
 
       // step 2: subscribe
           clientSockets[0].emit('pubsub.subscribe', 'subscribe!');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           backend.assertReceived([{ type: 'pubsub.subscribe',
                                     body: 'subscribe!' }]);
 
@@ -526,8 +515,8 @@ suite('Socket.IO Adapter', function() {
                                       'pubsub.subscribe.response',
                                       'subscribed!');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.assertThrows();
 
       // step 3: published messages while subscribing
@@ -539,26 +528,26 @@ suite('Socket.IO Adapter', function() {
                                      'published 1',
                                      { to: subscriberId });
         })
-        .next(function() {
+        .then(function() {
           return backend.sendMessage('pubsub.publish',
                                      'published 2',
                                      { to: subscriberId });
         })
-        .next(function() {
+        .then(function() {
           return backend.sendMessage('pubsub.publish',
                                      'published 3',
                                      { to: subscriberId });
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.assertThrows();
 
       // step 4: unsubscribe
           backend.clearMessages();
           clientSockets[0].emit('pubsub.unsubscribe', 'unsubscribe!');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           backend.assertReceived([{ type: 'pubsub.unsubscribe',
                                     body: 'unsubscribe!' }]);
 
@@ -569,8 +558,8 @@ suite('Socket.IO Adapter', function() {
                                       'pubsub.unsubscribe.response',
                                       'unsubscribed!');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.assertThrows();
 
       // step 5: published message after unsubscribing
@@ -579,16 +568,14 @@ suite('Socket.IO Adapter', function() {
           return backend.sendMessage('pubsub.publish',
                                      'never published');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.receive('nothing');
           mockedReceiver.assertThrows();
 
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 });

@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../test-utils');
 
@@ -30,21 +29,18 @@ suite('FluentReceiver', function() {
       mockedReceiver.start();
     });
 
-    Deferred
-      .wait(0.01)
-      .next(function() {
+    utils.wait(0.01)
+      .then(function() {
         assert.notEqual(receiver.port, undefined);
 
         var rawPacket = ['droonga.message', Date.now(), { message: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
-      .next(function() {
+      .then(function() {
         mockedReceiver.assertThrows();
         done();
       })
-      .error(function(error) {
-        done(error);
-      });
+      .catch(done);
   });
 
   test('receiving packed message (Forward type)', function(done) {
@@ -63,22 +59,19 @@ suite('FluentReceiver', function() {
       mockedReceiver.start();
     });
 
-    Deferred
-      .wait(0.01)
-      .next(function() {
+    utils.wait(0.01)
+      .then(function() {
         assert.notEqual(receiver.port, undefined);
 
         var rawPacket = ['droonga.message', [[Date.now(), { message1: true }],
                                              [Date.now(), { message2: true }]]];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
-      .next(function() {
+      .then(function() {
         mockedReceiver.assertThrows();
         done();
       })
-      .error(function(error) {
-        done(error);
-      });
+      .catch(done);
   });
 
   test('re-connecting', function(done) {
@@ -97,25 +90,22 @@ suite('FluentReceiver', function() {
       mockedReceiver.start();
     });
 
-    Deferred
-      .wait(0.01)
-      .next(function() {
+    utils.wait(0.01)
+      .then(function() {
         assert.notEqual(receiver.port, undefined);
 
         var rawPacket = ['droonga.message', Date.now(), { message1: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
-      .next(function() {
+      .then(function() {
         var rawPacket = ['droonga.message', Date.now(), { message2: true }];
         return utils.sendPacketTo(rawPacket, receiver.port);
       })
-      .next(function() {
+      .then(function() {
         mockedReceiver.assertThrows();
         done();
       })
-      .error(function(error) {
-        done(error);
-      });
+      .catch(done);
   });
 });
 

@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../../../test-utils');
 var groongaUtils = require('./utils');
@@ -19,7 +18,7 @@ suite('adapter/api/groonga: load', function() {
 
   setup(function(done) {
     utils.setupApplication()
-      .next(function(result) {
+      .then(function(result) {
         backend = result.backend;
         server = result.server;
         connection = result.connection;
@@ -30,7 +29,8 @@ suite('adapter/api/groonga: load', function() {
           plugins: [groongaAPI]
         });
         done();
-      });
+      })
+      .catch(done);
   });
 
   teardown(function() {
@@ -48,13 +48,11 @@ suite('adapter/api/groonga: load', function() {
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             assert.deepEqual(response.statusCode, 200);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('.json', function(done) {
@@ -62,13 +60,11 @@ suite('adapter/api/groonga: load', function() {
         var body = [
         ]
         utils.post('/d/load.json?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             assert.deepEqual(response.statusCode, 200);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
 
@@ -78,13 +74,11 @@ suite('adapter/api/groonga: load', function() {
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             assert.deepEqual(response.statusCode, 200);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
 
@@ -94,14 +88,12 @@ suite('adapter/api/groonga: load', function() {
         var body = [
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [0]);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('one', function(done) {
@@ -112,14 +104,12 @@ suite('adapter/api/groonga: load', function() {
           }
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [1]);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('multiple', function(done) {
@@ -134,14 +124,12 @@ suite('adapter/api/groonga: load', function() {
           }
         ]
         utils.post('/d/load?table=Users', JSON.stringify(body))
-          .next(function(response) {
+          .then(function(response) {
             var responseBody = groongaUtils.groongaResponseBody(response);
             assert.deepEqual(responseBody, [2]);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
 
@@ -165,7 +153,7 @@ suite('adapter/api/groonga: load', function() {
         }
 
         return utils.post(path, JSON.stringify(body))
-          .next(function(request) {
+          .then(function(request) {
             return requestBody;
           });
       }
@@ -179,7 +167,7 @@ suite('adapter/api/groonga: load', function() {
             }
           ]
           post(body)
-            .next(function(requestBody) {
+            .then(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -190,9 +178,7 @@ suite('adapter/api/groonga: load', function() {
                                });
               done();
             })
-            .error(function(error) {
-              done(error);
-            });
+            .catch(done);
         });
 
         test('with columns', function(done) {
@@ -204,7 +190,7 @@ suite('adapter/api/groonga: load', function() {
             }
           ]
           post(body)
-            .next(function(requestBody) {
+            .then(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -216,9 +202,7 @@ suite('adapter/api/groonga: load', function() {
                                });
               done();
             })
-            .error(function(error) {
-              done(error);
-            });
+            .catch(done);
         });
       });
 
@@ -235,7 +219,7 @@ suite('adapter/api/groonga: load', function() {
             ]
           ]
           post(body)
-            .next(function(requestBody) {
+            .then(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -246,9 +230,7 @@ suite('adapter/api/groonga: load', function() {
                                });
               done();
             })
-            .error(function(error) {
-              done(error);
-            });
+            .catch(done);
         });
 
         test('with columns', function(done) {
@@ -265,7 +247,7 @@ suite('adapter/api/groonga: load', function() {
             ]
           ]
           post(body)
-            .next(function(requestBody) {
+            .then(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -277,9 +259,7 @@ suite('adapter/api/groonga: load', function() {
                                });
               done();
             })
-            .error(function(error) {
-              done(error);
-            });
+            .catch(done);
         });
 
         test('with columns query parameter', function(done) {
@@ -294,7 +274,7 @@ suite('adapter/api/groonga: load', function() {
             ]
           ]
           post(body, query)
-            .next(function(requestBody) {
+            .then(function(requestBody) {
               assert.deepEqual(requestBody,
                                {
                                  table: 'Memos',
@@ -306,9 +286,7 @@ suite('adapter/api/groonga: load', function() {
                                });
               done();
             })
-            .error(function(error) {
-              done(error);
-            });
+            .catch(done);
         });
       });
     });
@@ -330,7 +308,7 @@ suite('adapter/api/groonga: load', function() {
         };
 
         return utils.get(path)
-          .next(function(response) {
+          .then(function(response) {
             return requestBody;
           });
       };
@@ -344,7 +322,7 @@ suite('adapter/api/groonga: load', function() {
           }
         ];
         get(values)
-          .next(function(requestBody) {
+          .then(function(requestBody) {
             assert.deepEqual(requestBody,
                              {
                                table: 'Users',
@@ -356,9 +334,7 @@ suite('adapter/api/groonga: load', function() {
                              });
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('array style', function(done) {
@@ -375,7 +351,7 @@ suite('adapter/api/groonga: load', function() {
           ]
         ];
         get(values)
-          .next(function(requestBody) {
+          .then(function(requestBody) {
             assert.deepEqual(requestBody,
                              {
                                table: 'Users',
@@ -387,9 +363,7 @@ suite('adapter/api/groonga: load', function() {
                              });
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
   });
@@ -402,7 +376,7 @@ suite('adapter/api/groonga: load', function() {
         }
       ];
       utils.post('/d/load', JSON.stringify(body))
-        .next(function(responseMessage) {
+        .then(function(responseMessage) {
           var actual = {
             httpStatusCode: responseMessage.statusCode,
             groongaStatusCode: groongaUtils.groongaResponseHeader(responseMessage)[0],
@@ -418,9 +392,7 @@ suite('adapter/api/groonga: load', function() {
                            });
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 });

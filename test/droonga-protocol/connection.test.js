@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../test-utils');
 var TypeOf = utils.TypeOf;
@@ -40,17 +39,14 @@ suite('Connection', function() {
                    undefined,
                    'should be not-initialized');
 
-      Deferred
-        .wait(0.01)
-        .next(function() {
+      utils.wait(0.01)
+        .then(function() {
           assert.notEqual(connection.receivePort,
                           undefined,
                           'should be initialized');
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 
@@ -60,7 +56,7 @@ suite('Connection', function() {
 
     function setupEnvironment(done) {
       utils.createBackend()
-        .next(function(newBackend) {
+        .then(function(newBackend) {
           backend = newBackend;
           connection = new Connection({
             tag:      'test',
@@ -72,7 +68,8 @@ suite('Connection', function() {
             retryDelay: 1
           });
           done();
-        });
+        })
+        .catch(done);
     }
 
     function teardownEnvironment() {
@@ -135,9 +132,8 @@ suite('Connection', function() {
                                                           'another',
                                                           { dataset: 'another' }));
 
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(),
                              [objectMessage,
                               stringMessage,
@@ -145,9 +141,7 @@ suite('Connection', function() {
                               messageForAnotherDataset]);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done)
       });
 
       test('from front to back, with callback', function(done) {
@@ -181,9 +175,8 @@ suite('Connection', function() {
                                                           { dataset: 'another',
                                                             requireReply: true }));
 
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(),
                              [objectMessage,
                               stringMessage,
@@ -191,9 +184,7 @@ suite('Connection', function() {
                               messageForAnotherDataset]);
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('from back to front', function(done) {
@@ -211,18 +202,16 @@ suite('Connection', function() {
           .takes(numericMessage)
           .takes(objectMessage);
 
-        utils
-          .sendPacketTo(utils.createPacket(stringMessage), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(numericMessage), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(objectMessage), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket({}, 'unknown, ignored'), utils.testReceivePort)
-          .next(function() {
+        utils.wait(0)
+          .then(utils.sendPacketToCb(utils.createPacket(stringMessage), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(numericMessage), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(objectMessage), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket({}, 'unknown, ignored'), utils.testReceivePort))
+          .then(function() {
             callback.assert();
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
 
@@ -247,9 +236,8 @@ suite('Connection', function() {
         callback
           .takes(null, responses[0])
           .takes(null, responses[1]);
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -258,10 +246,10 @@ suite('Connection', function() {
               'response listeners should be registered'
             );
           })
-          .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-          .wait(0.01)
-          .next(function() {
+          .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses[1]), utils.testReceivePort))
+          .then(utils.waitCb(0.01))
+          .then(function() {
             callback.assert();
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -271,9 +259,7 @@ suite('Connection', function() {
             );
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('error', function(done) {
@@ -296,9 +282,8 @@ suite('Connection', function() {
         callback
           .takes(responses[0].statusCode, responses[0])
           .takes(responses[1].statusCode, responses[1]);
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -307,10 +292,10 @@ suite('Connection', function() {
               'response listeners should be registered'
             );
           })
-          .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-          .wait(0.01)
-          .next(function() {
+          .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses[1]), utils.testReceivePort))
+          .then(utils.waitCb(0.01))
+          .then(function() {
             callback.assert();
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -320,9 +305,7 @@ suite('Connection', function() {
             );
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('duplicated', function(done) {
@@ -345,9 +328,8 @@ suite('Connection', function() {
         callback
           .takes(null, responses[0])
           .takes(responses[1].statusCode, responses[1]);
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(), messages);
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -356,12 +338,12 @@ suite('Connection', function() {
               'response listeners should be registered'
             );
           })
-          .sendPacketTo(utils.createPacket(responses[0]), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses[1]), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses[2]), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses[3]), utils.testReceivePort)
-          .wait(0.01)
-          .next(function() {
+          .then(utils.sendPacketToCb(utils.createPacket(responses[0]), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses[1]), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses[2]), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses[3]), utils.testReceivePort))
+          .then(utils.waitCb(0.01))
+          .then(function() {
             callback.assert();
             assert.deepEqual(
               [connection.listeners('reply:' + messages[0].id).length,
@@ -371,9 +353,7 @@ suite('Connection', function() {
             );
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
 
       test('timeout', function(done) {
@@ -406,9 +386,8 @@ suite('Connection', function() {
         callback
           .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
           .takes(null, responses.notTimedOut)
-        Deferred
-          .wait(0.01)
-          .next(function() {
+        utils.wait(0.01)
+          .then(function() {
             assert.deepEqual(getBackendReceivedMessages(),
                              [messages.notTimedOut,
                               messages.timedOut,
@@ -424,11 +403,11 @@ suite('Connection', function() {
               'response listeners should be registered'
             );
           })
-          .wait(0.02)
-          .sendPacketTo(utils.createPacket(responses.notTimedOut), utils.testReceivePort)
-          .sendPacketTo(utils.createPacket(responses.timedOut), utils.testReceivePort)
-          .wait(0.01)
-          .next(function() {
+          .then(utils.waitCb(0.02))
+          .then(utils.sendPacketToCb(utils.createPacket(responses.notTimedOut), utils.testReceivePort))
+          .then(utils.sendPacketToCb(utils.createPacket(responses.timedOut), utils.testReceivePort))
+          .then(utils.waitCb(0.01))
+          .then(function() {
             callback.assert();
             assert.deepEqual(
               { notTimedOut:
@@ -442,9 +421,7 @@ suite('Connection', function() {
             );
             done();
           })
-          .error(function(error) {
-            done(error);
-          });
+          .catch(done);
       });
     });
   });
@@ -457,7 +434,7 @@ suite('Connection', function() {
     setup(function(done) {
       restartedBackend = undefined;
       utils.createBackend()
-        .next(function(newBackend) {
+        .then(function(newBackend) {
           backend = newBackend;
           connection = new Connection({
             tag:      utils.testTag,
@@ -467,7 +444,8 @@ suite('Connection', function() {
             retryDelay: 1
           });
           done();
-        });
+        })
+        .catch(done);
     });
 
     teardown(function() {
@@ -486,60 +464,44 @@ suite('Connection', function() {
     });
 
     test('normal messaging', function(done) {
-      var deferred = new Deferred();
-      connection.emitMessage('type', { message: true });
-      backend.once('receive', function() {
-        deferred.call();
-      });
-      deferred
-        .next(function() {
+      function trigger() {
+        connection.emitMessage('type', { message: true });
+      }
+      backend.thennableOnce('receive')
+        .then(function() {
           assert.deepEqual(backend.getEvents(),
                            ['type']);
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
+
+      trigger();
     });
 
     test('disconnected suddenly', function(done) {
+      function trigger() {
+        connection.emitMessage('type1', { message: true });
+      }
+
       var lastError = null;
-      Deferred
-        .next(function() {
-          var deferred = new Deferred();
-          connection.emitMessage('type1', { message: true });
-          backend.once('receive', function() {
-            deferred.call();
-          });
-          return deferred;
-        })
-        .next(function() {
+      backend.thennableOnce('receive')
+        .then(function() {
           assert.deepEqual(backend.getEvents(),
                            ['type1']);
-          var deferred = new Deferred();
-          backend.close(function() {
-            deferred.call();
-          });
-          return deferred;
+          return backend.thennableClose();
         })
-        .next(function() {
-          var deferred = new Deferred();
-
-          var callback = function(errorCode, response) {
-            lastError = response.body.detail;
-            deferred.call();
-          };
-
-          connection.emitMessage('type2', { message: true }, callback);
-
-          return deferred;
+        .then(function() {
+          return connection.thennableEmitMessage('type2', { message: true })
+            .then(function(args) {
+              lastError = args.response.body.detail;
+            });
         })
-        .next(function() {
+        .then(function() {
           assert.isNotNull(lastError);
           assert.equal(lastError.code, 'ECONNREFUSED');
         })
-        .createBackend()
-        .next(function(newBackend) {
+        .then(utils.createBackendCb())
+        .then(function(newBackend) {
           restartedBackend = newBackend;
           assert.deepEqual(backend.getEvents(),
                            ['type1']);
@@ -548,24 +510,18 @@ suite('Connection', function() {
 
           connection.emitMessage('type3', { message: true });
 
-          var deferred = new Deferred();
-          restartedBackend.once('receive', function() {
-            restartedBackend.once('receive', function() {
-              deferred.call();
-            });
-          });
-          return deferred;
+          return utils.wait(0.1);
         })
-        .next(function() {
+        .then(function() {
           assert.deepEqual(backend.getEvents(),
                            ['type1']);
           assert.deepEqual(restartedBackend.getEvents(),
                            ['type2', 'type3']);
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
+
+      trigger();
     });
   });
 });

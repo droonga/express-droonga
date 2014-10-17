@@ -3,7 +3,7 @@ var nodemock = require('nodemock');
 var net = require('net');
 var msgpack = require('msgpack');
 var http = require('http');
-var Deferred = require('jsdeferred').Deferred;
+var Q = require('q');
 var socketIoClient = require('socket.io-client');
 var express = require('express');
 var url = require('url');
@@ -21,36 +21,53 @@ var testReceivePort = exports.testReceivePort = 3334;
 var testServerPort = exports.testServerPort = 3335;
 var testTag = exports.testTag = 'test';
 
+function registerCallbackGenerator(name) {
+  exports[name + 'Cb'] = (function() {
+    var givenArgs = arguments;
+    return (function() {
+      return exports[name].apply(exports, givenArgs);
+    });
+  });
+}
+
+
+function wait(seconds) {
+  return Q.Promise(function(resolve, reject, notify) {
+    setTimeout(resolve, seconds * 1000);
+  });
+}
+exports.wait = wait;
+registerCallbackGenerator('wait');
 
 function connectTo(port) {
-  var deferred = new Deferred();
-  var clientSocket = new net.Socket();
-  clientSocket.on('error', function(error){
-    clientSocket.destroy();
-    deferred.fail(error);
+  return Q.Promise(function(resolve, reject, notify) {
+    var clientSocket = new net.Socket();
+    clientSocket.on('error', function(error){
+      clientSocket.destroy();
+      reject(error);
+    });
+    clientSocket.connect(port, '127.0.0.1', function(){
+      resolve(clientSocket);
+    });
   });
-  clientSocket.connect(port, '127.0.0.1', function(){
-    deferred.call(clientSocket);
-  });
-  return deferred;
 }
 exports.connectTo = connectTo;
-Deferred.register('connectTo', connectTo);
+registerCallbackGenerator('connectTo');
 
 function sendPacketTo(packet, port) {
   var clientSocket;
   return connectTo(port)
-    .next(function(newSocket) {
+    .then(function(newSocket) {
       clientSocket = newSocket;
       var packedPacket = msgpack.pack(packet);
       clientSocket.write(new Buffer(packedPacket));
     })
-    .wait(0.01)
-    .next(function() {
+    .then(exports.waitCb(0.01))
+    .then(function() {
       clientSocket.destroy();
       clientSocket = undefined;
     })
-    .error(function(error) {
+    .catch(function(error) {
       if (clientSocket) {
         clientSocket.destroy();
         clientSocket = undefined;
@@ -59,24 +76,24 @@ function sendPacketTo(packet, port) {
     });
 }
 exports.sendPacketTo = sendPacketTo;
-Deferred.register('sendPacketTo', sendPacketTo);
+registerCallbackGenerator('sendPacketTo');
 
 
 function setupServer(handlerOrServer) {
-  var deferred = new Deferred();
-  var server;
-  if ('close' in handlerOrServer) { // it is a server
-    server = handlerOrServer;
-  } else { // it is a handler
-    server = http.createServer(handlerOrServer);
-  }
-  server.listen(testServerPort, function() {
-    deferred.call(server);
+  return Q.Promise(function(resolve, reject, notify) {
+    var server;
+    if ('close' in handlerOrServer) { // it is a server
+      server = handlerOrServer;
+    } else { // it is a handler
+      server = http.createServer(handlerOrServer);
+    }
+    server.listen(testServerPort, function() {
+      resolve(server);
+    });
   });
-  return deferred;
 }
 exports.setupServer = setupServer;
-Deferred.register('setupServer', setupServer);
+registerCallbackGenerator('setupServer');
 
 function normalizePath(path) {
   if (typeof path != 'string') {
@@ -86,101 +103,95 @@ function normalizePath(path) {
 }
 
 function sendRequest(method, path, postData, headers) {
-  var deferred = new Deferred();
+  return Q.Promise(function(resolve, reject, notify) {
+    path = normalizePath(path);
+    var options = {
+          host: '127.0.0.1',
+          port: testServerPort,
+          path: path,
+          method: method,
+          headers: {}
+        };
 
-  path = normalizePath(path);
-  var options = {
-        host: '127.0.0.1',
-        port: testServerPort,
-        path: path,
-        method: method,
-        headers: {}
-      };
-
-  if (headers) {
-    for (var header in headers) {
-      if (headers.hasOwnProperty(header))
-        options.headers[header] = headers[header];
+    if (headers) {
+      for (var header in headers) {
+        if (headers.hasOwnProperty(header))
+          options.headers[header] = headers[header];
+      }
     }
-  }
 
-  Deferred.next(function() {
     var request = http.request(options, function(response) {
           var body = '';
           response.on('data', function(data) {
             body += data;
           });
           response.on('end', function() {
-            deferred.call({
+            resolve({
               statusCode: response.statusCode,
               body: body
             });
           });
         });
     request.on('error', function(error) {
-      deferred.fail(error);
+      reject(error);
     });
 
     if (postData) request.write(postData);
     request.end();
   });
-
-  return deferred;
 }
 
 function get(path, headers) {
   return sendRequest('GET', path, null, headers);
 }
 exports.get = get;
-Deferred.register('get', function() { return get.apply(this, arguments); });
+registerCallbackGenerator('get');
 
 function post(path, body, headers) {
   return sendRequest('POST', path, body, headers);
 }
 exports.post = post;
-Deferred.register('post', function() { return post.apply(this, arguments); });
+registerCallbackGenerator('post');
 
 
 function createClient() {
-  var deferred = new Deferred();
-  var endpoint = 'http://127.0.0.1:' + testServerPort;
-  var options = {
-    'transports': ['websocket', 'polling'],
-    'force new connection': true
-  };
-  var socket = socketIoClient(endpoint, options);
-  var newClientSocket;
-//  socket.on('connect', function() {
-//    deferred.call(socket);
-//  });
-  socket.on('connected', function(client) {
-    client.socket = socket;
-    deferred.call(client);
+  return Q.Promise(function(resolve, reject, notify) {
+    var endpoint = 'http://127.0.0.1:' + testServerPort;
+    var options = {
+      'transports': ['websocket', 'polling'],
+      'force new connection': true
+    };
+    var socket = socketIoClient(endpoint, options);
+    var newClientSocket;
+//    socket.on('connect', function() {
+//      resolve(socket);
+//    });
+    socket.on('connected', function(client) {
+      client.socket = socket;
+      resolve(client);
+    });
+    socket.on('error', function(error) {
+      reject(new Error(JSON.stringify(error)));
+    });
   });
-  socket.on('error', function(error) {
-    deferred.fail(new Error(JSON.stringify(error)));
-  });
-  return deferred;
 }
 exports.createClient = createClient;
-Deferred.register('createClient', createClient);
+registerCallbackGenerator('createClient');
 
 function createClients(count) {
-  var clients = [];
-  return Deferred.next(function loop() {
-    if (clients.length < count) {
-      return createClient()
-               .next(function(client) {
-                 clients.push(client);
-               })
-               .next(loop);
-    } else {
-      return clients;
+  return Q.Promise(function(resolve, reject, notify) {
+    var clients = [];
+    for (var i = 0; i < count; i++) {
+      createClient().then(function(client) {
+        clients.push(client);
+        if (clients.length == count)
+          resolve(clients);
+      });
     }
   });
 }
 exports.createClients = createClients;
-Deferred.register('createClients', createClients);
+registerCallbackGenerator('createClients');
 
 function createStubbedBackendConnection() {
   return {
@@ -211,11 +222,11 @@ function setupApplication() {
   var server;
   var backend;
   return setupServer(application)
-    .next(function(newServer) {
+    .then(function(newServer) {
       server = newServer;
     })
-    .createBackend()
-    .next(function(newBackend) {
+    .then(exports.createBackendCb())
+    .then(function(newBackend) {
       backend = newBackend;
       var connection = new Connection({
         tag:      testTag,
@@ -235,7 +246,7 @@ function setupApplication() {
     });
 }
 exports.setupApplication = setupApplication;
-Deferred.register('setupApplication', setupApplication);
+registerCallbackGenerator('setupApplication');
 
 function teardownApplication(params) {
   params = params || {};
@@ -256,79 +267,77 @@ function teardownApplication(params) {
   }
 }
 exports.teardownApplication = teardownApplication;
-Deferred.register('teardownApplication', teardownApplication);
 
 function createBackend() {
-  var deferred = new Deferred();
-  var backend = new FluentReceiver(testSendPort);
+  return Q.Promise(function(resolve, reject, notify) {
+    var backend = new FluentReceiver(testSendPort);
 
-  backend.clearMessages = function() {
-    this.received = [];
-  };
+    backend.clearMessages = function() {
+      this.received = [];
+    };
 
-  backend.clearMessages();
-  backend.on('receive', function(data) {
-    logger.debug('test-utils.createBackend.receive %d', backend._id);
-    backend.received.push(data);
-    if (backend.reservedResponses.length > 0) {
-      var response = backend.reservedResponses.shift();
-      if (typeof response == 'function')
-        response = response(data);
-      sendPacketTo(response, testReceivePort);
-    }
-  });
-
-  backend.reservedResponses = [];
-  backend.reserveResponse = function(response) {
-    backend.reservedResponses.push(response);
-  };
-
-  backend.assertReceived = function(expectedMessages) {
-    assert.deepEqual(this.getMessages().map(function(message) {
-                       return { type: message.type,
-                                body: message.body };
-                     }),
-                     expectedMessages);
-  };
-
-  backend.getMessages = function() {
-    return this.received.map(function(packet) {
-      return packet[2];
+    backend.clearMessages();
+    backend.on('receive', function(data) {
+      logger.debug('test-utils.createBackend.receive %d', backend._id);
+      backend.received.push(data);
+      if (backend.reservedResponses.length > 0) {
+        var response = backend.reservedResponses.shift();
+        if (typeof response == 'function')
+          response = response(data);
+        sendPacketTo(response, testReceivePort);
+      }
     });
-  };
-  backend.getEvents = function() {
-    return this.getMessages().map(function(envelope) {
-      return envelope.type;
-    });
-  };
-  backend.getBodies = function() {
-    return this.getMessages().map(function(envelope) {
-      return envelope.body;
-    });
-  };
 
-  backend.sendMessage = function(type, body, options) {
-    var response = createEnvelope(type, body);
-    if (options && typeof options == 'object') {
-      Object.keys(options).forEach(function(key) {
-        response[key] = options[key];
+    backend.reservedResponses = [];
+    backend.reserveResponse = function(response) {
+      backend.reservedResponses.push(response);
+    };
+
+    backend.assertReceived = function(expectedMessages) {
+      assert.deepEqual(this.getMessages().map(function(message) {
+                         return { type: message.type,
+                                  body: message.body };
+                       }),
+                       expectedMessages);
+    };
+
+    backend.getMessages = function() {
+      return this.received.map(function(packet) {
+        return packet[2];
       });
-    }
-    return sendPacketTo(createPacket(response), testReceivePort)
-  };
-  backend.sendResponse = function(request, type, body) {
-    var response = createReplyEnvelope(request, type, body);
-    return sendPacketTo(createPacket(response), testReceivePort)
-  };
+    };
+    backend.getEvents = function() {
+      return this.getMessages().map(function(envelope) {
+        return envelope.type;
+      });
+    };
+    backend.getBodies = function() {
+      return this.getMessages().map(function(envelope) {
+        return envelope.body;
+      });
+    };
 
-  backend.listen(function() {
-    return deferred.call(backend);
+    backend.sendMessage = function(type, body, options) {
+      var response = createEnvelope(type, body);
+      if (options && typeof options == 'object') {
+        Object.keys(options).forEach(function(key) {
+          response[key] = options[key];
+        });
+      }
+      return sendPacketTo(createPacket(response), testReceivePort)
+    };
+    backend.sendResponse = function(request, type, body) {
+      var response = createReplyEnvelope(request, type, body);
+      return sendPacketTo(createPacket(response), testReceivePort)
+    };
+
+    backend.listen(function() {
+      return resolve(backend);
+    });
   });
-
-  return deferred;
 }
 exports.createBackend = createBackend;
-Deferred.register('createBackend', createBackend);
+registerCallbackGenerator('createBackend');
 
 
 function createEnvelope(type, body, options) {

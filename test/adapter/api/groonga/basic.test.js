@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../../../test-utils');
 var groongaUtils = require('./utils');
@@ -17,7 +16,7 @@ suite('adapter/api/groonga: basic commands', function() {
 
   setup(function(done) {
     utils.setupApplication()
-      .next(function(result) {
+      .then(function(result) {
         backend = result.backend;
         server = result.server;
         connection = result.connection;
@@ -29,7 +28,7 @@ suite('adapter/api/groonga: basic commands', function() {
         });
         done();
       })
-      .error(function(error) {
+      .catch(function(error) {
         done(error);
       });
   });
@@ -48,13 +47,11 @@ suite('adapter/api/groonga: basic commands', function() {
       var body = [
       ]
       utils.get('/d/table_create?name=Users', JSON.stringify(body))
-        .next(function(response) {
+        .then(function(response) {
           assert.deepEqual(response.statusCode, 200);
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('.json', function(done) {
@@ -62,13 +59,11 @@ suite('adapter/api/groonga: basic commands', function() {
       var body = [
       ]
       utils.get('/d/table_create.json?name=Users', JSON.stringify(body))
-        .next(function(response) {
+        .then(function(response) {
           assert.deepEqual(response.statusCode, 200);
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 });

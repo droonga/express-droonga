@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 var express = require('express');
 
 var utils = require('./test-utils');
@@ -39,16 +38,14 @@ suite('Adaption for express application', function() {
 
     setup(function(done) {
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           backend = result.backend;
           server = result.server;
           connection = result.connection;
           application = result.application;
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     teardown(function() {
@@ -73,15 +70,13 @@ suite('Adaption for express application', function() {
       });
 
       utils.get('/path/to/api')
-        .next(function(response) {
+        .then(function(response) {
           assert.deepEqual(response,
                            { statusCode: 200,
                              body:       JSON.stringify('api OK') });
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('under specified path', function(done) {
@@ -93,13 +88,12 @@ suite('Adaption for express application', function() {
 
       var responseBody;
       utils.get('/path/to/droonga/path/to/api')
-        .next(function(response) {
+        .then(function(response) {
           responseBody = response.body;
         });
 
-      Deferred
-        .wait(0.01)
-        .next(function() {
+      utils.wait(0.01)
+        .then(function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
 
@@ -107,14 +101,12 @@ suite('Adaption for express application', function() {
                                       'api.result',
                                       'api OK?');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           assert.equal(responseBody, JSON.stringify('api OK'));
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 
@@ -127,16 +119,14 @@ suite('Adaption for express application', function() {
 
     setup(function(done) {
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           backend = result.backend;
           server = result.server;
           connection = result.connection;
           application = result.application;
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     teardown(function() {
@@ -158,12 +148,12 @@ suite('Adaption for express application', function() {
 
       var mockedReceiver;
       utils.createClient()
-        .next(function(newClient) {
+        .then(function(newClient) {
           clientSocket = newClient.socket;
           clientSocket.emit('api', 'request');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           backend.assertReceived([{ type: 'api',
                                     body: 'api requested' }]);
 
@@ -178,14 +168,12 @@ suite('Adaption for express application', function() {
                                       'api.response',
                                       'api OK?');
         })
-        .wait(0.01)
-        .next(function() {
+        .then(utils.waitCb(0.01))
+        .then(function() {
           mockedReceiver.assertThrows();
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 });

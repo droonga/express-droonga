@@ -1,6 +1,5 @@
 var assert = require('chai').assert;
 var nodemock = require('nodemock');
-var Deferred = require('jsdeferred').Deferred;
 
 var utils = require('../test-utils');
 
@@ -67,13 +66,14 @@ suite('HTTP Adapter', function() {
 
     setup(function(done) {
       utils.setupApplication()
-        .next(function(result) {
+        .then(function(result) {
           backend = result.backend;
           server = result.server;
           connection = result.connection;
           application = result.application;
           done();
-        });
+        })
+        .catch(done);
     });
 
     teardown(function() {
@@ -104,7 +104,7 @@ suite('HTTP Adapter', function() {
       });
 
       utils.get('/path/to/adapter')
-        .next(function(response) {
+        .then(function(response) {
           backend.assertReceived([{ type: 'adapter',
                                     body: 'adapter requested' }]);
           assert.deepEqual(response,
@@ -112,9 +112,7 @@ suite('HTTP Adapter', function() {
                             body:       JSON.stringify('adapter OK') });
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('under specified path', function(done) {
@@ -139,7 +137,7 @@ suite('HTTP Adapter', function() {
       });
 
       utils.get('/path/to/droonga/path/to/adapter')
-        .next(function(response) {
+        .then(function(response) {
           backend.assertReceived([{ type: 'adapter',
                                     body: 'adapter requested' }]);
           assert.deepEqual(response,
@@ -147,9 +145,7 @@ suite('HTTP Adapter', function() {
                             body:       JSON.stringify('adapter OK') });
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 
@@ -178,12 +174,12 @@ suite('HTTP Adapter', function() {
         ]
       });
       utils.setupServer(application)
-        .next(function(newServer) {
+        .then(function(newServer) {
           server = newServer;
           utils.get('/tables/Store?query=NY');
         })
-        .wait(0.1)
-        .next(function() {
+        .then(utils.waitCb(0.1))
+        .then(function() {
           assert.equal(1, connection.emitMessageCalledArguments.length);
           var args = connection.emitMessageCalledArguments[0];
           assert.equal(args.type, 'search');
@@ -206,9 +202,7 @@ suite('HTTP Adapter', function() {
 
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
 
     test('droonga', function(done) {
@@ -230,12 +224,12 @@ suite('HTTP Adapter', function() {
         condition: { query: '検索', matchTo: ['body'] }
       };
       utils.setupServer(application)
-        .next(function(newServer) {
+        .then(function(newServer) {
           server = newServer;
           utils.post('/droonga/search', JSON.stringify({ queries: searchQueries }));
         })
-        .wait(0.1)
-        .next(function() {
+        .then(utils.waitCb(0.1))
+        .then(function() {
           assert.equal(1, connection.emitMessageCalledArguments.length);
           var args = connection.emitMessageCalledArguments[0];
           assert.equal(args.type, 'search');
@@ -249,9 +243,7 @@ suite('HTTP Adapter', function() {
 
           done();
         })
-        .error(function(error) {
-          done(error);
-        });
+        .catch(done);
     });
   });
 });
