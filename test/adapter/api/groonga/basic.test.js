@@ -28,6 +28,9 @@ suite('adapter/api/groonga: basic commands', function() {
           plugins: [groongaAPI]
         });
         done();
+      })
+      .error(function(error) {
+        done(error);
       });
   });
 
