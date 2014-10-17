@@ -62,14 +62,12 @@ suite('HTTP Adapter', function() {
     var connectionPool;
     var application;
     var server;
-    var backend;
 
     setup(function(done) {
-      utils.setupApplication()
+      connectionPool = utils.createStubbedBackendConnectionPool();
+      utils.setupApplication({ connectionPool: connectionPool })
         .then(function(result) {
-          backend = result.backend;
           server = result.server;
-          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -77,8 +75,7 @@ suite('HTTP Adapter', function() {
     });
 
     teardown(function() {
-      utils.teardownApplication({ backend:    backend,
-                                  server:     server,
+      utils.teardownApplication({ server:     server,
                                   connectionPool: connectionPool });
     });
 
@@ -87,29 +84,26 @@ suite('HTTP Adapter', function() {
         prefix:     '',
         connectionPool: connectionPool,
         plugins:    [
-          api.API_REST,
-          api.API_SOCKET_IO,
-          api.API_GROONGA,
-          api.API_DROONGA,
           testPlugin
         ]
       });
 
-      backend.reserveResponse(function(request) {
-        return utils.createReplyPacket(request,
-                                       {
-                                         statusCode: 200,
-                                         body:       'Adapter response',
-                                       });
-      });
-
+      var responses = [];
       utils.get('/path/to/adapter')
-        .then(function(response) {
-          backend.assertReceived([{ type: 'adapter',
-                                    body: 'adapter requested' }]);
-          assert.deepEqual(response,
-                          { statusCode: 200,
-                            body:       JSON.stringify('adapter OK') });
+        .then(function(response) { responses.push(response); })
+        .then(function() {
+          assert.deepEqual(
+            connectionPool.emittedMessages,
+            [
+              [{ type: 'adapter', message: 'adapter requested' }]
+            ]
+          );
+          assert.deepEqual(
+            responses,
+            [
+              { statusCode: 200, body: JSON.stringify('adapter OK') }
+            ]
+          );
           done();
         })
         .catch(done);
@@ -128,21 +122,22 @@ suite('HTTP Adapter', function() {
         ]
       });
 
-      backend.reserveResponse(function(request) {
-        return utils.createReplyPacket(request,
-                                       {
-                                         statusCode: 200,
-                                         body:       'Adapter response',
-                                       });
-      });
-
+      var responses = [];
       utils.get('/path/to/droonga/path/to/adapter')
-        .then(function(response) {
-          backend.assertReceived([{ type: 'adapter',
-                                    body: 'adapter requested' }]);
-          assert.deepEqual(response,
-                          { statusCode: 200,
-                            body:       JSON.stringify('adapter OK') });
+        .then(function(response) { responses.push(response); })
+        .then(function() {
+          assert.deepEqual(
+            connectionPool.emittedMessages,
+            [
+              [{ type: 'adapter', message: 'adapter requested' }]
+            ]
+          );
+          assert.deepEqual(
+            responses,
+            [
+              { statusCode: 200, body: JSON.stringify('adapter OK') }
+            ]
+          );
           done();
         })
         .catch(done);
