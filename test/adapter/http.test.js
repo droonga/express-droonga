@@ -240,5 +240,69 @@ suite('HTTP Adapter', function() {
         .catch(done);
     });
   });
+
+  suite('multiple backends', function() {
+    var testPlugin = {
+      adapter: new command.HTTPRequestResponse({
+        path: '/endpoint',
+        onRequest: function(request, connection) {
+          connection.emit('adapter', 'requested ' + request.query.id);
+        },
+        onResponse: function(data, response) {
+          response.status(200).jsonp('OK');
+        }
+      })
+    };
+
+    var server;
+
+    teardown(function() {
+      if (server) {
+        server.close();
+        server = undefined;
+      }
+    });
+
+    test('search', function(done) {
+      var receiverCallback = {};
+      var connections = utils.createStubbedBackendConnections(3);
+      var application = express();
+      httpAdapter.register(application, {
+        prefix:     '',
+        connections: connections,
+        plugins: [
+          testPlugin
+        ]
+      });
+      utils.setupServer(application)
+        .then(function(newServer) {
+          server = newServer;
+        })
+        .then(utils.getCb('/endpoint?id=1'))
+        .then(utils.getCb('/endpoint?id=2'))
+        .then(utils.getCb('/endpoint?id=3'))
+        .then(utils.getCb('/endpoint?id=4'))
+        .then(function() {
+          assert.deepEqual(
+            connections.connections.map(function(connection) {
+              return connection.emitMessageCalledArguments.map(function(args) {
+                return {
+                  type:    args.type,
+                  message: args.message
+                };
+              });
+            }),
+            [
+              [{ type: 'adapter', message: 'requested 1' },
+               { type: 'adapter', message: 'requested 4' }],
+              [{ type: 'adapter', message: 'requested 2' }],
+              [{ type: 'adapter', message: 'requested 3' }]
+            ]
+          );
+          done();
+        })
+        .catch(done);
+    });
+  });
 });
 
