@@ -53,7 +53,7 @@ suite('middleware - cache -', function() {
 
       test('non-GET requests', function(done) {
         application.post('/cache-target/path', function(request, response) {
-          response.send(200, 'POST - success');
+          response.status(200).send('POST - success');
         });
         client(application)
           .post('/cache-target/path')
@@ -73,7 +73,7 @@ suite('middleware - cache -', function() {
 
       test('not matched', function(done) {
         application.get('/not-cache-target/path', function(request, response) {
-          response.send(200, 'GET - success');
+          response.status(200).send('GET - success');
         });
         client(application)
           .get('/not-cache-target/path')
@@ -93,7 +93,7 @@ suite('middleware - cache -', function() {
 
       test('matched to a rule', function(done) {
         application.get('/cache-target/path', function(request, response) {
-          response.send(200, 'GET - success');
+          response.status(200).send('GET - success');
         });
         client(application)
           .get('/cache-target/path')
@@ -132,7 +132,7 @@ suite('middleware - cache -', function() {
           ]
         }));
         application.get('/cache-target-not-used', function(request, response) {
-          response.send(200, 'GET - success');
+          response.status(200).send('GET - success');
         });
 
         client(application)
@@ -159,7 +159,7 @@ suite('middleware - cache -', function() {
 
   test('cached', function(done) {
     application.get('/cached/success', function(request, response) {
-      response.send(200, 'OK');
+      response.status(200).send('OK');
     });
     client(application)
       .get('/cached/success')
@@ -185,7 +185,7 @@ suite('middleware - cache -', function() {
     var handled = false;
     application.get('/cached/handled', function(request, response) {
       handled = true;
-      response.send(200, 'OK');
+      response.status(200).send('OK');
     });
     client(application)
       .get('/cached/handled')
@@ -221,7 +221,7 @@ suite('middleware - cache -', function() {
   test('cached headers', function(done) {
     application.get('/cached/headers', function(request, response) {
       response.setHeader('X-Custom-Header', 'yes');
-      response.send(200, 'OK');
+      response.status(200).send('OK');
     });
     client(application)
       .get('/cached/headers')
@@ -244,7 +244,7 @@ suite('middleware - cache -', function() {
 
   test('cached body', function(done) {
     application.get('/cached/body', function(request, response) {
-      response.json(200, { value: true });
+      response.status(200).json({ value: true });
     });
     client(application)
       .get('/cached/body')
@@ -280,7 +280,7 @@ suite('middleware - cache -', function() {
 
     test('initial access', function(done) {
       application.get('/cached/initial', function(request, response) {
-        response.send(200, 'OK');
+        response.status(200).send('OK');
       });
       client(application)
         .get('/cached/initial')
@@ -295,7 +295,7 @@ suite('middleware - cache -', function() {
 
     test('error response', function(done) {
       application.get('/cached/fail', function(request, response) {
-        response.send(400, 'NG');
+        response.status(400).send('NG');
       });
       client(application)
         .get('/cached/fail')
@@ -318,7 +318,7 @@ suite('middleware - cache -', function() {
 
     test('not matched', function(done) {
       application.get('/fresh', function(request, response) {
-        response.send(200, 'OK');
+        response.status(200).send('OK');
       });
       client(application)
         .get('/fresh')
@@ -341,7 +341,7 @@ suite('middleware - cache -', function() {
 
     test('not GET method', function(done) {
       application.post('/cached/post', function(request, response) {
-        response.send(200, 'OK');
+        response.status(200).send('OK');
       });
       client(application)
         .post('/cached/post')
@@ -375,10 +375,10 @@ suite('middleware - cache -', function() {
         ]
       }));
       application.get('/cached/first', function(request, response) {
-        response.json(200, 'OK');
+        response.status(200).json('OK');
       });
       application.get('/cached/second', function(request, response) {
-        response.json(200, 'OK');
+        response.status(200).json('OK');
       });
       client(application)
         .get('/cached/first')
@@ -425,7 +425,7 @@ suite('middleware - cache -', function() {
         ]
       }));
       application.get('/cached/expired', function(request, response) {
-        response.json(200, 'OK');
+        response.status(200).json('OK');
       });
       client(application)
         .get('/cached/expired')
@@ -456,7 +456,7 @@ suite('middleware - cache -', function() {
         ]
       }));
       application.get('/cached/expired', function(request, response) {
-        response.json(200, 'OK');
+        response.status(200).json('OK');
       });
       client(application)
         .get('/cached/expired')

@@ -55,7 +55,7 @@ suite('HTTP Adapter', function() {
           connection.emit('adapter', 'adapter requested');
         },
         onResponse: function(data, response) {
-          response.jsonp(200, 'adapter OK');
+          response.status(200).jsonp('adapter OK');
         }
       })
     };

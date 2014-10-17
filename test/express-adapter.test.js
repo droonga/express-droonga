@@ -16,7 +16,7 @@ suite('Adaption for express application', function() {
         connection.emit('api', 'api requested');
       },
       onResponse: function(data, response) {
-        response.jsonp(200, 'api OK');
+        response.status(200).jsonp('api OK');
       }
     })
   };

@@ -36,7 +36,7 @@
     "winston": "*"
   },
   "devDependencies": {
-    "express": ">=4.0",
+    "express": ">=4.9",
     "chai": "*",
     "jsdeferred": "*",
     "mocha": "*",
