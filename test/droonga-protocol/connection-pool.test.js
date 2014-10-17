@@ -101,12 +101,12 @@ suite('ConnectionPool', function() {
       assert.isNotNull(connection);
       connections.push(connection);
 
-      assert.equal([connections[0].hostName,
-                    connections[1].hostName,
-                    connections[2].hostName],
-                   [connections[3].hostName,
-                    connections[4].hostName,
-                    connections[5].hostName]);
+      assert.deepEqual([connections[0].hostName,
+                        connections[1].hostName,
+                        connections[2].hostName],
+                       [connections[3].hostName,
+                        connections[4].hostName,
+                        connections[5].hostName]);
     });
   });
 });
