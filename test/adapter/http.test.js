@@ -168,18 +168,14 @@ suite('HTTP Adapter', function() {
         prefix:     '',
         connections: connections,
         plugins: [
-          api.API_REST,
-          api.API_SOCKET_IO,
-          api.API_GROONGA,
-          api.API_DROONGA
+          api.API_REST
         ]
       });
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-          utils.get('/tables/Store?query=NY');
         })
-        .then(utils.waitCb(0.1))
+        .then(utils.getCb('/tables/Store?query=NY'))
         .then(function() {
           assert.equal(1, connection.emitMessageCalledArguments.length);
           var args = connection.emitMessageCalledArguments[0];
@@ -215,9 +211,6 @@ suite('HTTP Adapter', function() {
         prefix:     '',
         connections: connections,
         plugins: [
-          api.API_REST,
-          api.API_SOCKET_IO,
-          api.API_GROONGA,
           api.API_DROONGA
         ]
       });
@@ -228,9 +221,8 @@ suite('HTTP Adapter', function() {
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-          utils.post('/droonga/search', JSON.stringify({ queries: searchQueries }));
         })
-        .then(utils.waitCb(0.1))
+        .then(utils.postCb('/droonga/search', JSON.stringify({ queries: searchQueries })))
         .then(function() {
           assert.equal(1, connection.emitMessageCalledArguments.length);
           var args = connection.emitMessageCalledArguments[0];
