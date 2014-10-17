@@ -74,8 +74,6 @@ suite('Adaption for express application', function() {
 
       utils.get('/path/to/api')
         .next(function(response) {
-          backend.assertReceived([{ type: 'api',
-                                    body: 'api requested' }]);
           assert.deepEqual(response,
                            { statusCode: 200,
                              body:       JSON.stringify('api OK') });
