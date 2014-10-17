@@ -52,7 +52,7 @@ suite('adapter/http.register', function() {
       var application = new StubApplication();
       httpAdapter.register(application, {
         prefix:     '',
-        connections: utils.createStubbedBackendConnections(),
+        connectionPool: utils.createStubbedBackendConnectionPool(),
         plugins: plugins
       });
       return application.paths();

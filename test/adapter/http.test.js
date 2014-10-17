@@ -16,7 +16,7 @@ suite('HTTP Adapter', function() {
     var application = express();
     var registeredCommands = httpAdapter.register(application, {
       prefix:     '',
-      connections: utils.createStubbedBackendConnections(),
+      connectionPool: utils.createStubbedBackendConnectionPool(),
       plugins: [
         api.API_REST,
         api.API_SOCKET_IO,
@@ -59,7 +59,7 @@ suite('HTTP Adapter', function() {
       })
     };
 
-    var connections;
+    var connectionPool;
     var application;
     var server;
     var backend;
@@ -69,7 +69,7 @@ suite('HTTP Adapter', function() {
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connections = result.connections;
+          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -79,13 +79,13 @@ suite('HTTP Adapter', function() {
     teardown(function() {
       utils.teardownApplication({ backend:    backend,
                                   server:     server,
-                                  connections: connections });
+                                  connectionPool: connectionPool });
     });
 
     test('to the document root', function(done) {
       httpAdapter.register(application, {
         prefix:     '',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins:    [
           api.API_REST,
           api.API_SOCKET_IO,
@@ -118,7 +118,7 @@ suite('HTTP Adapter', function() {
     test('under specified path', function(done) {
       httpAdapter.register(application, {
         prefix:     '/path/to/droonga',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins:    [
           api.API_REST,
           api.API_SOCKET_IO,
@@ -161,12 +161,12 @@ suite('HTTP Adapter', function() {
 
     test('search', function(done) {
       var receiverCallback = {};
-      var connections = utils.createStubbedBackendConnections();
-      var connection = connections.get();
+      var connectionPool = utils.createStubbedBackendConnectionPool();
+      var connection = connectionPool.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins: [
           api.API_REST
         ]
@@ -204,12 +204,12 @@ suite('HTTP Adapter', function() {
 
     test('droonga', function(done) {
       var receiverCallback = {};
-      var connections = utils.createStubbedBackendConnections();
-      var connection = connections.get();
+      var connectionPool = utils.createStubbedBackendConnectionPool();
+      var connection = connectionPool.get();
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins: [
           api.API_DROONGA
         ]
@@ -265,11 +265,11 @@ suite('HTTP Adapter', function() {
 
     test('round-robin', function(done) {
       var receiverCallback = {};
-      var connections = utils.createStubbedBackendConnections(3);
+      var connectionPool = utils.createStubbedBackendConnectionPool(3);
       var application = express();
       httpAdapter.register(application, {
         prefix:     '',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins: [
           testPlugin
         ]
@@ -289,7 +289,7 @@ suite('HTTP Adapter', function() {
           .then(function(response) { responses.push(response); })
         .then(function() {
           assert.deepEqual(
-            connections.connections.map(function(connection) {
+            connectionPool.connections.map(function(connection) {
               return connection.emitMessageCalledArguments.map(function(args) {
                 return {
                   type:    args.type,

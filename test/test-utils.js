@@ -12,7 +12,7 @@ var FluentReceiver = require('../lib/droonga-protocol/receiver').FluentReceiver;
 exports.FluentReceiver = FluentReceiver;
 
 var Connection = require('../lib/droonga-protocol/connection').Connection;
-var Connections = require('../lib/droonga-protocol/connections').Connections;
+var ConnectionPool = require('../lib/droonga-protocol/connection-pool').ConnectionPool;
 
 var ConsoleLogger = require('../lib/console-logger').ConsoleLogger;
 var logger = new ConsoleLogger();
@@ -239,7 +239,7 @@ function createStubbedBackendConnection(hostName) {
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
 
-function createStubbedBackendConnections(count) {
+function createStubbedBackendConnectionPool(count) {
   count = count || 1;
   var connections = [];
   for (var i = 0; i < count; i++) {
@@ -260,7 +260,7 @@ function createStubbedBackendConnections(count) {
     connections: connections
   };
 }
-exports.createStubbedBackendConnections = createStubbedBackendConnections;
+exports.createStubbedBackendConnectionPool = createStubbedBackendConnectionPool;
 
 function setupApplication() {
   var application = express();
@@ -273,7 +273,7 @@ function setupApplication() {
     .then(exports.createBackendCb())
     .then(function(newBackend) {
       backend = newBackend;
-      var connections = new Connections({
+      var connectionPool = new ConnectionPool({
         tag:      testTag,
         defaultDataset: 'test-dataset',
         hostName: ['127.0.0.1'],
@@ -286,7 +286,7 @@ function setupApplication() {
         backend:     backend,
         server:      server,
         application: application,
-        connections: connections
+        connectionPool: connectionPool
       };
     });
 }
@@ -299,12 +299,12 @@ function teardownApplication(params) {
     params.backend.close();
     params.backend = undefined;
   }
-  if (params.application && params.application.connections) {
-    params.application.connections.closeAll();
+  if (params.application && params.application.connectionPool) {
+    params.application.connectionPool.closeAll();
     params.application = undefined;
-  } else if (params.connections) {
-    params.connections.closeAll();
-    params.connections = undefined;
+  } else if (params.connectionPool) {
+    params.connectionPool.closeAll();
+    params.connectionPool = undefined;
   }
   if (params.server) {
     params.server.close();

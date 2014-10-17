@@ -32,7 +32,7 @@ suite('Adaption for express application', function() {
 
   suite('REST API registeration', function() {
     var backend;
-    var connections;
+    var connectionPool;
     var application;
     var server;
 
@@ -41,7 +41,7 @@ suite('Adaption for express application', function() {
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connections = result.connections;
+          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -51,13 +51,13 @@ suite('Adaption for express application', function() {
     teardown(function() {
       utils.teardownApplication({ backend:    backend,
                                   server:     server,
-                                  connections: connections });
+                                  connectionPool: connectionPool });
     });
 
     test('to the document root', function(done) {
       application.droonga({
         prefix:     '',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
@@ -82,7 +82,7 @@ suite('Adaption for express application', function() {
     test('under specified path', function(done) {
       application.droonga({
         prefix:     '/path/to/droonga',
-        connections: connections,
+        connectionPool: connectionPool,
         plugins:    [testRestPlugin, testSocketPlugin]
       });
 
@@ -112,7 +112,7 @@ suite('Adaption for express application', function() {
 
   suite('Socket.IO API registeration', function() {
     var application;
-    var connections;
+    var connectionPool;
     var server;
     var clientSocket;
     var backend;
@@ -122,7 +122,7 @@ suite('Adaption for express application', function() {
         .then(function(result) {
           backend = result.backend;
           server = result.server;
-          connections = result.connections;
+          connectionPool = result.connectionPool;
           application = result.application;
           done();
         })
@@ -136,12 +136,12 @@ suite('Adaption for express application', function() {
       }
       utils.teardownApplication({ backend:    backend,
                                   server:     server,
-                                  connections: connections });
+                                  connectionPool: connectionPool });
     });
 
     test('request-response', function(done) {
       application.droonga({
-        connections: connections,
+        connectionPool: connectionPool,
         server:     server,
         plugins:    [testRestPlugin, testSocketPlugin]
       });

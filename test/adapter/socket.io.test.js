@@ -10,7 +10,7 @@ var api = require('../../lib/adapter/api');
 var scoketIoAPI = require('../../lib/adapter/api/socket.io');
 
 suite('Socket.IO Adapter', function() {
-  var connections;
+  var connectionPool;
   var connection;
   var server;
   var clientSockets;
@@ -86,7 +86,7 @@ suite('Socket.IO Adapter', function() {
     }
     utils.teardownApplication({ backend:    backend,
                                 server:     server,
-                                connections: connections });
+                                connectionPool: connectionPool });
   }
 
   suite('registration', function() {
@@ -110,10 +110,10 @@ suite('Socket.IO Adapter', function() {
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-          connections = utils.createStubbedBackendConnections();
-          connection = connections.get();
+          connectionPool = utils.createStubbedBackendConnectionPool();
+          connection = connectionPool.get();
           var registeredCommands = socketIoAdapter.register(application, server, {
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -160,10 +160,10 @@ suite('Socket.IO Adapter', function() {
       utils.setupServer(application)
         .then(function(newServer) {
           server = newServer;
-          connections = utils.createStubbedBackendConnections();
-          connection = connections.get();
+          connectionPool = utils.createStubbedBackendConnectionPool();
+          connection = connectionPool.get();
           socketIoAdapter.register(application, server, {
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -193,12 +193,12 @@ suite('Socket.IO Adapter', function() {
       utils.setupApplication()
         .then(function(result) {
           server     = result.server;
-          connections = result.connections;
-          connection = connections.get();
+          connectionPool = result.connectionPool;
+          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -288,12 +288,12 @@ suite('Socket.IO Adapter', function() {
       utils.setupApplication()
         .then(function(result) {
           server     = result.server;
-          connections = result.connections;
-          connection = connections.get();
+          connectionPool = result.connectionPool;
+          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -367,12 +367,12 @@ suite('Socket.IO Adapter', function() {
       utils.setupApplication()
         .then(function(result) {
           server     = result.server;
-          connections = result.connections;
-          connection = connections.get();
+          connectionPool = result.connectionPool;
+          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
@@ -466,12 +466,12 @@ suite('Socket.IO Adapter', function() {
       utils.setupApplication()
         .then(function(result) {
           server     = result.server;
-          connections = result.connections;
-          connection = connections.get();
+          connectionPool = result.connectionPool;
+          connection = connectionPool.get();
           backend    = result.backend;
           socketIoAdapter.register(result.application, server, {
             tag:      utils.testTag,
-            connections: connections,
+            connectionPool: connectionPool,
             plugins: [
               api.API_REST,
               api.API_SOCKET_IO,
