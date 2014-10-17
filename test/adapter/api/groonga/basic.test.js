@@ -28,9 +28,7 @@ suite('adapter/api/groonga: basic commands', function() {
         });
         done();
       })
-      .catch(function(error) {
-        done(error);
-      });
+      .catch(done);
   });
 
   teardown(function() {
