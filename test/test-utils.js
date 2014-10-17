@@ -154,6 +154,10 @@ function createClient() {
     client.socket = socket;
     deferred.call(client);
   });
+  socket.on('error', function(error) {
+    client.socket = socket;
+    deferred.fail(new Error(JSON.stringify(error)));
+  });
   return deferred;
 }
 exports.createClient = createClient;
