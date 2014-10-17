@@ -44,7 +44,6 @@
     "supertest": "*"
   },
   "scripts": {
-    "start": "./application.js",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter list --ui tdd --timeout 5s --recursive"
   },
   "main": "index",
