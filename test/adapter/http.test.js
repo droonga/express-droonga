@@ -114,10 +114,6 @@ suite('HTTP Adapter', function() {
         prefix:     '/path/to/droonga',
         connectionPool: connectionPool,
         plugins:    [
-          api.API_REST,
-          api.API_SOCKET_IO,
-          api.API_GROONGA,
-          api.API_DROONGA,
           testPlugin
         ]
       });
