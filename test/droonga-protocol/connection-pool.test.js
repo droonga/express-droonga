@@ -109,4 +109,45 @@ suite('ConnectionPool', function() {
                         connections[5].hostName]);
     });
   });
+
+  suite('updating of hostNames', function() {
+    var connectionPool;
+
+    teardown(function() {
+      if (connectionPool) {
+        connectionPool.closeAll();
+        connectionPool = undefined;
+      }
+    });
+
+    test('no change', function() {
+      connectionPool = new ConnectionPool({
+        hostNames: [
+          '127.0.0.1'
+        ]
+      });
+      var beforeConnection = connectionPool.get();
+
+      connectionPool.hostNames = ['127.0.0.1'];
+
+      var afterConnection = connectionPool.get();
+      assert.equal(afterConnection.hostName, beforeConnection.hostName);
+      assert.isFalse(beforeConnection.closed);
+    });
+
+    test('replace', function() {
+      connectionPool = new ConnectionPool({
+        hostNames: [
+          '127.0.0.1'
+        ]
+      });
+      var beforeConnection = connectionPool.get();
+
+      connectionPool.hostNames = ['127.0.0.2'];
+
+      var afterConnection = connectionPool.get();
+      assert.notEqual(afterConnection.hostName, beforeConnection.hostName);
+      assert(beforeConnection.closed);
+    });
+  });
 });
