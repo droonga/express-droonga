@@ -467,7 +467,7 @@ suite('Connection', function() {
       function trigger() {
         connection.emitMessage('type', { message: true });
       }
-      backend.thennableOnce('receive')
+      backend.thenableOnce('receive')
         .then(function() {
           assert.deepEqual(backend.getEvents(),
                            ['type']);
@@ -484,14 +484,14 @@ suite('Connection', function() {
       }
 
       var lastError = null;
-      backend.thennableOnce('receive')
+      backend.thenableOnce('receive')
         .then(function() {
           assert.deepEqual(backend.getEvents(),
                            ['type1']);
-          return backend.thennableClose();
+          return backend.thenableClose();
         })
         .then(function() {
-          return connection.thennableEmitMessage('type2', { message: true })
+          return connection.thenableEmitMessage('type2', { message: true })
             .then(function(args) {
               lastError = args.response.body.detail;
             });
