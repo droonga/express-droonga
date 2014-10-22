@@ -135,7 +135,7 @@ suite('ConnectionPool', function() {
       assert.isFalse(beforeConnection.closed);
     });
 
-    test('replace', function() {
+    test('replace all', function() {
       connectionPool = new ConnectionPool({
         hostNames: [
           '127.0.0.1'
@@ -148,6 +148,24 @@ suite('ConnectionPool', function() {
       var afterConnection = connectionPool.get();
       assert.notEqual(afterConnection.hostName, beforeConnection.hostName);
       assert(beforeConnection.closed);
+    });
+
+    test('replace partially', function() {
+      connectionPool = new ConnectionPool({
+        hostNames: [
+          '127.0.0.1',
+          '127.0.0.2'
+        ]
+      });
+      var willClosedConnection = connectionPool.getConnectionFor('127.0.0.1');
+      var willBeKeptConnection = connectionPool.getConnectionFor('127.0.0.2');
+
+      connectionPool.hostNames = ['127.0.0.2', '127.0.0.3'];
+
+      assert.deepEqual([willClosedConnection.closed,
+                        willBeKeptConnection.closed],
+                       [true,
+                        false]);
     });
   });
 });
