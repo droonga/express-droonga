@@ -4,6 +4,15 @@ var utils = require('../test-utils');
 
 var ConnectionPool = require('../../lib/droonga-protocol/connection-pool').ConnectionPool;
 
+function singleVolumeWithHostName(hostname, localPath) {
+  localPath = localPath || '000';
+  return {
+    volume: {
+      address: hostname + ':10031/droonga.' + localPath
+    }
+  };
+}
+
 suite('ConnectionPool', function() {
   suite('initialization', function() {
     var connectionPool;
@@ -166,6 +175,48 @@ suite('ConnectionPool', function() {
                         willBeKeptConnection.closed],
                        [true,
                         false]);
+    });
+  });
+
+  suite('communication with the backend', function() {
+    var connectionPool;
+
+    setup(function() {
+      connectionPool = new ConnectionPool({
+        hostNames: [
+          '127.0.0.1'
+        ],
+        connectionClass: utils.ConnectionStub
+      });
+      connectionPool.get().addResult({
+        version: 2,
+        datasets: {
+          main: {
+            replicas: [
+              singleVolumeWithHostName('127.0.0.2'),
+              singleVolumeWithHostName('127.0.0.3')
+            ]
+          }
+        }
+      });
+    });
+
+    teardown(function() {
+      if (connectionPool) {
+        connectionPool.closeAll();
+        connectionPool = undefined;
+      }
+    });
+
+    test('fetchCatalog', function(done) {
+      connectionPool.fetchCatalog()
+        .then(function(catalog) {
+          assert.deepEqual(catalog.allHostNames,
+                           ['127.0.0.2',
+                            '127.0.0.3']);
+          done();
+        })
+        .catch(done);
     });
   });
 });

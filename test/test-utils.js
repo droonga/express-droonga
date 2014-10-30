@@ -248,6 +248,14 @@ function createStubbedBackendConnection(hostName) {
       return hostName + ':' + testReceivePort + '/' + testTag;
     },
 
+    thenableEmitMessage: function(type, message, options) {
+      return Q.Promise((function(resolve, reject, notify) {
+        this.emitMessage(type, message, function(errorCode, response) {
+          resolve({ errorCode: errorCode, response: response });
+        }, options);
+      }).bind(this));
+    },
+
     emit: function() {},
     on: function() {},
     removeListener: function() {},
@@ -261,10 +269,18 @@ function createStubbedBackendConnection(hostName) {
           message: args.message
         };
       });
-    }
+    },
+    addResult: function(body) {
+      this._toBeReturnedResults.push(body);
+    },
+    _toBeReturnedResults: []
   };
 }
 exports.createStubbedBackendConnection = createStubbedBackendConnection;
+
+exports.ConnectionStub = function(params) {
+  return createStubbedBackendConnection(params.hostName);
+};
 
 function createStubbedBackendConnectionPool(count) {
   count = count || 1;
