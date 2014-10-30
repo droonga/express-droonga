@@ -218,5 +218,30 @@ suite('ConnectionPool', function() {
         })
         .catch(done);
     });
+
+    test('getHostNamesFromCatalog', function(done) {
+      connectionPool.getHostNamesFromCatalog()
+        .then(function(hostNames) {
+          assert.deepEqual(hostNames,
+                           ['127.0.0.2',
+                            '127.0.0.3']);
+          done();
+        })
+        .catch(done);
+    });
+
+    test('updateHostNamesFromCatalog', function(done) {
+      connectionPool.updateHostNamesFromCatalog()
+        .then(function(hostNames) {
+          assert.deepEqual(hostNames,
+                           ['127.0.0.2',
+                            '127.0.0.3']);
+          assert.deepEqual(connectionPool.hostNames,
+                           ['127.0.0.2',
+                            '127.0.0.3']);
+          done();
+        })
+        .catch(done);
+    });
   });
 });
