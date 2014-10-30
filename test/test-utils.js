@@ -218,6 +218,7 @@ function createStubbedBackendConnection(hostName) {
     tag: testTag,
 
     emitMessage: function(type, message, callback, options) {
+      options = options || {};
       if (typeof callback != 'function') {
         callback = null;
         options = callback;
@@ -235,9 +236,10 @@ function createStubbedBackendConnection(hostName) {
       this.emitMessageCalledArguments.push(args);
 
       if (typeof callback == 'function') {
+        var result = this._toBeReturnedResults.shift() || message;
         callback(null, {
           type: type + '.result',
-          body: message
+          body: result
         });
       }
     },
