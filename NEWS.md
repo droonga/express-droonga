@@ -1,5 +1,12 @@
 # News
 
+## 1.0.7: 2014-11-29 (planned)
+
+ * Supports multiple Droonga Engine nodes as its backends.
+   Now express-droonga can work like a load balancer.
+ * List of connecting Droonga Engine nodes can be updated based on the `catalog.json`,
+   which is downloaded from a remote Droonga Engine node.
+
 ## 1.0.6: 2014-10-07
 
  * Debug logs are now reported via given logger.
