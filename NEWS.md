@@ -4,8 +4,9 @@
 
  * Supports multiple Droonga Engine nodes as its backends.
    Now express-droonga can work like a load balancer.
- * List of connecting Droonga Engine nodes can be updated based on the `catalog.json`,
-   which is downloaded from a remote Droonga Engine node.
+ * On the startup, the list of connecting Droonga Engine nodes is automatically updated
+   based on the actual list of active members in the cluster.
+   (It should be updated dynamically by changes of the cluster itself, but not yet.)
 
 ## 1.0.6: 2014-10-07
 
