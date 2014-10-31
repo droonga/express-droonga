@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "*",
+    "commander": "*",
     "connect": "*",
     "cookie": "*",
     "errorhandler": "*",
@@ -32,6 +33,7 @@
     "method-override": "*",
     "msgpack": "*",
     "q": "*",
+    "serf-rpc": "*",
     "serve-static": "*",
     "socket.io": ">=1.0",
     "winston": "*"
@@ -45,6 +47,7 @@
     "supertest": "*"
   },
   "scripts": {
+    "express-droonga-report-live-engine-hosts": "./bin/express-droonga-report-live-engine-hosts",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter list --ui tdd --timeout 5s --recursive"
   },
   "main": "index",
