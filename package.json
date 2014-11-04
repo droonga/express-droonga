@@ -23,6 +23,7 @@
     "commander": "*",
     "connect": "*",
     "cookie": "*",
+    "download": "*",
     "errorhandler": "*",
     "fluent-logger": "*",
     "inflection": "*",
