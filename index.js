@@ -21,19 +21,26 @@ function droonga(application, params) {
   if (params.server) {
     socketIoAdapter.register(application, params.server, params);
     params.server.on('error', function(error) {
-      connectionPool.closeAll();
-    });
-    params.server.on('close', function() {
-      // The connection can be mocked/stubbed. We don't need to close
-      // such a fake connection.
       if (typeof connectionPool.closeAll == 'function')
         connectionPool.closeAll();
+      if (typeof connectionPool.stopSyncHostNamesFromCluster == 'function')
+        connectionPool.stopSyncHostNamesFromCluster();
+    });
+    params.server.on('close', function() {
+      if (typeof connectionPool.closeAll == 'function')
+        connectionPool.closeAll();
+      if (typeof connectionPool.stopSyncHostNamesFromCluster == 'function')
+        connectionPool.stopSyncHostNamesFromCluster();
     });
   }
 
   dashboardUI.register(application, params);
 
   application.connectionPool = connectionPool;
+
+  if (params.syncHostNames &&
+      typeof connectionPool.startSyncHostNamesFromCluster == 'function')
+    connectionPool.startSyncHostNamesFromCluster();
 }
 
 exports.initialize = droonga;
