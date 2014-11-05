@@ -16,9 +16,9 @@ client.getLiveEngineNodes()
     members.forEach(function(member) {
       console.log(member.HostName);
     });
-    process.exit(true);
+    process.exit(0);
   })
   .catch(function(error) {
     console.error(error);
-    process.exit(false);
+    process.exit(1);
   });
