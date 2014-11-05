@@ -6,7 +6,7 @@ var options = require('../lib/serf/options');
 options = options.define().parse(process.argv);
 
 var client = new SerfClient({
-  host:       options.rpcHostName,
+  rpcAddress: options.rpcAddress,
   enginePort: options.droongaEnginePort,
   tag:        options.tag
 });
