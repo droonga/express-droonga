@@ -39,8 +39,11 @@ function droonga(application, params) {
   application.connectionPool = connectionPool;
 
   if (params.syncHostNames &&
-      typeof connectionPool.startSyncHostNamesFromCluster == 'function')
-    connectionPool.startSyncHostNamesFromCluster();
+      typeof connectionPool.startSyncHostNamesFromCluster == 'function') {
+    params.server.on('listening', function() {
+      connectionPool.startSyncHostNamesFromCluster();
+    });
+  }
 }
 
 exports.initialize = droonga;
