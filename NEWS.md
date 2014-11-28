@@ -1,6 +1,6 @@
 # News
 
-## 1.0.7: 2014-11-29 (planned)
+## 1.0.7: 2014-11-29
 
  * Supports multiple Droonga Engine nodes as its backends.
    Now express-droonga can work like a load balancer.
