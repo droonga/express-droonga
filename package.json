@@ -49,6 +49,7 @@
   },
   "scripts": {
     "express-droonga-report-live-engine-hosts": "./bin/express-droonga-report-live-engine-hosts",
+    "express-droonga-join-to-cluster": "./bin/express-droonga-join-to-cluster",
     "test": "NODE_ENV=test ./node_modules/.bin/mocha --reporter list --ui tdd --timeout 5s --recursive"
   },
   "main": "index",
