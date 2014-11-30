@@ -44,6 +44,13 @@ function droonga(application, params) {
       connectionPool.startSyncHostNamesFromCluster();
     });
   }
+
+  application.get(params.prefix + '/engines', function(request, response, next) {
+    response.jsonp({
+      clusterId: connectionPool.clusterId,
+      hostNames: connectionPool.hostNames
+    });
+  });
 }
 
 exports.initialize = droonga;
