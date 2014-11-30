@@ -13,9 +13,7 @@ var client = new SerfClient({
 
 client.getLiveEngineNodes()
   .then(function(members) {
-    members.forEach(function(member) {
-      console.log(member.HostName);
-    });
+    console.log(JSON.stringify(members);
     process.exit(0);
   })
   .catch(function(error) {
