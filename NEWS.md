@@ -1,5 +1,10 @@
 # News
 
+## 1.0.8: 2014-XX-XX
+
+ * Connects to active engine nodes of the cluster of the associated engine node correctly.
+   Previous version unexpectedly kept connections to already unjoined engine nodes.
+
 ## 1.0.7: 2014-11-29
 
  * Supports multiple Droonga Engine nodes as its backends.
