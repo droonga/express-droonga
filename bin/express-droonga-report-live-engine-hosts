@@ -3,7 +3,13 @@
 var SerfClient = require('../lib/serf/client');
 
 var options = require('../lib/serf/options');
-options = options.define().parse(process.argv);
+options = options.define()
+                 .add('--priority-hosts <hosts>',
+                      'Comma-separated list of host names which is preferentially connected.',
+                      function(newValue, oldValue) {
+                        return newValue.trim().split(/[, ]+/);
+                      })
+                 .parse(process.argv);
 
 var client = new SerfClient({
   rpcAddress: options.rpcAddress,
@@ -11,9 +17,11 @@ var client = new SerfClient({
   tag:        options.tag
 });
 
-client.getLiveEngineNodes()
-  .then(function(members) {
-    console.log(JSON.stringify(members));
+client.getLiveEngineNodes({
+  priorityHosts: options.priorityHosts
+})
+  .then(function(result) {
+    console.log(JSON.stringify(result));
     process.exit(0);
   })
   .catch(function(error) {
