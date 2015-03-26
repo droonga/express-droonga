@@ -51,6 +51,10 @@ function droonga(application, params) {
       hostNames: connectionPool.hostNames
     });
   });
+
+  application.get(params.prefix + '/connections', function(request, response, next) {
+    response.jsonp(connectionPool.getStatus());
+  });
 }
 
 exports.initialize = droonga;
