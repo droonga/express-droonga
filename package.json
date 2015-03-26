@@ -30,7 +30,7 @@
     "jade": "*",
     "jsonparse": "*",
     "less-middleware": ">=0.2",
-    "uber-cache": "*",
+    "uber-cache": ">=2.0.0",
     "method-override": "*",
     "msgpack": "*",
     "q": "*",
