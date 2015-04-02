@@ -1,5 +1,14 @@
 # News
 
+## 1.0.9: ???
+
+ * Updated for the latest Droonga Engine 1.1.0.
+ * Supports uber-cache 2.0.0.
+ * New endpoints are introduced to inspect connections to Droonga Engine nodes.
+   - `/engines` returns the list of currently conencted Droonga Engine nodes.
+   - `/connections` returns detailed status of internal connections to Droonga Engine nodes.
+ * Always reconnects to Droonga Engine nodes when there is any change around the Droonga cluster.
+
 ## 1.0.8: 2014-12-01
 
  * Connects to active engine nodes of the cluster of the associated engine node correctly.
