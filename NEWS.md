@@ -1,6 +1,6 @@
 # News
 
-## 1.0.9: ???
+## 1.0.9: 2015-04-29 (planned)
 
  * Updated for the latest Droonga Engine 1.1.0.
  * Supports uber-cache 2.0.0.
