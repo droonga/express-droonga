@@ -21,16 +21,13 @@ function droonga(application, params) {
   if (params.server) {
     socketIoAdapter.register(application, params.server, params);
     params.server.on('error', function(error) {
-      if (typeof connectionPool.closeAll == 'function')
-        connectionPool.closeAll();
-      if (typeof connectionPool.stopSyncHostNamesFromCluster == 'function')
-        connectionPool.stopSyncHostNamesFromCluster();
+      params.logger.error(error);
+      if (typeof connectionPool.shutdown == 'function')
+        connectionPool.shutdown();
     });
     params.server.on('close', function() {
-      if (typeof connectionPool.closeAll == 'function')
-        connectionPool.closeAll();
-      if (typeof connectionPool.stopSyncHostNamesFromCluster == 'function')
-        connectionPool.stopSyncHostNamesFromCluster();
+      if (typeof connectionPool.shutdown == 'function')
+        connectionPool.shutdown();
     });
   }
 
