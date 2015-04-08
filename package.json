@@ -32,6 +32,7 @@
     "less-middleware": ">=0.2",
     "uber-cache": ">=2.0.0",
     "method-override": "*",
+    "microtime": "*",
     "msgpack": "*",
     "q": "*",
     "serf-rpc": "*",
