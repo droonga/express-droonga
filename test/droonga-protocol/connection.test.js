@@ -356,72 +356,115 @@ suite('Connection', function() {
           .catch(done);
       });
 
-      test('timeout', function(done) {
-        var callback = createMockedMessageCallback();
-        var response;
-        var packet;
-        var messages = {
-          notTimedOut:
-            connection.emitMessage('not timed out',
-                                   Math.random(),
-                                   callback,
-                                   { timeout: 1000 }),
-          timedOut:
-            connection.emitMessage('timed out',
-                                   Math.random(),
-                                   callback,
-                                   { timeout: 20 }),
-          permanent:
-            connection.emitMessage('permanent',
-                                   Math.random(),
-                                   callback,
-                                   { timeout: -1 })
-        };
-        var responses = {
-          notTimedOut:
-            utils.createReplyEnvelope(messages.notTimedOut, 'ok', Math.random()),
-          timedOut:
-            utils.createReplyEnvelope(messages.timedOut, 'ignored', Math.random())
-        };
-        callback
-          .takes(Connection.ERROR_GATEWAY_TIMEOUT, null)
-          .takes(null, responses.notTimedOut)
-        utils.wait(0.01)
-          .then(function() {
-            assert.deepEqual(getBackendReceivedMessages(),
-                             [messages.notTimedOut,
-                              messages.timedOut,
-                              messages.permanent]);
-            assert.deepEqual(
-              { notTimedOut:
-                  connection.listeners('reply:' + messages.notTimedOut.id).length,
-                timedOut:
-                  connection.listeners('reply:' + messages.timedOut.id).length,
-                permanent:
-                  connection.listeners('reply:' + messages.permanent.id).length },
-              { notTimedOut: 1, timedOut: 1, permanent: 1 },
-              'response listeners should be registered'
-            );
-          })
-          .then(utils.waitCb(0.02))
-          .then(utils.sendPacketToCb(utils.createPacket(responses.notTimedOut), utils.testReceivePort))
-          .then(utils.sendPacketToCb(utils.createPacket(responses.timedOut), utils.testReceivePort))
-          .then(utils.waitCb(0.01))
-          .then(function() {
-            callback.assert();
-            assert.deepEqual(
-              { notTimedOut:
-                  connection.listeners('reply:' + messages.notTimedOut.id).length,
-                timedOut:
-                  connection.listeners('reply:' + messages.timedOut.id).length,
-                permanent:
-                  connection.listeners('reply:' + messages.permanent.id).length },
-              { notTimedOut: 0, timedOut: 0, permanent: 1 },
-              'response listener should be removed even if it is timed out'
-            );
-            done();
-          })
-          .catch(done);
+      suite('timeout', function() {
+        test('not timed out', function(done) {
+          var callback = createMockedMessageCallback();
+          var response;
+          var packet;
+          var message = connection.emitMessage('not timed out',
+                                               Math.random(),
+                                               callback,
+                                               { timeout: 1000 });
+          var response = utils.createReplyEnvelope(message, 'ok', Math.random());
+          callback.takes(null, response);
+
+          utils.wait(0.01)
+            .then(function() {
+              assert.deepEqual(getBackendReceivedMessages(),
+                               [message]);
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                1,
+                'response listeners should be registered'
+              );
+            })
+            .then(utils.waitCb(0.02))
+            .then(utils.sendPacketToCb(utils.createPacket(response), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(function() {
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                0,
+                'response listener should be removed even if it is timed out'
+              );
+              connection.close();
+              callback.assert();
+              done();
+            })
+            .catch(done);
+        });
+
+        test('timed out', function(done) {
+          var callback = createMockedMessageCallback();
+          var response;
+          var packet;
+          var message = connection.emitMessage('timed out',
+                                               Math.random(),
+                                               callback,
+                                               { timeout: 20 });
+          var response = utils.createReplyEnvelope(message, 'ignored', Math.random());
+          callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
+
+          utils.wait(0.01)
+            .then(function() {
+              assert.deepEqual(getBackendReceivedMessages(),
+                               [message]);
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                1,
+                'response listeners should be registered'
+              );
+            })
+            .then(utils.waitCb(0.02))
+            .then(utils.sendPacketToCb(utils.createPacket(response), utils.testReceivePort))
+            .then(utils.waitCb(0.01))
+            .then(function() {
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                0,
+                'response listener should be removed even if it is timed out'
+              );
+              connection.close();
+              callback.assert();
+              done();
+            })
+            .catch(done);
+        });
+
+        test('permanent callback (never timed out)', function(done) {
+          var callback = createMockedMessageCallback();
+          var response;
+          var packet;
+          var message = connection.emitMessage('permanent',
+                                               Math.random(),
+                                               callback,
+                                               { timeout: -1 });
+          // connection closed before response message is returned
+          callback.takes(Connection.ERROR_SERVICE_UNAVAILABLE, null);
+
+          utils.wait(0.01)
+            .then(function() {
+              assert.deepEqual(getBackendReceivedMessages(),
+                               [message]);
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                1,
+                'response listeners should be registered'
+              );
+            })
+            .then(utils.waitCb(0.03))
+            .then(function() {
+              assert.equal(
+                connection.listeners('reply:' + message.id).length,
+                1,
+                'response listener should not be removed'
+              );
+              connection.close();
+              callback.assert();
+              done();
+            })
+            .catch(done);
+        });
       });
     });
   });
