@@ -401,7 +401,7 @@ suite('Connection', function() {
           var message = connection.emitMessage('timed out',
                                                Math.random(),
                                                callback,
-                                               { timeout: 20 });
+                                               { timeout: 0.02 });
           callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
 
           utils.wait(0.01)
