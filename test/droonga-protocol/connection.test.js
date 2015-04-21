@@ -402,7 +402,6 @@ suite('Connection', function() {
                                                Math.random(),
                                                callback,
                                                { timeout: 20 });
-          var response = utils.createReplyEnvelope(message, 'ignored', Math.random());
           callback.takes(Connection.ERROR_GATEWAY_TIMEOUT, null);
 
           utils.wait(0.01)
@@ -415,9 +414,7 @@ suite('Connection', function() {
                 'response listeners should be registered'
               );
             })
-            .then(utils.waitCb(0.02))
-            .then(utils.sendPacketToCb(utils.createPacket(response), utils.testReceivePort))
-            .then(utils.waitCb(0.01))
+            .then(utils.waitCb(0.03))
             .then(function() {
               assert.equal(
                 connection.listeners('reply:' + message.id).length,
