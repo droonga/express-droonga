@@ -239,7 +239,6 @@ suite('HTTP Adapter', function() {
                     [{ type: 'search',
                         message: {
                           queries: searchQueries,
-                          timeout: 1000,
                           type:    'droonga-search'
                         }
                      }]
