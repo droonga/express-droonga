@@ -8,6 +8,7 @@
    - `/engines` returns the list of currently conencted Droonga Engine nodes.
    - `/connections` returns detailed status of internal connections to Droonga Engine nodes.
  * Always reconnects to Droonga Engine nodes when there is any change around the Droonga cluster.
+ * Query parameters for `/droonga/*` endpoints are used as the message body.
 
 ## 1.0.8: 2014-12-01
 
