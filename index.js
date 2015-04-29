@@ -5,6 +5,8 @@ var socketIoAdapter = require('./lib/adapter/socket.io');
 var dashboardUI = require('./lib/ui/dashboard');
 var ConsoleLogger = require('./lib/console-logger').ConsoleLogger;
 
+var LOG_PREFIX = '[global] ';
+
 function droonga(application, params) {
   params = params || {};
 
@@ -21,7 +23,7 @@ function droonga(application, params) {
   if (params.server) {
     socketIoAdapter.register(application, params.server, params);
     params.server.on('error', function(error) {
-      params.logger.error(error);
+      params.logger.error(LOG_PREFIX + 'Unhandled Error', error);
       if (typeof connectionPool.shutdown == 'function')
         connectionPool.shutdown();
     });
