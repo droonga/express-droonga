@@ -17,6 +17,51 @@ suite('adapter/api/groonga: load', function() {
 
   var successMessage = groongaUtils.successMessage;
 
+  function post(body, additionalQuery) {
+    var requestBody;
+    backend.reserveResponse(function(requestPacket) {
+      requestBody = requestPacket[2].body;
+      return utils.createReplyPacket(requestPacket, successMessage);
+    });
+    var path = {
+      pathname: '/d/load',
+      query: {
+        table: 'Memos'
+      }
+    };
+    if (additionalQuery) {
+      Object.keys(additionalQuery).forEach(function(key) {
+        path.query[key] = additionalQuery[key];
+      });
+    }
+
+    return utils.post(path, JSON.stringify(body))
+      .then(function(request) {
+        return requestBody;
+      });
+  }
+
+  function get(values) {
+    var requestBody;
+    backend.reserveResponse(function(requestPacket) {
+      requestBody = requestPacket[2].body;
+      return utils.createReplyPacket(requestPacket, successMessage);
+    });
+
+    var path = {
+      pathname: '/d/load',
+      query: {
+        table: 'Users',
+        values: JSON.stringify(values)
+      }
+    };
+
+    return utils.get(path)
+      .then(function(response) {
+        return requestBody;
+      });
+  };
+
   setup(function(done) {
     utils.setupApplication()
       .then(function(result) {
@@ -174,30 +219,6 @@ suite('adapter/api/groonga: load', function() {
     });
 
     suite('POST', function() {
-      function post(body, additionalQuery) {
-        var requestBody;
-        backend.reserveResponse(function(requestPacket) {
-          requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
-        });
-        var path = {
-          pathname: '/d/load',
-          query: {
-            table: 'Memos'
-          }
-        };
-        if (additionalQuery) {
-          Object.keys(additionalQuery).forEach(function(key) {
-            path.query[key] = additionalQuery[key];
-          });
-        }
-
-        return utils.post(path, JSON.stringify(body))
-          .then(function(request) {
-            return requestBody;
-          });
-      }
-
       suite('object style', function() {
         test('no _key', function(done) {
           var body = [
@@ -332,27 +353,6 @@ suite('adapter/api/groonga: load', function() {
     });
 
     suite('GET', function() {
-      function get(values) {
-        var requestBody;
-        backend.reserveResponse(function(requestPacket) {
-          requestBody = requestPacket[2].body;
-          return utils.createReplyPacket(requestPacket, successMessage);
-        });
-
-        var path = {
-          pathname: '/d/load',
-          query: {
-            table: 'Users',
-            values: JSON.stringify(values)
-          }
-        };
-
-        return utils.get(path)
-          .then(function(response) {
-            return requestBody;
-          });
-      };
-
       test('object style', function(done) {
         var values = [
           {
