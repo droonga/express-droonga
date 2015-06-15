@@ -441,5 +441,69 @@ suite('adapter/api/groonga: load', function() {
           done();
         });
     });
+
+    test('GET, not records but a record', function(done) {
+      var values = [
+        'bob',
+        'Bob',
+        30
+      ]
+      client(application)
+        .get('/d/load?table=Users&values=' + JSON.stringify(values))
+        .expect(400)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+          try {
+            var actual = {
+              groongaStatusCode: groongaUtils.groongaResponseHeader(response)[0],
+              errorMessage: groongaUtils.groongaResponseHeader(response)[3],
+              body: groongaUtils.groongaResponseBody(response)
+            }
+            assert.deepEqual(actual,
+                             {
+                               groongaStatusCode: -22,
+                               errorMessage: 'invalid record: <"bob">',
+                               body: [0]
+                             });
+          } catch(error) {
+            return done(error);
+          }
+          done();
+        });
+    });
+
+    test('POST, not records but a record', function(done) {
+      var body = [
+        'alice',
+        'Alice',
+        20
+      ]
+      client(application)
+        .post('/d/load?table=Users')
+        .set('Content-Type', 'application/json')
+        .send(body)
+        .expect(400)
+        .end(function(error, response) {
+          if (error)
+            return done(error);
+          try {
+            var actual = {
+              groongaStatusCode: groongaUtils.groongaResponseHeader(response)[0],
+              errorMessage: groongaUtils.groongaResponseHeader(response)[3],
+              body: groongaUtils.groongaResponseBody(response)
+            }
+            assert.deepEqual(actual,
+                             {
+                               groongaStatusCode: -22,
+                               errorMessage: 'invalid record: <"alice">',
+                               body: [0]
+                             });
+          } catch(error) {
+            return done(error);
+          }
+          done();
+        });
+    });
   });
 });
