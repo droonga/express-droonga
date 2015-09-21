@@ -9,11 +9,11 @@
 ### Fixes
 
  * Fixed a bug that cache is broken.
-   [GitHub#25] [Reported by Kitaiti Makoto]
+   [GitHub#25] [Reported by KITAITI Makoto]
 
 ### Thanks
 
-  * Kitaiti Makoto
+  * KITAITI Makoto
 
 ## 1.0.9: 2015-04-29
 
