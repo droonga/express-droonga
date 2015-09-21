@@ -2,7 +2,7 @@
 
 ## 1.1.0: 2015-06-29 (planned)
 
- * Erros while loading of invalid data becomes correctly handled.
+ * Errors while loading of invalid data become correctly handled.
 
 ## 1.0.9: 2015-04-29
 
