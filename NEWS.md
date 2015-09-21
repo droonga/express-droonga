@@ -1,8 +1,19 @@
 # News
 
-## 1.1.0: 2015-06-29 (planned)
+## 1.1.0: 2015-09-21
+
+### Improvements
 
  * Errors while loading of invalid data become correctly handled.
+
+### Fixes
+
+ * Fixed a bug that cache is broken.
+   [GitHub#25] [Reported by Kitaiti Makoto]
+
+### Thanks
+
+  * Kitaiti Makoto
 
 ## 1.0.9: 2015-04-29
 
